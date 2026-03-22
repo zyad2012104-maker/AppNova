@@ -1243,6 +1243,35 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 });
 
+
+
+// التأكد من وجود حساب المدير في النظام
+function ensureAdminExists() {
+    let users = JSON.parse(localStorage.getItem('users'));
+    if (!users) {
+        users = [];
+    }
+    
+    // التحقق من وجود حساب المدير
+    const adminExists = users.some(user => user.email === 'admin@example.com');
+    
+    if (!adminExists) {
+        users.push({
+            id: users.length + 1,
+            name: 'مدير النظام',
+            email: 'admin@example.com',
+            password: 'admin123',
+            role: 'admin',
+            joinDate: new Date().toISOString().split('T')[0]
+        });
+        localStorage.setItem('users', JSON.stringify(users));
+        console.log('تم إضافة حساب المدير بنجاح');
+    }
+}
+
+// استدعاء الدالة عند تحميل الصفحة
+ensureAdminExists();
+
 // جعل الدوال متاحة عالمياً
 window.openLoginModal = openLoginModal;
 window.closeLoginModal = closeLoginModal;
