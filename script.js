@@ -9,6 +9,7 @@ let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
 
 // ==================== دوال إدارة المستخدمين ====================
 function login(email, password) {
+    console.log('محاولة تسجيل الدخول:', email);
     const user = users.find(u => u.email === email && u.password === password);
     if (user) {
         currentUser = user;
@@ -16,8 +17,12 @@ function login(email, password) {
         updateUIForUser();
         showNotification(`مرحباً ${user.name}! تم تسجيل الدخول بنجاح`, 'success');
         closeLoginModal();
+        console.log('تم تسجيل الدخول بنجاح، دور المستخدم:', user.role);
         if (user.role === 'admin') {
-            setTimeout(() => showAdminPanel(), 500);
+            console.log('المستخدم مدير، سيتم فتح لوحة التحكم');
+            setTimeout(() => {
+                showAdminPanel();
+            }, 500);
         }
         return true;
     } else {
@@ -67,16 +72,21 @@ function updateUIForUser() {
     const userNameSpan = document.getElementById('userName');
     const adminPanelBtn = document.getElementById('adminPanelBtn');
     
+    console.log('تحديث واجهة المستخدم، المستخدم الحالي:', currentUser);
+    
     if (currentUser) {
         if (authButtons) authButtons.style.display = 'none';
         if (userInfo) {
             userInfo.style.display = 'flex';
             if (userNameSpan) userNameSpan.textContent = currentUser.name;
         }
-        if (adminPanelBtn && currentUser.role === 'admin') {
-            adminPanelBtn.style.display = 'block';
-        } else if (adminPanelBtn) {
-            adminPanelBtn.style.display = 'none';
+        if (adminPanelBtn) {
+            if (currentUser.role === 'admin') {
+                adminPanelBtn.style.display = 'block';
+                console.log('تم إظهار زر لوحة التحكم للمدير');
+            } else {
+                adminPanelBtn.style.display = 'none';
+            }
         }
         if (window.location.pathname.includes('upload.html')) {
             const uploadContainer = document.getElementById('uploadFormContainer');
@@ -98,287 +108,50 @@ function updateUIForUser() {
     updateStats();
 }
 
-// ==================== دوال رفع التطبيقات ====================
-function uploadApp(formData) {
-    if (!currentUser) {
-        showNotification('يجب تسجيل الدخول أولاً', 'warning');
-        openLoginModal();
-        return false;
-    }
-    
-    const iconFile = formData.get('appIcon');
-    const appFile = formData.get('appFile');
-    const screenshotsFiles = formData.getAll('appScreenshots');
-    
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const iconBase64 = e.target.result;
-        const screenshots = [];
-        
-        const processScreenshots = () => {
-            const newApp = {
-                id: apps.length + 1,
-                name: formData.get('appName'),
-                category: formData.get('appCategory'),
-                categoryName: getCategoryName(formData.get('appCategory')),
-                platform: formData.get('appPlatform'),
-                platformName: getPlatformName(formData.get('appPlatform')),
-                description: formData.get('appDescription'),
-                version: formData.get('appVersion') || '1.0',
-                size: formData.get('appSize') || '0',
-                price: formData.get('appPrice'),
-                icon: getCategoryIcon(formData.get('appCategory')),
-                iconUrl: iconBase64,
-                downloadLink: URL.createObjectURL(appFile),
-                screenshots: screenshots,
-                developer: currentUser.name,
-                developerId: currentUser.id,
-                developerEmail: currentUser.email,
-                rating: 0,
-                ratingCount: 0,
-                comments: [],
-                downloads: 0,
-                uploadDate: new Date().toISOString().split('T')[0]
-            };
-            if (newApp.price === 'paid') newApp.priceText = 'مدفوع';
-            if (newApp.price === 'freemium') newApp.priceText = 'مجاني + داخلي';
-            apps.push(newApp);
-            localStorage.setItem('apps', JSON.stringify(apps));
-            showNotification('تم رفع التطبيق بنجاح!', 'success');
-            setTimeout(() => window.location.href = 'apps.html', 1500);
-        };
-        
-        let processed = 0;
-        if (screenshotsFiles && screenshotsFiles.length > 0) {
-            screenshotsFiles.forEach(file => {
-                if (file && file.size > 0) {
-                    const sr = new FileReader();
-                    sr.onload = function(se) {
-                        screenshots.push(se.target.result);
-                        processed++;
-                        if (processed === screenshotsFiles.filter(f => f && f.size > 0).length) processScreenshots();
-                    };
-                    sr.readAsDataURL(file);
-                } else {
-                    processed++;
-                    if (processed === screenshotsFiles.filter(f => f && f.size > 0).length) processScreenshots();
-                }
-            });
-        } else {
-            processScreenshots();
-        }
-    };
-    if (iconFile && iconFile.size > 0) reader.readAsDataURL(iconFile);
-    return true;
-}
-
-// ==================== دوال التحميل مع التقييم ====================
-let downloadRating = 0;
-
-function showDownloadModal(appId) {
-    const app = apps.find(a => a.id === appId);
-    if (!app) return;
-    const modal = document.getElementById('downloadModal');
-    const modalContent = document.getElementById('downloadModalContent');
-    modalContent.innerHTML = `
-        <div class="download-modal">
-            <div class="download-app-info">
-                <div class="download-app-icon">
-                    ${app.iconUrl ? `<img src="${app.iconUrl}" alt="${app.name}">` : `<i class="fas ${app.icon}"></i>`}
-                </div>
-                <div class="download-app-details">
-                    <h3>${app.name}</h3>
-                    <p>المطور: ${app.developer}</p>
-                    <p>الحجم: ${app.size} MB</p>
-                    <p>الإصدار: ${app.version || '1.0'}</p>
-                </div>
-            </div>
-            <div class="download-rating-section">
-                <h4>قيم التطبيق قبل التحميل</h4>
-                <div class="rating-stars-download" id="downloadRatingStars">
-                    ${[1,2,3,4,5].map(star => `<i class="far fa-star" data-rating="${star}" onclick="selectDownloadRating(${star})"></i>`).join('')}
-                </div>
-            </div>
-            <div class="download-comment-section">
-                <h4>أضف تعليقاً (اختياري)</h4>
-                <textarea id="downloadComment" rows="3" placeholder="اكتب تعليقك هنا..."></textarea>
-            </div>
-            <div class="download-actions">
-                <button onclick="confirmDownload(${app.id})" class="btn-primary"><i class="fas fa-download"></i> تأكيد التحميل</button>
-                <button onclick="closeDownloadModal()" class="btn-secondary"><i class="fas fa-times"></i> إلغاء</button>
-            </div>
-        </div>
-    `;
-    modal.style.display = 'block';
-}
-
-function selectDownloadRating(rating) {
-    downloadRating = rating;
-    const stars = document.querySelectorAll('#downloadRatingStars i');
-    stars.forEach((star, index) => {
-        star.className = index < rating ? 'fas fa-star' : 'far fa-star';
-    });
-}
-
-function confirmDownload(appId) {
-    const app = apps.find(a => a.id === appId);
-    if (!app) return;
-    if (downloadRating > 0) addRating(appId, downloadRating);
-    const commentText = document.getElementById('downloadComment')?.value;
-    if (commentText && commentText.trim()) addComment(appId, commentText, downloadRating);
-    app.downloads++;
-    localStorage.setItem('apps', JSON.stringify(apps));
-    if (app.downloadLink) {
-        window.open(app.downloadLink, '_blank');
-        showNotification(`جاري تحميل ${app.name}... شكراً لتقييمك!`, 'success');
-    } else showNotification('رابط التحميل غير متوفر', 'error');
-    downloadRating = 0;
-    closeDownloadModal();
-    updateStats();
-    displayAllApps();
-    displayFeaturedApps();
-}
-
-function closeDownloadModal() {
-    const modal = document.getElementById('downloadModal');
-    if (modal) modal.style.display = 'none';
-    downloadRating = 0;
-}
-
-// ==================== دوال التقييم والتعليقات ====================
-function addRating(appId, rating) {
-    const app = apps.find(a => a.id === appId);
-    if (app) {
-        const totalRating = (app.rating * app.ratingCount) + rating;
-        app.ratingCount++;
-        app.rating = totalRating / app.ratingCount;
-        localStorage.setItem('apps', JSON.stringify(apps));
-        return true;
-    }
-    return false;
-}
-
-function addComment(appId, commentText, rating) {
-    const app = apps.find(a => a.id === appId);
-    if (app && commentText.trim()) {
-        const comment = {
-            id: Date.now(),
-            userId: currentUser ? currentUser.id : 0,
-            userName: currentUser ? currentUser.name : 'زائر',
-            userEmail: currentUser ? currentUser.email : '',
-            rating: rating || 0,
-            text: commentText,
-            date: new Date().toISOString().split('T')[0]
-        };
-        if (!app.comments) app.comments = [];
-        app.comments.unshift(comment);
-        localStorage.setItem('apps', JSON.stringify(apps));
-        return true;
-    }
-    return false;
-}
-
-// ==================== دوال عرض التطبيقات ====================
-function createAppCard(app) {
-    const priceClass = app.price === 'paid' ? 'paid' : 'free';
-    const priceText = app.priceText || (app.price === 'paid' ? 'مدفوع' : 'مجاني');
-    const ratingStars = generateRatingStars(app.rating, true);
-    const iconHtml = app.iconUrl ? `<img src="${app.iconUrl}" alt="${app.name}">` : `<i class="fas ${app.icon}"></i>`;
-    return `
-        <div class="app-card" data-id="${app.id}">
-            <div class="app-icon">${iconHtml}<span class="app-platform"><i class="fas ${app.platform === 'android' ? 'fa-android' : 'fa-apple'}"></i> ${app.platformName}</span></div>
-            <div class="app-info">
-                <h3>${app.name}</h3>
-                <span class="app-category">${app.categoryName}</span>
-                <p class="app-description">${app.description.substring(0, 80)}${app.description.length > 80 ? '...' : ''}</p>
-                <div class="app-rating">${ratingStars}<span class="rating-count">(${app.ratingCount})</span></div>
-                <div class="app-meta"><span class="app-size"><i class="fas fa-database"></i> ${app.size} MB</span><span class="app-price ${priceClass}">${priceText}</span></div>
-                <div class="app-actions">
-                    <button onclick="showDownloadModal(${app.id})" class="btn-download"><i class="fas fa-download"></i> تحميل (${app.downloads})</button>
-                    <button onclick="showAppDetails(${app.id})" class="btn-details"><i class="fas fa-info-circle"></i> تفاصيل</button>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function generateRatingStars(rating, isSmall = false) {
-    const full = Math.floor(rating);
-    const half = rating % 1 >= 0.5;
-    const empty = 5 - full - (half ? 1 : 0);
-    let stars = '';
-    for (let i = 0; i < full; i++) stars += '<i class="fas fa-star"></i>';
-    if (half) stars += '<i class="fas fa-star-half-alt"></i>';
-    for (let i = 0; i < empty; i++) stars += '<i class="far fa-star"></i>';
-    return `<div class="stars-container">${stars}</div>`;
-}
-
-function showAppDetails(appId) {
-    const app = apps.find(a => a.id === appId);
-    if (!app) return;
-    const modal = document.getElementById('appDetailsModal');
-    document.getElementById('modalAppTitle').textContent = app.name;
-    const iconHtml = app.iconUrl ? `<img src="${app.iconUrl}" alt="${app.name}">` : `<i class="fas ${app.icon}"></i>`;
-    const screenshotsHtml = app.screenshots && app.screenshots.length > 0 ? `
-        <div class="app-screenshots"><h3>صور الشاشة</h3><div class="screenshots-grid">${app.screenshots.map(img => `<img src="${img}" alt="لقطة شاشة" onclick="window.open(this.src)">`).join('')}</div></div>
-    ` : '';
-    
-    document.getElementById('appDetailsContent').innerHTML = `
-        <div class="app-details">
-            <div class="app-details-header">
-                <div class="app-details-icon">${iconHtml}</div>
-                <div class="app-details-info">
-                    <h2>${app.name}</h2>
-                    <p class="developer">المطور: ${app.developer} (${app.developerEmail})</p>
-                    <p class="developer">الإصدار: ${app.version || '1.0'}</p>
-                    <div class="app-details-rating">${generateRatingStars(app.rating)}<span>(${app.ratingCount} تقييم)</span></div>
-                    <div class="app-details-meta">
-                        <span><i class="fas fa-tag"></i> ${app.categoryName}</span>
-                        <span><i class="fas fa-mobile-alt"></i> ${app.platformName}</span>
-                        <span><i class="fas fa-database"></i> ${app.size} MB</span>
-                        <span><i class="fas fa-dollar-sign"></i> ${app.price === 'free' ? 'مجاني' : (app.priceText || 'مدفوع')}</span>
-                        <span><i class="fas fa-download"></i> ${app.downloads} تحميل</span>
-                        <span><i class="fas fa-calendar"></i> ${app.uploadDate}</span>
-                    </div>
-                    <button onclick="showDownloadModal(${app.id})" class="btn-primary" style="margin-top:15px;"><i class="fas fa-download"></i> تحميل التطبيق</button>
-                </div>
-            </div>
-            <div class="app-details-description"><h3>عن التطبيق</h3><p>${app.description}</p></div>
-            ${screenshotsHtml}
-            <div class="rating-section"><h3><i class="fas fa-star"></i> قيم التطبيق</h3><div class="rating-stars">${[1,2,3,4,5].map(s => `<i class="far fa-star" onclick="addRatingAndRefresh(${app.id}, ${s})"></i>`).join('')}</div></div>
-            <div class="comment-section">
-                <h3><i class="fas fa-comments"></i> التعليقات (${app.comments?.length || 0})</h3>
-                <div class="comment-list">${app.comments?.length ? app.comments.map(c => `
-                    <div class="comment-item"><div class="comment-header"><span class="comment-user"><i class="fas fa-user-circle"></i> ${c.userName} (${c.userEmail || 'زائر'})</span><span class="comment-date">${c.date}</span>${currentUser?.role === 'admin' ? `<button class="admin-delete-comment" onclick="deleteCommentAdmin(${app.id}, ${c.id})"><i class="fas fa-trash"></i> حذف</button>` : ''}</div>${c.rating ? `<div class="comment-rating">${generateRatingStars(c.rating)}</div>` : ''}<p class="comment-text">${c.text}</p></div>
-                `).join('') : '<p style="text-align:center;color:var(--gray-color);">لا توجد تعليقات بعد</p>'}</div>
-                <div class="comment-form"><h4>أضف تعليقاً</h4><div class="rating-input" id="commentRatingInput">${[1,2,3,4,5].map(s => `<i class="far fa-star" onclick="selectRating(${s})"></i>`).join('')}</div><textarea id="commentText" rows="3" placeholder="اكتب تعليقك هنا..."></textarea><button onclick="submitComment(${app.id})" class="btn-submit" style="width:auto;"><i class="fas fa-paper-plane"></i> إرسال</button></div>
-            </div>
-        </div>
-    `;
-    modal.style.display = 'block';
-}
-
-let selectedRating = 0;
-function selectRating(r) { selectedRating = r; document.querySelectorAll('#commentRatingInput i').forEach((star, i) => star.className = i < r ? 'fas fa-star' : 'far fa-star'); }
-function addRatingAndRefresh(id, r) { addRating(id, r); showAppDetails(id); }
-function submitComment(id) { if (addComment(id, document.getElementById('commentText')?.value, selectedRating)) { selectedRating = 0; document.getElementById('commentText').value = ''; showAppDetails(id); } }
-
-// ==================== لوحة التحكم الكاملة ====================
+// ==================== لوحة التحكم ====================
 function showAdminPanel() {
-    if (!currentUser || currentUser.role !== 'admin') { showNotification('غير مصرح لك', 'error'); return; }
+    console.log('محاولة فتح لوحة التحكم');
+    if (!currentUser) {
+        showNotification('الرجاء تسجيل الدخول أولاً', 'warning');
+        openLoginModal();
+        return;
+    }
+    if (currentUser.role !== 'admin') {
+        showNotification('غير مصرح لك بالدخول إلى لوحة التحكم', 'error');
+        console.log('المستخدم ليس مديراً:', currentUser.role);
+        return;
+    }
+    
+    const modal = document.getElementById('adminPanelModal');
+    if (!modal) {
+        console.error('لم يتم العثور على عنصر adminPanelModal');
+        showNotification('حدث خطأ في فتح لوحة التحكم', 'error');
+        return;
+    }
+    
+    console.log('جارٍ تحميل محتوى لوحة التحكم');
     updateAdminPanelContent();
-    document.getElementById('adminPanelModal').style.display = 'block';
+    modal.style.display = 'block';
+    console.log('تم فتح لوحة التحكم بنجاح');
 }
 
-function closeAdminPanel() { document.getElementById('adminPanelModal').style.display = 'none'; }
+function closeAdminPanel() {
+    const modal = document.getElementById('adminPanelModal');
+    if (modal) modal.style.display = 'none';
+}
 
 function updateAdminPanelContent() {
     const totalDownloads = apps.reduce((s, a) => s + (a.downloads || 0), 0);
     const totalComments = apps.reduce((s, a) => s + (a.comments?.length || 0), 0);
-    document.getElementById('adminPanelContent').innerHTML = `
+    const regularUsers = users.filter(u => u.role !== 'admin');
+    
+    const content = document.getElementById('adminPanelContent');
+    if (!content) return;
+    
+    content.innerHTML = `
         <div class="admin-stats">
             <div class="admin-stat-card"><i class="fas fa-mobile-alt"></i><div><h3>${apps.length}</h3><p>التطبيقات</p></div></div>
-            <div class="admin-stat-card"><i class="fas fa-users"></i><div><h3>${users.filter(u=>u.role!=='admin').length}</h3><p>المستخدمين</p></div></div>
+            <div class="admin-stat-card"><i class="fas fa-users"></i><div><h3>${regularUsers.length}</h3><p>المستخدمين</p></div></div>
             <div class="admin-stat-card"><i class="fas fa-download"></i><div><h3>${totalDownloads}</h3><p>التحميلات</p></div></div>
             <div class="admin-stat-card"><i class="fas fa-comments"></i><div><h3>${totalComments}</h3><p>التعليقات</p></div></div>
         </div>
@@ -392,8 +165,10 @@ function updateAdminPanelContent() {
 }
 
 function showAdminTab(tab) {
-    document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('active'));
+    const btns = document.querySelectorAll('.admin-tab-btn');
+    btns.forEach(btn => btn.classList.remove('active'));
     event.target.classList.add('active');
+    
     const content = document.getElementById('adminTabContent');
     if (tab === 'apps') content.innerHTML = renderAppsTable();
     else if (tab === 'users') content.innerHTML = renderUsersTable();
@@ -405,9 +180,7 @@ function renderAppsTable() {
     return `
         <div class="admin-table">
             <table>
-                <thead>
-                    <tr><th>#</th><th>الصورة</th><th>الاسم</th><th>المطور</th><th>الإصدار</th><th>التحميلات</th><th>التقييم</th><th>تاريخ الرفع</th><th>الإجراءات</th></tr>
-                </thead>
+                <thead><tr><th>#</th><th>الصورة</th><th>الاسم</th><th>المطور</th><th>الإصدار</th><th>التحميلات</th><th>التقييم</th><th>تاريخ الرفع</th><th>الإجراءات</th></tr></thead>
                 <tbody>
                     ${apps.map(a => `
                         <tr>
@@ -437,9 +210,7 @@ function renderUsersTable() {
     return `
         <div class="admin-table">
             <table>
-                <thead>
-                    <tr><th>#</th><th>الاسم</th><th>البريد الإلكتروني</th><th>عدد التطبيقات</th><th>عدد التعليقات</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr>
-                </thead>
+                <thead><tr><th>#</th><th>الاسم</th><th>البريد الإلكتروني</th><th>عدد التطبيقات</th><th>عدد التعليقات</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead>
                 <tbody>
                     ${normalUsers.map(u => {
                         const userApps = apps.filter(a => a.developerId === u.id);
@@ -471,16 +242,14 @@ function renderCommentsTable() {
     return `
         <div class="admin-table">
             <table>
-                <thead>
-                    <tr><th>التطبيق</th><th>المستخدم</th><th>البريد</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th></tr>
-                </thead>
+                <thead><tr><th>التطبيق</th><th>المستخدم</th><th>البريد</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th></tr></thead>
                 <tbody>
                     ${allComments.map(c => `
                         <tr>
                             <td><strong>${c.appName}</strong></td>
                             <td>${c.userName}</td>
                             <td>${c.userEmail || 'زائر'}</td>
-                            <td>${c.text.substring(0, 60)}${c.text.length > 60 ? '...' : ''}</td>
+                            <td>${c.text.substring(0, 50)}${c.text.length > 50 ? '...' : ''}</td>
                             <td>${c.rating || 0} <i class="fas fa-star" style="color:#ffc107;"></i></td>
                             <td>${c.date}</td>
                             <td class="admin-actions">
@@ -589,6 +358,7 @@ function editApp(appId) {
         updateAdminPanelContent();
         displayAllApps();
         displayFeaturedApps();
+        updateStats();
     });
 }
 
@@ -634,7 +404,6 @@ function editUser(userId) {
         const newPassword = document.getElementById('editUserPassword').value;
         if (newPassword) user.password = newPassword;
         
-        // تحديث تطبيقات المستخدم
         apps.forEach(app => {
             if (app.developerId === user.id) {
                 app.developer = user.name;
@@ -664,6 +433,7 @@ function editUser(userId) {
         updateAdminPanelContent();
         if (document.getElementById('appsContainer')) displayAllApps();
         if (document.getElementById('featuredApps')) displayFeaturedApps();
+        updateStats();
     });
 }
 
@@ -717,13 +487,12 @@ function editComment(appId, commentId) {
         comment.text = document.getElementById('editCommentText').value;
         comment.rating = window.currentEditRating;
         
-        // تحديث تقييم التطبيق
         let totalRating = 0;
-        app.comments.forEach(c => { if (c.rating > 0) totalRating += c.rating; });
-        const ratedComments = app.comments.filter(c => c.rating > 0).length;
-        if (ratedComments > 0) {
-            app.rating = totalRating / ratedComments;
-            app.ratingCount = ratedComments;
+        let ratedCount = 0;
+        app.comments.forEach(c => { if (c.rating > 0) { totalRating += c.rating; ratedCount++; } });
+        if (ratedCount > 0) {
+            app.rating = totalRating / ratedCount;
+            app.ratingCount = ratedCount;
         } else {
             app.rating = 0;
             app.ratingCount = 0;
@@ -779,13 +548,12 @@ function deleteCommentAdmin(appId, commentId) {
         if (app && app.comments) {
             app.comments = app.comments.filter(c => c.id !== commentId);
             
-            // تحديث تقييم التطبيق
             let totalRating = 0;
-            app.comments.forEach(c => { if (c.rating > 0) totalRating += c.rating; });
-            const ratedComments = app.comments.filter(c => c.rating > 0).length;
-            if (ratedComments > 0) {
-                app.rating = totalRating / ratedComments;
-                app.ratingCount = ratedComments;
+            let ratedCount = 0;
+            app.comments.forEach(c => { if (c.rating > 0) { totalRating += c.rating; ratedCount++; } });
+            if (ratedCount > 0) {
+                app.rating = totalRating / ratedCount;
+                app.ratingCount = ratedCount;
             } else {
                 app.rating = 0;
                 app.ratingCount = 0;
@@ -799,6 +567,182 @@ function deleteCommentAdmin(appId, commentId) {
         }
     }
 }
+
+// ==================== دوال رفع التطبيقات ====================
+function uploadApp(formData) {
+    if (!currentUser) {
+        showNotification('يجب تسجيل الدخول أولاً', 'warning');
+        openLoginModal();
+        return false;
+    }
+    
+    const iconFile = formData.get('appIcon');
+    const appFile = formData.get('appFile');
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const iconBase64 = e.target.result;
+        const newApp = {
+            id: apps.length + 1,
+            name: formData.get('appName'),
+            category: formData.get('appCategory'),
+            categoryName: getCategoryName(formData.get('appCategory')),
+            platform: formData.get('appPlatform'),
+            platformName: getPlatformName(formData.get('appPlatform')),
+            description: formData.get('appDescription'),
+            version: formData.get('appVersion') || '1.0',
+            size: formData.get('appSize') || '0',
+            price: formData.get('appPrice'),
+            icon: getCategoryIcon(formData.get('appCategory')),
+            iconUrl: iconBase64,
+            downloadLink: URL.createObjectURL(appFile),
+            developer: currentUser.name,
+            developerId: currentUser.id,
+            developerEmail: currentUser.email,
+            rating: 0,
+            ratingCount: 0,
+            comments: [],
+            downloads: 0,
+            uploadDate: new Date().toISOString().split('T')[0]
+        };
+        if (newApp.price === 'paid') newApp.priceText = 'مدفوع';
+        if (newApp.price === 'freemium') newApp.priceText = 'مجاني + داخلي';
+        apps.push(newApp);
+        localStorage.setItem('apps', JSON.stringify(apps));
+        showNotification('تم رفع التطبيق بنجاح!', 'success');
+        setTimeout(() => window.location.href = 'apps.html', 1500);
+    };
+    if (iconFile && iconFile.size > 0) reader.readAsDataURL(iconFile);
+    return true;
+}
+
+// ==================== دوال التحميل والتقييم ====================
+let downloadRating = 0;
+
+function showDownloadModal(appId) {
+    const app = apps.find(a => a.id === appId);
+    if (!app) return;
+    const modal = document.getElementById('downloadModal');
+    const modalContent = document.getElementById('downloadModalContent');
+    modalContent.innerHTML = `
+        <div class="download-modal">
+            <div class="download-app-info">
+                <div class="download-app-icon">${app.iconUrl ? `<img src="${app.iconUrl}" alt="${app.name}">` : `<i class="fas ${app.icon}"></i>`}</div>
+                <div class="download-app-details"><h3>${app.name}</h3><p>المطور: ${app.developer}</p><p>الحجم: ${app.size} MB</p><p>الإصدار: ${app.version || '1.0'}</p></div>
+            </div>
+            <div class="download-rating-section"><h4>قيم التطبيق قبل التحميل</h4><div class="rating-stars-download" id="downloadRatingStars">${[1,2,3,4,5].map(star => `<i class="far fa-star" onclick="selectDownloadRating(${star})"></i>`).join('')}</div></div>
+            <div class="download-comment-section"><h4>أضف تعليقاً (اختياري)</h4><textarea id="downloadComment" rows="3" placeholder="اكتب تعليقك هنا..."></textarea></div>
+            <div class="download-actions"><button onclick="confirmDownload(${app.id})" class="btn-primary"><i class="fas fa-download"></i> تأكيد التحميل</button><button onclick="closeDownloadModal()" class="btn-secondary"><i class="fas fa-times"></i> إلغاء</button></div>
+        </div>
+    `;
+    modal.style.display = 'block';
+}
+
+function selectDownloadRating(rating) {
+    downloadRating = rating;
+    const stars = document.querySelectorAll('#downloadRatingStars i');
+    stars.forEach((star, index) => { star.className = index < rating ? 'fas fa-star' : 'far fa-star'; });
+}
+
+function confirmDownload(appId) {
+    const app = apps.find(a => a.id === appId);
+    if (!app) return;
+    if (downloadRating > 0) addRating(appId, downloadRating);
+    const commentText = document.getElementById('downloadComment')?.value;
+    if (commentText && commentText.trim()) addComment(appId, commentText, downloadRating);
+    app.downloads++;
+    localStorage.setItem('apps', JSON.stringify(apps));
+    if (app.downloadLink) { window.open(app.downloadLink, '_blank'); showNotification(`جاري تحميل ${app.name}...`, 'success'); }
+    else showNotification('رابط التحميل غير متوفر', 'error');
+    downloadRating = 0;
+    closeDownloadModal();
+    updateStats();
+    displayAllApps();
+    displayFeaturedApps();
+}
+
+function closeDownloadModal() { const modal = document.getElementById('downloadModal'); if (modal) modal.style.display = 'none'; downloadRating = 0; }
+
+function addRating(appId, rating) {
+    const app = apps.find(a => a.id === appId);
+    if (app) {
+        const totalRating = (app.rating * app.ratingCount) + rating;
+        app.ratingCount++;
+        app.rating = totalRating / app.ratingCount;
+        localStorage.setItem('apps', JSON.stringify(apps));
+        return true;
+    }
+    return false;
+}
+
+function addComment(appId, commentText, rating) {
+    const app = apps.find(a => a.id === appId);
+    if (app && commentText.trim()) {
+        const comment = { id: Date.now(), userId: currentUser ? currentUser.id : 0, userName: currentUser ? currentUser.name : 'زائر', userEmail: currentUser ? currentUser.email : '', rating: rating || 0, text: commentText, date: new Date().toISOString().split('T')[0] };
+        if (!app.comments) app.comments = [];
+        app.comments.unshift(comment);
+        localStorage.setItem('apps', JSON.stringify(apps));
+        return true;
+    }
+    return false;
+}
+
+// ==================== دوال عرض التطبيقات ====================
+function createAppCard(app) {
+    const priceClass = app.price === 'paid' ? 'paid' : 'free';
+    const priceText = app.priceText || (app.price === 'paid' ? 'مدفوع' : 'مجاني');
+    const ratingStars = generateRatingStars(app.rating, true);
+    const iconHtml = app.iconUrl ? `<img src="${app.iconUrl}" alt="${app.name}">` : `<i class="fas ${app.icon}"></i>`;
+    return `
+        <div class="app-card">
+            <div class="app-icon">${iconHtml}<span class="app-platform"><i class="fas ${app.platform === 'android' ? 'fa-android' : 'fa-apple'}"></i> ${app.platformName}</span></div>
+            <div class="app-info">
+                <h3>${app.name}</h3><span class="app-category">${app.categoryName}</span>
+                <p class="app-description">${app.description.substring(0, 80)}${app.description.length > 80 ? '...' : ''}</p>
+                <div class="app-rating">${ratingStars}<span class="rating-count">(${app.ratingCount})</span></div>
+                <div class="app-meta"><span class="app-size"><i class="fas fa-database"></i> ${app.size} MB</span><span class="app-price ${priceClass}">${priceText}</span></div>
+                <div class="app-actions"><button onclick="showDownloadModal(${app.id})" class="btn-download"><i class="fas fa-download"></i> تحميل (${app.downloads})</button><button onclick="showAppDetails(${app.id})" class="btn-details"><i class="fas fa-info-circle"></i> تفاصيل</button></div>
+            </div>
+        </div>
+    `;
+}
+
+function generateRatingStars(rating, isSmall = false) {
+    const full = Math.floor(rating), half = rating % 1 >= 0.5, empty = 5 - full - (half ? 1 : 0);
+    let stars = '';
+    for (let i = 0; i < full; i++) stars += '<i class="fas fa-star"></i>';
+    if (half) stars += '<i class="fas fa-star-half-alt"></i>';
+    for (let i = 0; i < empty; i++) stars += '<i class="far fa-star"></i>';
+    return `<div class="stars-container">${stars}</div>`;
+}
+
+function showAppDetails(appId) {
+    const app = apps.find(a => a.id === appId);
+    if (!app) return;
+    const modal = document.getElementById('appDetailsModal');
+    document.getElementById('modalAppTitle').textContent = app.name;
+    const iconHtml = app.iconUrl ? `<img src="${app.iconUrl}" alt="${app.name}">` : `<i class="fas ${app.icon}"></i>`;
+    document.getElementById('appDetailsContent').innerHTML = `
+        <div class="app-details">
+            <div class="app-details-header"><div class="app-details-icon">${iconHtml}</div>
+            <div class="app-details-info"><h2>${app.name}</h2><p class="developer">المطور: ${app.developer} (${app.developerEmail})</p><p>الإصدار: ${app.version || '1.0'}</p>
+            <div class="app-details-rating">${generateRatingStars(app.rating)}<span>(${app.ratingCount} تقييم)</span></div>
+            <div class="app-details-meta"><span><i class="fas fa-tag"></i> ${app.categoryName}</span><span><i class="fas fa-mobile-alt"></i> ${app.platformName}</span><span><i class="fas fa-database"></i> ${app.size} MB</span><span><i class="fas fa-dollar-sign"></i> ${app.price === 'free' ? 'مجاني' : (app.priceText || 'مدفوع')}</span><span><i class="fas fa-download"></i> ${app.downloads} تحميل</span><span><i class="fas fa-calendar"></i> ${app.uploadDate}</span></div>
+            <button onclick="showDownloadModal(${app.id})" class="btn-primary" style="margin-top:15px;"><i class="fas fa-download"></i> تحميل التطبيق</button></div></div>
+            <div class="app-details-description"><h3>عن التطبيق</h3><p>${app.description}</p></div>
+            <div class="rating-section"><h3><i class="fas fa-star"></i> قيم التطبيق</h3><div class="rating-stars">${[1,2,3,4,5].map(s => `<i class="far fa-star" onclick="addRatingAndRefresh(${app.id}, ${s})"></i>`).join('')}</div></div>
+            <div class="comment-section"><h3><i class="fas fa-comments"></i> التعليقات (${app.comments?.length || 0})</h3>
+            <div class="comment-list">${app.comments?.length ? app.comments.map(c => `<div class="comment-item"><div class="comment-header"><span class="comment-user"><i class="fas fa-user-circle"></i> ${c.userName} (${c.userEmail || 'زائر'})</span><span class="comment-date">${c.date}</span>${currentUser?.role === 'admin' ? `<button class="admin-delete-comment" onclick="deleteCommentAdmin(${app.id}, ${c.id})"><i class="fas fa-trash"></i> حذف</button>` : ''}</div>${c.rating ? `<div class="comment-rating">${generateRatingStars(c.rating)}</div>` : ''}<p class="comment-text">${c.text}</p></div>`).join('') : '<p style="text-align:center;color:var(--gray-color);">لا توجد تعليقات بعد</p>'}</div>
+            <div class="comment-form"><h4>أضف تعليقاً</h4><div class="rating-input" id="commentRatingInput">${[1,2,3,4,5].map(s => `<i class="far fa-star" onclick="selectRating(${s})"></i>`).join('')}</div><textarea id="commentText" rows="3" placeholder="اكتب تعليقك هنا..."></textarea><button onclick="submitComment(${app.id})" class="btn-submit" style="width:auto;"><i class="fas fa-paper-plane"></i> إرسال</button></div></div>
+        </div>
+    `;
+    modal.style.display = 'block';
+}
+
+let selectedRating = 0;
+function selectRating(r) { selectedRating = r; document.querySelectorAll('#commentRatingInput i').forEach((star, i) => star.className = i < r ? 'fas fa-star' : 'far fa-star'); }
+function addRatingAndRefresh(id, r) { addRating(id, r); showAppDetails(id); }
+function submitComment(id) { if (addComment(id, document.getElementById('commentText')?.value, selectedRating)) { selectedRating = 0; document.getElementById('commentText').value = ''; showAppDetails(id); } }
 
 // ==================== دوال العرض والبحث ====================
 let currentApps = [...apps];
@@ -849,6 +793,7 @@ function closeBottomAd() { const ad=document.querySelector('.ad-bottom'); if(ad)
 
 // ==================== التهيئة ====================
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('تم تحميل الصفحة، تهيئة النظام...');
     updateUIForUser();
     displayFeaturedApps();
     if(document.getElementById('appsContainer')) displayAllApps();
