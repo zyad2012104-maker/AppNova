@@ -95,6 +95,12 @@
                         <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button>
                     </div>
                     
+                    <div class="admin-panel-btn" id="adminPanelBtn" style="display: none;">
+                        <button class="btn-admin" onclick="showAdminPanel()">
+                            <i class="fas fa-crown"></i> لوحة التحكم
+                        </button>
+                    </div>
+                    
                     <div class="mobile-menu-btn">
                         <i class="fas fa-bars"></i>
                     </div>
@@ -303,6 +309,28 @@
             <div class="modal-footer">
                 <p>لديك حساب بالفعل؟ <a href="javascript:void(0)" onclick="switchToLogin()">تسجيل الدخول</a></p>
             </div>
+        </div>
+    </div>
+
+    <!-- لوحة تحكم المدير -->
+    <div id="adminPanelModal" class="modal modal-large">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-crown"></i> لوحة تحكم المدير</h3>
+                <span class="close" onclick="closeAdminPanel()">&times;</span>
+            </div>
+            <div id="adminPanelContent"></div>
+        </div>
+    </div>
+
+    <!-- نافذة التحميل مع التقييم -->
+    <div id="downloadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-download"></i> تحميل التطبيق</h3>
+                <span class="close" onclick="closeDownloadModal()">&times;</span>
+            </div>
+            <div id="downloadModalContent"></div>
         </div>
     </div>
 
