@@ -2127,7 +2127,7 @@ footer {
 
 /* تنسيق زر لوحة التحكم */
 .admin-panel-btn {
-    display: none; /* سيتم إظهاره فقط للمدير عبر JavaScript */
+    display: none;
 }
 
 .btn-admin {

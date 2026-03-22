@@ -71,27 +71,26 @@ function updateUIForUser() {
     console.log('المستخدم الحالي:', currentUser);
     
     if (currentUser) {
-        // إخفاء أزرار تسجيل الدخول
         if (authButtons) authButtons.style.display = 'none';
-        
-        // إظهار معلومات المستخدم
         if (userInfo) {
             userInfo.style.display = 'flex';
             if (userNameSpan) userNameSpan.textContent = currentUser.name;
         }
-        
-        // إظهار زر لوحة التحكم إذا كان المستخدم مديراً
         if (adminPanelBtn) {
             if (currentUser.role === 'admin') {
                 adminPanelBtn.style.display = 'block';
                 console.log('✅ تم إظهار زر لوحة التحكم للمدير');
             } else {
                 adminPanelBtn.style.display = 'none';
-                console.log('المستخدم ليس مديراً، إخفاء زر لوحة التحكم');
             }
-        } else {
-            console.log('❌ لم يتم العثور على عنصر adminPanelBtn في الصفحة');
         }
+    } else {
+        if (authButtons) authButtons.style.display = 'flex';
+        if (userInfo) userInfo.style.display = 'none';
+        if (adminPanelBtn) adminPanelBtn.style.display = 'none';
+    }
+    updateStats();
+}
         
         // التحقق من صفحة رفع التطبيق
         if (window.location.pathname.includes('upload.html')) {
