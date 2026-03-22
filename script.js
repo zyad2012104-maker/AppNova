@@ -17,13 +17,8 @@ function login(email, password) {
         updateUIForUser();
         showNotification(`مرحباً ${user.name}! تم تسجيل الدخول بنجاح`, 'success');
         closeLoginModal();
-        console.log('تم تسجيل الدخول بنجاح، دور المستخدم:', user.role);
-        if (user.role === 'admin') {
-            console.log('المستخدم مدير، سيتم فتح لوحة التحكم');
-            setTimeout(() => {
-                showAdminPanel();
-            }, 500);
-        }
+        console.log('تم تسجيل الدخول، دور المستخدم:', user.role);
+        console.log('المستخدم الحالي:', currentUser);
         return true;
     } else {
         showNotification('البريد الإلكتروني أو كلمة المرور غير صحيحة', 'error');
@@ -72,22 +67,33 @@ function updateUIForUser() {
     const userNameSpan = document.getElementById('userName');
     const adminPanelBtn = document.getElementById('adminPanelBtn');
     
-    console.log('تحديث واجهة المستخدم، المستخدم الحالي:', currentUser);
+    console.log('تحديث واجهة المستخدم...');
+    console.log('المستخدم الحالي:', currentUser);
     
     if (currentUser) {
+        // إخفاء أزرار تسجيل الدخول
         if (authButtons) authButtons.style.display = 'none';
+        
+        // إظهار معلومات المستخدم
         if (userInfo) {
             userInfo.style.display = 'flex';
             if (userNameSpan) userNameSpan.textContent = currentUser.name;
         }
+        
+        // إظهار زر لوحة التحكم إذا كان المستخدم مديراً
         if (adminPanelBtn) {
             if (currentUser.role === 'admin') {
                 adminPanelBtn.style.display = 'block';
-                console.log('تم إظهار زر لوحة التحكم للمدير');
+                console.log('✅ تم إظهار زر لوحة التحكم للمدير');
             } else {
                 adminPanelBtn.style.display = 'none';
+                console.log('المستخدم ليس مديراً، إخفاء زر لوحة التحكم');
             }
+        } else {
+            console.log('❌ لم يتم العثور على عنصر adminPanelBtn في الصفحة');
         }
+        
+        // التحقق من صفحة رفع التطبيق
         if (window.location.pathname.includes('upload.html')) {
             const uploadContainer = document.getElementById('uploadFormContainer');
             const loginMessage = document.getElementById('loginRequiredMessage');
@@ -95,9 +101,16 @@ function updateUIForUser() {
             if (loginMessage) loginMessage.style.display = 'none';
         }
     } else {
+        // إظهار أزرار تسجيل الدخول
         if (authButtons) authButtons.style.display = 'flex';
+        
+        // إخفاء معلومات المستخدم
         if (userInfo) userInfo.style.display = 'none';
+        
+        // إخفاء زر لوحة التحكم
         if (adminPanelBtn) adminPanelBtn.style.display = 'none';
+        
+        // التحقق من صفحة رفع التطبيق
         if (window.location.pathname.includes('upload.html')) {
             const uploadContainer = document.getElementById('uploadFormContainer');
             const loginMessage = document.getElementById('loginRequiredMessage');
@@ -105,17 +118,21 @@ function updateUIForUser() {
             if (loginMessage) loginMessage.style.display = 'block';
         }
     }
+    
     updateStats();
+    console.log('تم تحديث واجهة المستخدم بنجاح');
 }
 
 // ==================== لوحة التحكم ====================
 function showAdminPanel() {
     console.log('محاولة فتح لوحة التحكم');
+    
     if (!currentUser) {
         showNotification('الرجاء تسجيل الدخول أولاً', 'warning');
         openLoginModal();
         return;
     }
+    
     if (currentUser.role !== 'admin') {
         showNotification('غير مصرح لك بالدخول إلى لوحة التحكم', 'error');
         console.log('المستخدم ليس مديراً:', currentUser.role);
@@ -264,7 +281,7 @@ function renderCommentsTable() {
     `;
 }
 
-// ==================== دوال التعديل ====================
+// ==================== دوال التعديل والحذف ====================
 function editApp(appId) {
     const app = apps.find(a => a.id === appId);
     if (!app) return;
@@ -507,7 +524,6 @@ function editComment(appId, commentId) {
     });
 }
 
-// ==================== دوال الحذف ====================
 function deleteAppAdmin(id) {
     if (confirm('⚠️ هل أنت متأكد من حذف هذا التطبيق؟\nسيتم حذف جميع بياناته وتعليقاته بشكل نهائي.')) {
         apps = apps.filter(a => a.id !== id);
@@ -568,7 +584,7 @@ function deleteCommentAdmin(appId, commentId) {
     }
 }
 
-// ==================== دوال رفع التطبيقات ====================
+// ==================== دوال رفع التطبيقات والتحميل ====================
 function uploadApp(formData) {
     if (!currentUser) {
         showNotification('يجب تسجيل الدخول أولاً', 'warning');
@@ -616,7 +632,6 @@ function uploadApp(formData) {
     return true;
 }
 
-// ==================== دوال التحميل والتقييم ====================
 let downloadRating = 0;
 
 function showDownloadModal(appId) {
