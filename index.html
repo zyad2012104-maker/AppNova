@@ -118,21 +118,21 @@
                         <h2>شارك تطبيقاتك<br>مع <span class="highlight">العالم</span></h2>
                         <p>منصة متكاملة لرفع ومشاركة تطبيقات الأندرويد و iOS بكل سهولة وأمان. انضم إلى آلاف المطورين العرب وابدأ رحلتك الآن.</p>
                         <div class="hero-buttons">
-                            <a href="upload.html" class="btn-primary" onclick="return checkLoginAndRedirect(event, 'upload.html')"><i class="fas fa-upload"></i> ابدأ برفع تطبيقك</a>
+                            <a href="upload.html" class="btn-primary"><i class="fas fa-upload"></i> ابدأ برفع تطبيقك</a>
                             <a href="apps.html" class="btn-secondary"><i class="fas fa-mobile-alt"></i> استعرض التطبيقات</a>
                         </div>
                         <div class="stats">
                             <div class="stat-item">
-                                <span class="stat-number" id="appsCount">500+</span>
+                                <span class="stat-number" id="appsCount">0</span>
                                 <span class="stat-label">تطبيق منشور</span>
                             </div>
                             <div class="stat-item">
-                                <span class="stat-number">10K+</span>
-                                <span class="stat-label">تحميل شهري</span>
+                                <span class="stat-number" id="downloadsCount">0</span>
+                                <span class="stat-label">إجمالي التحميلات</span>
                             </div>
                             <div class="stat-item">
-                                <span class="stat-number" id="usersCount">200+</span>
-                                <span class="stat-label">مطور نشط</span>
+                                <span class="stat-number" id="usersCount">0</span>
+                                <span class="stat-label">مستخدم نشط</span>
                             </div>
                         </div>
                     </div>
@@ -309,6 +309,17 @@
             <div class="modal-footer">
                 <p>لديك حساب بالفعل؟ <a href="javascript:void(0)" onclick="switchToLogin()">تسجيل الدخول</a></p>
             </div>
+        </div>
+    </div>
+
+    <!-- نافذة تفاصيل التطبيق -->
+    <div id="appDetailsModal" class="modal modal-large">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalAppTitle">تفاصيل التطبيق</h3>
+                <span class="close" onclick="closeAppDetailsModal()">&times;</span>
+            </div>
+            <div id="appDetailsContent"></div>
         </div>
     </div>
 
