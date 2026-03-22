@@ -1969,3 +1969,80 @@ footer {
         padding: 8px;
     }
 }
+
+/* ==================== تنسيقات أزرار الإدارة ==================== */
+.admin-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.admin-btn-edit {
+    background: #ffc107;
+    color: #212529;
+    border: none;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+}
+
+.admin-btn-edit:hover {
+    background: #e0a800;
+    transform: scale(1.05);
+}
+
+.admin-btn-danger {
+    background: var(--danger);
+    color: var(--white);
+    border: none;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+}
+
+.admin-btn-danger:hover {
+    background: #c82333;
+    transform: scale(1.05);
+}
+
+.admin-app-icon {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gray-light);
+    border-radius: var(--radius-md);
+}
+
+.admin-app-icon img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+}
+
+.admin-app-icon i {
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+.admin-table td {
+    vertical-align: middle;
+}
+
+/* ==================== تحسينات النماذج ==================== */
+.modal-content form {
+    max-height: 70vh;
+    overflow-y: auto;
+}
