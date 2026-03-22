@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متجر التطبيقات | جميع التطبيقات</title>
+    
+    <!-- الخطوط من Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- مكتبة Font Awesome للأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- ملف التنسيقات -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ==================== إعلان أعلى الموقع ==================== -->
+    <div class="ad-top-wrapper">
+        <div class="ad-container ad-top">
+            <div class="ad-content">
+                <div class="ad-grid">
+                    <div class="ad-item">
+                        <script src="https://pl28941417.profitablecpmratenetwork.com/56/78/41/567841b929b9b0b5da580931d4c9140c.js"></script>
+                    </div>
+                </div>
+            </div>
+            <button class="close-ad-btn" onclick="closeTopAd()"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
+    <!-- ==================== الحاوية الرئيسية ==================== -->
+    <div class="main-wrapper">
+        <!-- إعلان جانبي أيمن -->
+        <div class="ad-sidebar ad-sidebar-right">
+            <div class="ad-sidebar-content">
+                <div class="ad-sidebar-title">
+                    <i class="fas fa-ad"></i>
+                    <span>إعلانات</span>
+                </div>
+                <div class="ad-sidebar-items">
+                    <div class="ad-sidebar-item">
+                        <script src="https://pl28941680.profitablecpmratenetwork.com/8b/d5/21/8bd5212efbe7fc123c0c78afb316cd4f.js"></script>
+                    </div>
+                    <div class="ad-sidebar-item">
+                        <script src="https://pl28941417.profitablecpmratenetwork.com/56/78/41/567841b929b9b0b5da580931d4c9140c.js"></script>
+                    </div>
+                    <div class="ad-sidebar-item">
+                        <script>
+                          atOptions = {
+                            'key' : 'd97eda55927b2ccbf2ad42d5cb6201f8',
+                            'format' : 'iframe',
+                            'height' : 600,
+                            'width' : 160,
+                            'params' : {}
+                          };
+                        </script>
+                        <script src="https://www.highperformanceformat.com/d97eda55927b2ccbf2ad42d5cb6201f8/invoke.js"></script>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- المحتوى الرئيسي للموقع -->
+        <div class="site-content">
+            <!-- رأس الموقع -->
+            <header>
+                <div class="container header-container">
+                    <div class="logo">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h1>متجر <span>التطبيقات</span></h1>
+                    </div>
+                    
+                    <nav>
+                        <ul>
+                            <li><a href="index.html"><i class="fas fa-home"></i> الرئيسية</a></li>
+                            <li><a href="apps.html" class="active"><i class="fas fa-mobile-alt"></i> التطبيقات</a></li>
+                            <li><a href="upload.html"><i class="fas fa-upload"></i> رفع تطبيق</a></li>
+                            <li><a href="contact.html"><i class="fas fa-envelope"></i> اتصل بنا</a></li>
+                        </ul>
+                    </nav>
+                    
+                    <div class="auth-buttons" id="authButtons">
+                        <button class="btn-login" onclick="openLoginModal()"><i class="fas fa-sign-in-alt"></i> دخول</button>
+                        <button class="btn-signup" onclick="openRegisterModal()"><i class="fas fa-user-plus"></i> حساب جديد</button>
+                    </div>
+                    
+                    <div class="user-info" id="userInfo" style="display: none;">
+                        <div class="user-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <span id="userName"></span>
+                        <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button>
+                    </div>
+                    
+                    <div class="mobile-menu-btn">
+                        <i class="fas fa-bars"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- عرض جميع التطبيقات -->
+            <section class="apps-section">
+                <div class="container">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <h2>جميع التطبيقات</h2>
+                        <p>تصفح جميع التطبيقات المتاحة على منصتنا</p>
+                    </div>
+                    
+                    <div class="filter-bar">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchApps" placeholder="ابحث عن تطبيق...">
+                        </div>
+                        
+                        <div class="filter-options">
+                            <select id="filterCategory">
+                                <option value="all">جميع التصنيفات</option>
+                                <option value="educational">تعليمي</option>
+                                <option value="entertainment">ترفيهي</option>
+                                <option value="productivity">إنتاجية</option>
+                                <option value="social">تواصل اجتماعي</option>
+                                <option value="games">ألعاب</option>
+                                <option value="business">أعمال</option>
+                                <option value="health">صحة ولياقة</option>
+                            </select>
+                            
+                            <select id="filterPlatform">
+                                <option value="all">جميع المنصات</option>
+                                <option value="android">أندرويد</option>
+                                <option value="ios">iOS</option>
+                                <option value="both">كلاهما</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="apps-grid" id="appsContainer">
+                        <!-- التطبيقات ستظهر هنا -->
+                    </div>
+                    
+                    <div class="load-more">
+                        <button id="loadMoreBtn" class="btn-load-more"><i class="fas fa-sync-alt"></i> تحميل المزيد</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- إعلان جانبي أيسر -->
+        <div class="ad-sidebar ad-sidebar-left">
+            <div class="ad-sidebar-content">
+                <div class="ad-sidebar-title">
+                    <i class="fas fa-ad"></i>
+                    <span>إعلانات</span>
+                </div>
+                <div class="ad-sidebar-items">
+                    <div class="ad-sidebar-item">
+                        <script>
+                          atOptions = {
+                            'key' : 'd97eda55927b2ccbf2ad42d5cb6201f8',
+                            'format' : 'iframe',
+                            'height' : 600,
+                            'width' : 160,
+                            'params' : {}
+                          };
+                        </script>
+                        <script src="https://www.highperformanceformat.com/d97eda55927b2ccbf2ad42d5cb6201f8/invoke.js"></script>
+                    </div>
+                    <div class="ad-sidebar-item">
+                        <script src="https://pl28941680.profitablecpmratenetwork.com/8b/d5/21/8bd5212efbe7fc123c0c78afb316cd4f.js"></script>
+                    </div>
+                    <div class="ad-sidebar-item">
+                        <script src="https://pl28941417.profitablecpmratenetwork.com/56/78/41/567841b929b9b0b5da580931d4c9140c.js"></script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== إعلان أسفل الموقع ==================== -->
+    <div class="ad-bottom-wrapper">
+        <div class="ad-container ad-bottom">
+            <div class="ad-content">
+                <div class="ad-grid">
+                    <div class="ad-item">
+                        <script src="https://pl28941417.profitablecpmratenetwork.com/56/78/41/567841b929b9b0b5da580931d4c9140c.js"></script>
+                    </div>
+                </div>
+            </div>
+            <button class="close-ad-btn" onclick="closeBottomAd()"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
+    <!-- تذييل الموقع -->
+    <footer>
+        <div class="container footer-container">
+            <div class="footer-about">
+                <div class="logo">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>متجر التطبيقات</h3>
+                </div>
+                <p>منصة عربية لرفع ومشاركة تطبيقات الموبيل، نسعى لتوفير بيئة آمنة وسهلة للمطورين والمستخدمين.</p>
+            </div>
+            
+            <div class="footer-links">
+                <h4>روابط سريعة</h4>
+                <ul>
+                    <li><a href="index.html">الرئيسية</a></li>
+                    <li><a href="apps.html">التطبيقات</a></li>
+                    <li><a href="upload.html">رفع تطبيق</a></li>
+                    <li><a href="contact.html">اتصل بنا</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-links">
+                <h4>الدعم</h4>
+                <ul>
+                    <li><a href="#">شروط الاستخدام</a></li>
+                    <li><a href="#">سياسة الخصوصية</a></li>
+                    <li><a href="#">الأسئلة الشائعة</a></li>
+                    <li><a href="#">مساعدة</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-newsletter">
+                <h4>النشرة البريدية</h4>
+                <p>اشترك لتصلك أحدث التطبيقات</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="بريدك الإلكتروني">
+                    <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            <p>جميع الحقوق محفوظة &copy; 2024 متجر التطبيقات</p>
+        </div>
+    </footer>
+
+    <!-- نافذة تفاصيل التطبيق -->
+    <div id="appDetailsModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="modalAppTitle">تفاصيل التطبيق</h3>
+                <span class="close" onclick="closeAppDetailsModal()">&times;</span>
+            </div>
+            <div id="appDetailsContent"></div>
+        </div>
+    </div>
+
+    <!-- نماذج تسجيل الدخول والتسجيل -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</h3>
+                <span class="close" onclick="closeLoginModal()">&times;</span>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> البريد الإلكتروني</label>
+                    <input type="email" id="loginEmail" placeholder="example@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> كلمة المرور</label>
+                    <input type="password" id="loginPassword" placeholder="********" required>
+                </div>
+                <button type="submit" class="btn-submit">تسجيل الدخول</button>
+            </form>
+            <div class="modal-footer">
+                <p>ليس لديك حساب؟ <a href="javascript:void(0)" onclick="switchToRegister()">إنشاء حساب جديد</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> إنشاء حساب جديد</h3>
+                <span class="close" onclick="closeRegisterModal()">&times;</span>
+            </div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> الاسم الكامل</label>
+                    <input type="text" id="regName" placeholder="أحمد محمد" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> البريد الإلكتروني</label>
+                    <input type="email" id="regEmail" placeholder="example@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> كلمة المرور</label>
+                    <input type="password" id="regPassword" placeholder="********" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> تأكيد كلمة المرور</label>
+                    <input type="password" id="regConfirmPassword" placeholder="********" required>
+                </div>
+                <button type="submit" class="btn-submit">إنشاء حساب</button>
+            </form>
+            <div class="modal-footer">
+                <p>لديك حساب بالفعل؟ <a href="javascript:void(0)" onclick="switchToLogin()">تسجيل الدخول</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
