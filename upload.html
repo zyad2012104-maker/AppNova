@@ -101,7 +101,7 @@
                 </div>
             </header>
 
-            <!-- نموذج رفع التطبيق -->
+            <!-- نموذج رفع التطبيق عبر الرابط -->
             <div id="uploadFormContainer">
                 <section class="upload-section">
                     <div class="container">
@@ -110,7 +110,7 @@
                                 <i class="fas fa-cloud-upload-alt"></i>
                             </div>
                             <h2>رفع تطبيق جديد</h2>
-                            <p>املأ البيانات التالية لرفع تطبيقك إلى المتجر</p>
+                            <p>أدخل رابط تحميل التطبيق المباشر (Google Drive, Dropbox, أو أي رابط مباشر)</p>
                         </div>
                         
                         <div class="upload-form-container">
@@ -176,32 +176,16 @@
                                 
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="appIcon"><i class="fas fa-image"></i> أيقونة التطبيق <span class="required">*</span></label>
-                                        <div class="file-input-wrapper">
-                                            <input type="file" id="appIcon" name="appIcon" accept="image/*" required>
-                                            <button type="button" class="file-input-btn"><i class="fas fa-camera"></i> اختر صورة</button>
-                                            <span class="file-name">لم يتم اختيار ملف</span>
-                                        </div>
+                                        <label for="iconUrl"><i class="fas fa-image"></i> رابط صورة التطبيق</label>
+                                        <input type="url" id="iconUrl" name="iconUrl" placeholder="https://example.com/icon.png">
+                                        <small class="form-text">أدخل رابط صورة أيقونة التطبيق (اختياري)</small>
                                     </div>
                                     
                                     <div class="form-group">
-                                        <label for="appScreenshots"><i class="fas fa-images"></i> صور الشاشة</label>
-                                        <div class="file-input-wrapper">
-                                            <input type="file" id="appScreenshots" name="appScreenshots" accept="image/*" multiple>
-                                            <button type="button" class="file-input-btn"><i class="fas fa-images"></i> اختر صور</button>
-                                            <span class="file-name">لم يتم اختيار ملفات</span>
-                                        </div>
+                                        <label for="downloadLink"><i class="fas fa-link"></i> رابط تحميل التطبيق <span class="required">*</span></label>
+                                        <input type="url" id="downloadLink" name="downloadLink" placeholder="https://example.com/app.apk" required>
+                                        <small class="form-text">أدخل رابط تحميل مباشر للتطبيق (Google Drive, Dropbox, أو أي رابط مباشر)</small>
                                     </div>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="appFile"><i class="fas fa-file"></i> ملف التطبيق (APK/IPA) <span class="required">*</span></label>
-                                    <div class="file-input-wrapper">
-                                        <input type="file" id="appFile" name="appFile" accept=".apk,.ipa,.aab" required>
-                                        <button type="button" class="file-input-btn"><i class="fas fa-file-upload"></i> اختر الملف</button>
-                                        <span class="file-name">لم يتم اختيار ملف</span>
-                                    </div>
-                                    <small class="form-text">الحد الأقصى للحجم: 100 ميجابايت. الصيغ المدعومة: APK, AAB, IPA</small>
                                 </div>
                                 
                                 <div class="form-group terms-group">
