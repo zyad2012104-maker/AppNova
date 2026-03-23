@@ -65,7 +65,6 @@ function login(email, password) {
         showNotification(`مرحباً ${user.name}! تم تسجيل الدخول بنجاح`, 'success');
         closeLoginModal();
         
-        // إذا كان المستخدم مديراً، افتح لوحة التحكم
         if (user.role === 'admin') {
             setTimeout(() => {
                 showAdminPanel();
@@ -117,7 +116,7 @@ function logout() {
     closeAdminPanel();
 }
 
-// ==================== تحديث واجهة المستخدم ====================
+// ==================== تحديث واجهة المستخدم (المفتاح الرئيسي) ====================
 function updateUIForUser() {
     const authButtons = document.getElementById('authButtons');
     const userInfo = document.getElementById('userInfo');
@@ -137,14 +136,17 @@ function updateUIForUser() {
             if (userNameSpan) userNameSpan.textContent = currentUser.name;
         }
         
-        // إظهار زر لوحة التحكم إذا كان المستخدم مديراً
+        // **الجزء الأهم: إظهار زر لوحة التحكم إذا كان المستخدم مديراً**
         if (adminPanelBtn) {
             if (currentUser.role === 'admin') {
                 adminPanelBtn.style.display = 'block';
                 console.log('✅ تم إظهار زر لوحة التحكم للمدير');
             } else {
                 adminPanelBtn.style.display = 'none';
+                console.log('المستخدم ليس مديراً، إخفاء زر لوحة التحكم');
             }
+        } else {
+            console.log('❌ لم يتم العثور على عنصر adminPanelBtn في الصفحة');
         }
     } else {
         // إظهار أزرار تسجيل الدخول
@@ -195,6 +197,7 @@ function showAdminPanel() {
     
     updateAdminPanelContent();
     modal.style.display = 'block';
+    console.log('تم فتح لوحة التحكم بنجاح');
 }
 
 function updateAdminPanelContent() {
@@ -224,7 +227,7 @@ function updateAdminPanelContent() {
 function showAdminTab(tab) {
     const btns = document.querySelectorAll('.admin-tab-btn');
     btns.forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
+    if (event && event.target) event.target.classList.add('active');
     
     const content = document.getElementById('adminTabContent');
     if (tab === 'apps') content.innerHTML = renderAppsTable();
@@ -237,9 +240,7 @@ function renderAppsTable() {
     return `
         <div class="admin-table">
             <table>
-                <thead>
-                    <tr><th>#</th><th>الصورة</th><th>الاسم</th><th>المطور</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr>
-                </thead>
+                <thead><tr><th>#</th><th>الصورة</th><th>الاسم</th><th>المطور</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr></thead>
                 <tbody>
                     ${apps.map(a => `
                         <tr>
@@ -267,9 +268,7 @@ function renderUsersTable() {
     return `
         <div class="admin-table">
             <table>
-                <thead>
-                    <tr><th>#</th><th>الاسم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr>
-                </thead>
+                <thead><tr><th>#</th><th>الاسم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead>
                 <tbody>
                     ${normalUsers.map(u => `
                         <tr>
@@ -296,9 +295,7 @@ function renderCommentsTable() {
     return `
         <div class="admin-table">
             <table>
-                <thead>
-                    <tr><th>التطبيق</th><th>المستخدم</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th></tr>
-                </thead>
+                <thead><tr><th>التطبيق</th><th>المستخدم</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th></tr></thead>
                 <tbody>
                     ${allComments.map(c => `
                         <tr>
@@ -321,14 +318,10 @@ function renderCommentsTable() {
 
 // ==================== دوال التعديل والحذف ====================
 function editApp(appId) {
-    const app = apps.find(a => a.id === appId);
-    if (!app) return;
     showNotification('سيتم إضافة نافذة تعديل قريباً', 'info');
 }
 
 function editUser(userId) {
-    const user = users.find(u => u.id === userId);
-    if (!user) return;
     showNotification('سيتم إضافة نافذة تعديل قريباً', 'info');
 }
 
@@ -464,6 +457,8 @@ function displayFeaturedApps() {
     const container = document.getElementById('featuredApps');
     if (container && apps.length > 0) {
         container.innerHTML = apps.slice(0, 3).map(createAppCard).join('');
+    } else if (container) {
+        container.innerHTML = '<div class="no-results">لا توجد تطبيقات حالياً</div>';
     }
 }
 
@@ -547,7 +542,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupForms();
     setupMobileMenu();
     
-    // إغلاق النوافذ عند النقر خارجها
     window.onclick = (e) => {
         if (e.target === document.getElementById('loginModal')) closeLoginModal();
         if (e.target === document.getElementById('registerModal')) closeRegisterModal();
