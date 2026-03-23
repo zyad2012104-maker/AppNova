@@ -6,169 +6,6 @@
     <title>AppNova - لوحة الإدارة</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <style>
-        .admin-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 10px;
-            flex-wrap: wrap;
-        }
-        .admin-tab {
-            padding: 10px 25px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            color: #64748b;
-            border-radius: 10px;
-            transition: all 0.3s;
-            font-family: inherit;
-        }
-        .admin-tab.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .admin-tab:hover:not(.active) {
-            background: #f1f5f9;
-        }
-        .admin-panel {
-            display: none;
-        }
-        .admin-panel.active {
-            display: block;
-            animation: fadeIn 0.3s;
-        }
-        .search-admin {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-        }
-        .search-admin input {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-family: inherit;
-        }
-        .search-admin button {
-            padding: 12px 25px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-        }
-        .admin-table {
-            width: 100%;
-            overflow-x: auto;
-        }
-        .admin-table table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .admin-table th,
-        .admin-table td {
-            padding: 12px;
-            text-align: right;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .admin-table th {
-            background: #f8fafc;
-            font-weight: 700;
-            color: #1e293b;
-        }
-        .admin-table tr:hover {
-            background: #f8fafc;
-        }
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        .badge-admin { background: #ef4444; color: white; }
-        .badge-moderator { background: #f59e0b; color: white; }
-        .badge-user { background: #10b981; color: white; }
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .btn-edit {
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-        .btn-delete {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-        .btn-view {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-        .add-moderator-form {
-            background: #f8fafc;
-            padding: 20px;
-            border-radius: 15px;
-            margin-top: 20px;
-        }
-        .permissions-group {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin: 15px 0;
-        }
-        .permissions-group label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-        .stats-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        .stat-card h3 {
-            font-size: 2rem;
-            color: #667eea;
-            margin-bottom: 5px;
-        }
-        .stat-card p {
-            color: #64748b;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -183,7 +20,8 @@
                 <li><a href="apps.html">📱 التطبيقات</a></li>
                 <li id="uploadNav"><a href="upload.html">⬆️ رفع تطبيق</a></li>
                 <li id="loginNav"><a href="login.html">🔐 تسجيل الدخول</a></li>
-                <li id="adminNav" style="display:none;"><a href="admin.html">⚙️ الإدارة</a></li>
+                <li id="adminNav" style="display:none;"><a href="admin.html">👑 الإدارة</a></li>
+                <li id="moderatorNav" style="display:none;"><a href="admin.html">🛡️ الإشراف</a></li>
                 <li id="userInfo" style="display:none;"></li>
             </ul>
         </div>
@@ -201,17 +39,18 @@
 
         <main class="content-wrapper">
             <div class="hero" style="padding: 30px;">
-                <h1>⚙️ لوحة التحكم - الإدارة</h1>
-                <p>إدارة المستخدمين والمشرفين والتطبيقات والتعليقات</p>
+                <h1 id="adminPageTitle">⚙️ لوحة التحكم - الإدارة</h1>
+                <p id="adminPageDesc">إدارة المستخدمين والمشرفين والتطبيقات والتعليقات والتصنيفات</p>
             </div>
             
             <div class="stats-cards" id="statsCards"></div>
             
-            <div class="admin-tabs">
-                <button class="admin-tab active" onclick="showAdminPanel('users')">👥 المستخدمين</button>
-                <button class="admin-tab" onclick="showAdminPanel('moderators')">👑 المشرفين</button>
-                <button class="admin-tab" onclick="showAdminPanel('apps')">📱 التطبيقات</button>
-                <button class="admin-tab" onclick="showAdminPanel('comments')">💬 التعليقات</button>
+            <div class="admin-tabs" id="adminTabs">
+                <button class="admin-tab active" data-panel="users" onclick="showAdminPanel('users')">👥 المستخدمين</button>
+                <button class="admin-tab" data-panel="moderators" id="moderatorsTab" onclick="showAdminPanel('moderators')">👑 المشرفين</button>
+                <button class="admin-tab" data-panel="apps" onclick="showAdminPanel('apps')">📱 التطبيقات</button>
+                <button class="admin-tab" data-panel="comments" onclick="showAdminPanel('comments')">💬 التعليقات</button>
+                <button class="admin-tab" data-panel="categories" onclick="showAdminPanel('categories')">🏷️ التصنيفات</button>
             </div>
             
             <div id="usersPanel" class="admin-panel active">
@@ -238,12 +77,13 @@
                             <input type="password" id="modPassword" placeholder="كلمة المرور" required style="padding:10px; border:2px solid #e2e8f0; border-radius:8px;">
                         </div>
                         <div class="permissions-group">
-                            <label><input type="checkbox" id="permDeleteUser"> حذف المستخدمين</label>
-                            <label><input type="checkbox" id="permDeleteApp"> حذف التطبيقات</label>
-                            <label><input type="checkbox" id="permEditApp"> تعديل التطبيقات</label>
-                            <label><input type="checkbox" id="permDeleteComment"> حذف التعليقات</label>
-                            <label><input type="checkbox" id="permEditComment"> تعديل التعليقات</label>
-                            <label><input type="checkbox" id="permViewStats"> عرض الإحصائيات</label>
+                            <label><input type="checkbox" id="permDeleteUser"> 🗑️ حذف المستخدمين</label>
+                            <label><input type="checkbox" id="permDeleteApp"> 📱 حذف التطبيقات</label>
+                            <label><input type="checkbox" id="permEditApp"> ✏️ تعديل التطبيقات</label>
+                            <label><input type="checkbox" id="permDeleteComment"> 💬 حذف التعليقات</label>
+                            <label><input type="checkbox" id="permEditComment"> ✏️ تعديل التعليقات</label>
+                            <label><input type="checkbox" id="permViewStats"> 📊 عرض الإحصائيات</label>
+                            <label><input type="checkbox" id="permManageCategories"> 🏷️ إدارة التصنيفات</label>
                         </div>
                         <button type="submit" class="submit-btn" style="margin-top:10px;">➕ إضافة مشرف</button>
                     </form>
@@ -264,6 +104,41 @@
                     <button onclick="searchComments()">🔍 بحث</button>
                 </div>
                 <div class="admin-table" id="commentsTable"></div>
+            </div>
+            
+            <div id="categoriesPanel" class="admin-panel">
+                <div class="categories-admin">
+                    <h3 style="margin-bottom: 15px;">🏷️ قائمة التصنيفات</h3>
+                    <div id="categoriesList"></div>
+                    <div class="add-category-form">
+                        <input type="text" id="newCategoryName" placeholder="اسم التصنيف الجديد">
+                        <input type="text" id="newCategoryIcon" placeholder="الأيقونة (مثال: 🎮)" style="width:80px;">
+                        <input type="text" id="newCategoryKey" placeholder="المفتاح (مثال: games)">
+                        <button onclick="addCategory()">➕ إضافة تصنيف</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- قسم إدارة أيقونة الموقع - يظهر للمدير فقط -->
+            <div id="faviconPanel" class="admin-panel" style="margin-top: 30px;">
+                <div class="categories-admin">
+                    <h3 style="margin-bottom: 15px;">🖼️ إدارة أيقونة الموقع (Favicon)</h3>
+                    <p style="color: #64748b; margin-bottom: 15px;">يمكنك رفع صورة لتكون أيقونة الموقع التي تظهر في علامة التبويب</p>
+                    
+                    <div class="favicon-upload">
+                        <div class="favicon-preview" id="faviconPreview">
+                            <img id="faviconPreviewImg" src="" onerror="this.style.display='none'" style="display:none;">
+                            <span id="noFaviconText" style="color:#94a3b8; font-size:12px;">لا توجد أيقونة</span>
+                        </div>
+                        <input type="file" id="faviconFile" accept="image/png,image/jpeg,image/jpg,image/ico,image/x-icon">
+                        <button onclick="uploadFavicon()">📤 رفع أيقونة</button>
+                        <button onclick="removeFavicon()" class="remove-favicon">🗑️ إزالة الأيقونة</button>
+                    </div>
+                    
+                    <div style="margin-top: 15px; padding: 10px; background: #e6f7e6; border-radius: 8px;">
+                        <small>💡 ملاحظة: يفضل استخدام صورة مربعة بحجم 32x32 أو 64x64 بكسل بصيغة PNG أو ICO</small>
+                    </div>
+                </div>
             </div>
         </main>
 
@@ -288,6 +163,19 @@
         </div>
         <div class="footer-bottom">© 2024 AppNova</div>
     </footer>
+
+    <!-- نافذة تعديل الصلاحيات -->
+    <div id="permissionsModal" class="modal">
+        <div class="modal-content permissions-modal-content">
+            <span class="close" onclick="closePermissionsModal()">&times;</span>
+            <h3>🔧 تعديل صلاحيات المشرف</h3>
+            <div id="permissionsModalContent"></div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="savePermissionsChanges()" class="submit-btn" style="flex:1;">💾 حفظ التغييرات</button>
+                <button onclick="closePermissionsModal()" class="submit-btn" style="flex:1; background:#94a3b8;">إلغاء</button>
+            </div>
+        </div>
+    </div>
 
     <div id="adModal" class="modal">
         <div class="modal-content">

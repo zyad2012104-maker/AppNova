@@ -11,14 +11,14 @@ body {
     color: #2d3748;
 }
 
-/* شريط التنقل */
+/* شريط التنقل - متحرك مع الصفحة (غير ثابت) */
 .navbar {
     background: white;
     border-radius: 20px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.1);
     margin: 20px;
-    position: sticky;
-    top: 20px;
+    position: relative;
+    top: auto;
     z-index: 100;
 }
 
@@ -431,7 +431,7 @@ body {
     to { transform: translateX(100%); opacity: 0; }
 }
 
-/* تصميم متجاوب */
+/* ========== تصميم الموبايل - 2 أعمدة ========== */
 @media (max-width: 768px) {
     .main-layout {
         flex-direction: column;
@@ -451,6 +451,7 @@ body {
     
     .content-wrapper {
         order: 0;
+        padding: 15px;
     }
     
     .nav-container {
@@ -473,21 +474,158 @@ body {
         grid-template-columns: 1fr;
     }
     
+    /* 2 أعمدة في عرض الموبايل */
     .apps-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
     }
     
+    .app-card {
+        margin: 0;
+    }
+    
+    .app-card-image {
+        height: 100px;
+    }
+    
+    .app-card-content {
+        padding: 10px;
+    }
+    
+    .app-card-title {
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+    }
+    
+    .app-card-description {
+        font-size: 0.7rem;
+        -webkit-line-clamp: 2;
+        margin-bottom: 6px;
+    }
+    
+    .app-card-meta {
+        font-size: 0.65rem;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-bottom: 4px;
+    }
+    
+    .app-card-download {
+        padding: 6px;
+        font-size: 0.7rem;
+        margin-top: 8px;
+    }
+    
+    /* تعديل عرض الصفحة الرئيسية */
+    .apps-section {
+        padding: 12px;
+        margin-bottom: 15px;
+    }
+    
+    .apps-section h2 {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+    }
+    
+    /* تعديل الإحصائيات */
+    .stats-cards {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .stat-card {
+        padding: 10px;
+    }
+    
+    .stat-card h3 {
+        font-size: 1.2rem;
+    }
+    
+    .stat-card p {
+        font-size: 0.7rem;
+    }
+    
+    /* تعديل جداول الإدارة */
+    .admin-table {
+        font-size: 0.7rem;
+        overflow-x: auto;
+    }
+    
+    .admin-table th,
+    .admin-table td {
+        padding: 6px 4px;
+    }
+    
+    .action-buttons {
+        gap: 3px;
+        flex-direction: column;
+    }
+    
+    .btn-edit, .btn-delete, .btn-view, .btn-permissions {
+        padding: 3px 6px;
+        font-size: 0.6rem;
+    }
+    
+    /* تعديل أزرار التبويب */
     .admin-tabs {
+        gap: 5px;
         justify-content: center;
+        flex-wrap: wrap;
     }
     
     .admin-tab {
-        padding: 8px 16px;
-        font-size: 0.85rem;
+        padding: 6px 12px;
+        font-size: 0.7rem;
     }
     
-    .stats-cards {
-        grid-template-columns: repeat(2, 1fr);
+    /* تعديل نموذج إضافة المشرف */
+    .permissions-group {
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    
+    .permissions-group label {
+        font-size: 0.7rem;
+    }
+    
+    /* تعديل الفوتر */
+    .footer {
+        margin: 10px;
+        padding: 20px 15px;
+    }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .newsletter {
+        flex-direction: column;
+    }
+    
+    .newsletter button {
+        width: 100%;
+    }
+    
+    /* تعديل إدارة التصنيفات */
+    .categories-admin {
+        padding: 12px;
+    }
+    
+    .category-item {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+    
+    .add-category-form {
+        flex-direction: column;
+    }
+    
+    .permissions-modal-content {
+        width: 95%;
+        margin: 10% auto;
+        padding: 20px;
     }
 }
 
@@ -504,4 +642,199 @@ body {
 @keyframes loading {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
+}
+
+/* إضافات لإدارة التصنيفات */
+.categories-admin {
+    background: #f8fafc;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #e2e8f0;
+    transition: background 0.2s;
+}
+
+.category-item:hover {
+    background: #f1f5f9;
+}
+
+.category-item:last-child {
+    border-bottom: none;
+}
+
+.category-name {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+}
+
+.category-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.add-category-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 2px dashed #e2e8f0;
+}
+
+.add-category-form input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+.add-category-form input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.add-category-form button {
+    padding: 10px 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform 0.2s;
+}
+
+.add-category-form button:hover {
+    transform: scale(1.02);
+}
+
+/* أزرار الإدارة */
+.btn-permissions {
+    background: #f59e0b;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.btn-permissions:hover {
+    background: #d97706;
+}
+
+/* نافذة الصلاحيات */
+.permissions-modal-content {
+    max-width: 450px;
+}
+
+.permissions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.permission-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    background: #f8fafc;
+    border-radius: 10px;
+}
+
+.permission-item input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.permission-item label {
+    cursor: pointer;
+    font-weight: 500;
+    flex: 1;
+}
+
+.permission-desc {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+/* تبويبات الإدارة للمشرفين */
+.admin-tab.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ========== أيقونة الموقع ========== */
+.favicon-upload {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #f8fafc;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.favicon-preview {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.favicon-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.favicon-upload input[type="file"] {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-family: inherit;
+}
+
+.favicon-upload button {
+    padding: 10px 20px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.favicon-upload button:hover {
+    background: #5a67d8;
+}
+
+.favicon-upload .remove-favicon {
+    background: #ef4444;
+}
+
+.favicon-upload .remove-favicon:hover {
+    background: #dc2626;
 }
