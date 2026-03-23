@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AppNova - التطبيقات | اكتشف أحدث التطبيقات</title>
+    <title>AppNova - تسجيل الدخول</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -38,20 +38,18 @@
 
         <main class="content-wrapper">
             <div class="hero" style="padding: 30px;">
-                <h1>جميع التطبيقات</h1>
-                <p>استكشف آلاف التطبيقات المميزة</p>
+                <h1>تسجيل الدخول</h1>
+                <p>مرحباً بعودتك</p>
             </div>
             
-            <div class="categories-bar">
-                <button class="category-btn active" onclick="filterApps('all')">الكل</button>
-                <button class="category-btn" onclick="filterApps('games')">🎮 ألعاب</button>
-                <button class="category-btn" onclick="filterApps('social')">💬 تواصل</button>
-                <button class="category-btn" onclick="filterApps('education')">📚 تعليم</button>
-                <button class="category-btn" onclick="filterApps('productivity')">💼 إنتاجية</button>
-                <button class="category-btn" onclick="filterApps('entertainment')">🎬 ترفيه</button>
+            <div class="auth-container">
+                <form id="loginForm">
+                    <div class="form-group"><input type="text" id="loginEmail" placeholder="اسم المستخدم أو البريد" required></div>
+                    <div class="form-group"><input type="password" id="loginPassword" placeholder="كلمة المرور" required></div>
+                    <button type="submit" class="submit-btn">🔑 دخول</button>
+                </form>
+                <p style="text-align:center; margin-top:20px;">ليس لديك حساب؟ <a href="register.html">سجل هنا</a></p>
             </div>
-            
-            <div class="apps-grid" id="allApps"></div>
         </main>
 
         <aside class="ad-sidebar ad-right">
@@ -76,34 +74,15 @@
         <div class="footer-bottom">© 2024 AppNova</div>
     </footer>
 
-    <div id="ratingModal" class="modal">
+    <div id="adModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h3>⭐ تقييم التطبيق</h3>
-            <div id="modalAppInfo"></div>
-            <div class="rating-stars">
-                <span class="star" onclick="setRating(1)">★</span>
-                <span class="star" onclick="setRating(2)">★</span>
-                <span class="star" onclick="setRating(3)">★</span>
-                <span class="star" onclick="setRating(4)">★</span>
-                <span class="star" onclick="setRating(5)">★</span>
-            </div>
-            <textarea id="commentText" placeholder="تعليقك..." rows="3"></textarea>
-            <button onclick="submitRating()" class="submit-btn">إرسال</button>
-        </div>
-    </div>
-
-    <div id="downloadModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeDownloadModal()">&times;</span>
-            <h3>📥 تأكيد التحميل</h3>
-            <div id="downloadAppInfo"></div>
-            <button onclick="confirmDownload()" class="submit-btn" style="background:#10b981;">نعم، تحميل</button>
-            <button onclick="closeDownloadModal()" class="submit-btn" style="background:#94a3b8;">إلغاء</button>
+            <span class="close" onclick="closeAdModal()">&times;</span>
+            <div id="modalAdContent"></div>
+            <button onclick="closeAdModal()" class="submit-btn">إغلاق</button>
         </div>
     </div>
 
     <script src="common.js"></script>
-    <script src="apps-page.js"></script>
+    <script src="login.js"></script>
 </body>
 </html>
