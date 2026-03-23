@@ -9,7 +9,7 @@ if(editId) {
         document.getElementById('pageTitle').innerHTML = '✏️ تعديل التطبيق';
         document.getElementById('pageDesc').innerHTML = 'قم بتعديل بيانات التطبيق';
         document.getElementById('submitBtn').innerHTML = '💾 حفظ التغييرات';
-        document.getElementById('cancelBtn').style.display = 'block';
+        document.getElementById('cancelBtn').style.display = 'inline-block';
         
         // ملء البيانات
         document.getElementById('appId').value = appToEdit.id;
@@ -21,7 +21,7 @@ if(editId) {
         document.getElementById('appSize').value = appToEdit.size;
         document.getElementById('appImage').value = appToEdit.image;
         document.getElementById('appDownloadLink').value = appToEdit.downloadLink;
-    } else {
+    } else if(appToEdit) {
         showAlert('لا تملك صلاحية تعديل هذا التطبيق', 'error');
         window.location.href = 'admin.html';
     }
@@ -52,6 +52,7 @@ document.getElementById('uploadForm')?.addEventListener('submit', function(e) {
         rating: 0,
         ratings: [],
         userId: currentUser.id,
+        userName: currentUser.username,
         date: new Date().toISOString()
     };
     
@@ -63,21 +64,19 @@ document.getElementById('uploadForm')?.addEventListener('submit', function(e) {
             appData.rating = apps[index].rating;
             appData.ratings = apps[index].ratings;
             apps[index] = appData;
-            showAdModal(() => {
-                showAlert('تم تعديل التطبيق بنجاح', 'success');
-                window.location.href = 'admin.html';
-            });
+            saveApps();
+            showAlert('تم تعديل التطبيق بنجاح', 'success');
+            window.location.href = 'admin.html';
         }
     } else {
         // رفع تطبيق جديد
         apps.push(appData);
+        saveApps();
         showAdModal(() => {
             showAlert('تم رفع التطبيق بنجاح', 'success');
             window.location.href = 'apps.html';
         });
     }
-    
-    saveApps();
 });
 
 function cancelEdit() {

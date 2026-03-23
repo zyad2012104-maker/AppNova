@@ -2,7 +2,7 @@
 function displayAppsGrid(list, containerId) {
     let container = document.getElementById(containerId);
     if(!container) return;
-    if(!list.length) {
+    if(!list || list.length === 0) {
         container.innerHTML = '<div class="loading-skeleton">لا توجد تطبيقات</div>';
         return;
     }
@@ -115,7 +115,7 @@ function submitRating() {
         
         saveApps();
         saveComments();
-        showAlert('تم إضافة التقييم', 'success');
+        showAlert('تم إضافة التقييم بنجاح', 'success');
         closeModal();
         displayHomeContent();
         

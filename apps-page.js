@@ -2,7 +2,7 @@
 function displayAllApps() {
     let container = document.getElementById('allApps');
     if(!container) return;
-    if(!apps.length) {
+    if(!apps || apps.length === 0) {
         container.innerHTML = '<div class="loading-skeleton">لا توجد تطبيقات</div>';
         return;
     }
@@ -15,18 +15,21 @@ function filterApps(category) {
     let container = document.getElementById('allApps');
     if(!container) return;
     if(!filtered.length) {
-        container.innerHTML = '<div class="loading-skeleton">لا توجد تطبيقات</div>';
+        container.innerHTML = '<div class="loading-skeleton">لا توجد تطبيقات في هذا التصنيف</div>';
         return;
     }
     container.innerHTML = filtered.map(app => createAppCard(app)).join('');
     
     document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
-    if(event.target) event.target.classList.add('active');
+    if(event && event.target) event.target.classList.add('active');
 }
 
 // البحث في التطبيقات
 function searchApps() {
     let term = document.getElementById('searchInput')?.value.toLowerCase().trim();
+    let container = document.getElementById('allApps');
+    if(!container) return;
+    
     if(!term) {
         displayAllApps();
         return;
@@ -37,10 +40,8 @@ function searchApps() {
         a.description.toLowerCase().includes(term)
     );
     
-    let container = document.getElementById('allApps');
-    if(!container) return;
     if(!filtered.length) {
-        container.innerHTML = '<div class="loading-skeleton">لا توجد نتائج</div>';
+        container.innerHTML = '<div class="loading-skeleton">لا توجد نتائج مطابقة</div>';
         return;
     }
     container.innerHTML = filtered.map(app => createAppCard(app)).join('');
@@ -138,7 +139,7 @@ function submitRating() {
         
         saveApps();
         saveComments();
-        showAlert('تم إضافة التقييم', 'success');
+        showAlert('تم إضافة التقييم بنجاح', 'success');
         closeModal();
         displayAllApps();
         
@@ -168,7 +169,7 @@ let viewId = urlParams.get('view');
 if(viewId) {
     let app = apps.find(a => a.id === parseInt(viewId));
     if(app) {
-        showRatingModal(app.id);
+        setTimeout(() => showRatingModal(app.id), 500);
     }
 }
 

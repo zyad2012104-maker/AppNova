@@ -1,21 +1,21 @@
 let currentAdminPanel = 'users';
-let usersData = [];
-let appsData = [];
-let commentsData = [];
 
 // عرض الإحصائيات
 function displayStats() {
-    if(!hasPermission(currentUser, 'viewStats') && currentUser.role !== 'admin') return;
+    let statsContainer = document.getElementById('statsCards');
+    if(!statsContainer) return;
     
-    let statsHtml = `
-        <div class="stat-card"><h3>${users.filter(u => u.role === 'user').length}</h3><p>👥 مستخدمين</p></div>
-        <div class="stat-card"><h3>${moderators.length}</h3><p>🛡️ مشرفين</p></div>
+    let usersCount = users.filter(u => u.role === 'user').length;
+    let moderatorsCount = users.filter(u => u.role === 'moderator').length;
+    let totalDownloads = apps.reduce((sum, a) => sum + a.downloads, 0);
+    
+    statsContainer.innerHTML = `
+        <div class="stat-card"><h3>${usersCount}</h3><p>👥 مستخدمين</p></div>
+        <div class="stat-card"><h3>${moderatorsCount}</h3><p>🛡️ مشرفين</p></div>
         <div class="stat-card"><h3>${apps.length}</h3><p>📱 تطبيقات</p></div>
         <div class="stat-card"><h3>${comments.length}</h3><p>💬 تعليقات</p></div>
-        <div class="stat-card"><h3>${apps.reduce((sum, a) => sum + a.downloads, 0)}</h3><p>📥 إجمالي التحميلات</p></div>
+        <div class="stat-card"><h3>${totalDownloads}</h3><p>📥 إجمالي التحميلات</p></div>
     `;
-    let statsContainer = document.getElementById('statsCards');
-    if(statsContainer) statsContainer.innerHTML = statsHtml;
 }
 
 // عرض لوحة الإدارة
@@ -24,7 +24,7 @@ function showAdminPanel(panel) {
     document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
     document.getElementById(`${panel}Panel`).classList.add('active');
     document.querySelectorAll('.admin-tab').forEach(tab => tab.classList.remove('active'));
-    event.target.classList.add('active');
+    if(event && event.target) event.target.classList.add('active');
     
     if(panel === 'users') displayUsers();
     else if(panel === 'moderators') displayModerators();
@@ -34,34 +34,51 @@ function showAdminPanel(panel) {
 
 // عرض المستخدمين
 function displayUsers() {
-    if(!hasPermission(currentUser, 'deleteUser') && currentUser.role !== 'admin') {
-        document.getElementById('usersTable').innerHTML = '<p style="text-align:center; padding:40px;">⚠️ لا تملك صلاحية عرض المستخدمين</p>';
+    let usersTable = document.getElementById('usersTable');
+    if(!usersTable) return;
+    
+    let regularUsers = users.filter(u => u.role === 'user');
+    
+    if(regularUsers.length === 0) {
+        usersTable.innerHTML = '<p style="text-align:center; padding:40px;">لا يوجد مستخدمين</p>';
         return;
     }
     
-    usersData = users.filter(u => u.role === 'user');
-    let html = `<table><thead><tr><th>#</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead><tbody>`;
-    usersData.forEach((user, index) => {
+    let html = '<table><thead><tr><th>#</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead><tbody>';
+    regularUsers.forEach((user, index) => {
         html += `<tr>
             <td>${index + 1}</td>
             <td><strong>${escapeHtml(user.username)}</strong></td>
             <td>${escapeHtml(user.email)}</td>
             <td>${new Date(user.date).toLocaleDateString('ar-EG')}</td>
             <td class="action-buttons">
-                ${hasPermission(currentUser, 'deleteUser') || currentUser.role === 'admin' ? `<button class="btn-delete" onclick="deleteUser(${user.id})">🗑️ حذف</button>` : ''}
+                <button class="btn-delete" onclick="deleteUser(${user.id})">🗑️ حذف</button>
             </td>
         </tr>`;
     });
-    html += `</tbody></table>`;
-    if(usersData.length === 0) html = '<p style="text-align:center; padding:40px;">لا يوجد مستخدمين</p>';
-    document.getElementById('usersTable').innerHTML = html;
+    html += '</tbody></table>';
+    usersTable.innerHTML = html;
 }
 
 function searchUsers() {
     let term = document.getElementById('searchUsers')?.value.toLowerCase();
-    if(!term) return displayUsers();
-    let filtered = usersData.filter(u => u.username.toLowerCase().includes(term) || u.email.toLowerCase().includes(term));
-    let html = `<table><thead><tr><th>#</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead><tbody>`;
+    let usersTable = document.getElementById('usersTable');
+    if(!usersTable) return;
+    
+    let regularUsers = users.filter(u => u.role === 'user');
+    if(!term) {
+        displayUsers();
+        return;
+    }
+    
+    let filtered = regularUsers.filter(u => u.username.toLowerCase().includes(term) || u.email.toLowerCase().includes(term));
+    
+    if(filtered.length === 0) {
+        usersTable.innerHTML = '<p style="text-align:center; padding:40px;">لا توجد نتائج</p>';
+        return;
+    }
+    
+    let html = '<table><thead><tr><th>#</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead><tbody>';
     filtered.forEach((user, index) => {
         html += `<tr>
             <td>${index + 1}</td>
@@ -69,24 +86,34 @@ function searchUsers() {
             <td>${escapeHtml(user.email)}</td>
             <td>${new Date(user.date).toLocaleDateString('ar-EG')}</td>
             <td class="action-buttons">
-                ${hasPermission(currentUser, 'deleteUser') || currentUser.role === 'admin' ? `<button class="btn-delete" onclick="deleteUser(${user.id})">🗑️ حذف</button>` : ''}
+                <button class="btn-delete" onclick="deleteUser(${user.id})">🗑️ حذف</button>
             </td>
         </tr>`;
     });
-    html += `</tbody></table>`;
-    document.getElementById('usersTable').innerHTML = html;
+    html += '</tbody></table>';
+    usersTable.innerHTML = html;
 }
 
-// عرض المشرفين
+// عرض المشرفين (للمدير فقط)
 function displayModerators() {
-    if(currentUser.role !== 'admin') {
-        document.getElementById('moderatorsTable').innerHTML = '<p style="text-align:center; padding:40px;">⚠️ فقط المدير يمكنه إدارة المشرفين</p>';
+    let moderatorsTable = document.getElementById('moderatorsTable');
+    if(!moderatorsTable) return;
+    
+    // فقط المدير يمكنه رؤية وإدارة المشرفين
+    if(!isAdmin(currentUser)) {
+        moderatorsTable.innerHTML = '<p style="text-align:center; padding:40px;">⚠️ فقط المدير يمكنه إدارة المشرفين</p>';
         return;
     }
     
-    let mods = users.filter(u => u.role === 'moderator');
-    let html = `<table><thead><tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr></thead><tbody>`;
-    mods.forEach((mod, index) => {
+    let moderatorsList = users.filter(u => u.role === 'moderator');
+    
+    if(moderatorsList.length === 0) {
+        moderatorsTable.innerHTML = '<p style="text-align:center; padding:40px;">لا يوجد مشرفين</p>';
+        return;
+    }
+    
+    let html = '<table><thead><tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr></thead><tbody>';
+    moderatorsList.forEach((mod, index) => {
         let perms = [];
         if(mod.permissions?.deleteUser) perms.push('حذف مستخدم');
         if(mod.permissions?.deleteApp) perms.push('حذف تطبيق');
@@ -107,17 +134,32 @@ function displayModerators() {
             </td>
         </tr>`;
     });
-    html += `</tbody></table>`;
-    if(mods.length === 0) html = '<p style="text-align:center; padding:40px;">لا يوجد مشرفين</p>';
-    document.getElementById('moderatorsTable').innerHTML = html;
+    html += '</tbody></table>';
+    moderatorsTable.innerHTML = html;
 }
 
 function searchModerators() {
     let term = document.getElementById('searchModerators')?.value.toLowerCase();
-    if(!term) return displayModerators();
-    let mods = users.filter(u => u.role === 'moderator' && (u.username.toLowerCase().includes(term) || u.email.toLowerCase().includes(term)));
-    let html = `<table><thead><tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr></thead><tbody>`;
-    mods.forEach((mod, index) => {
+    let moderatorsTable = document.getElementById('moderatorsTable');
+    if(!moderatorsTable) return;
+    
+    if(!isAdmin(currentUser)) return;
+    
+    let moderatorsList = users.filter(u => u.role === 'moderator');
+    if(!term) {
+        displayModerators();
+        return;
+    }
+    
+    let filtered = moderatorsList.filter(m => m.username.toLowerCase().includes(term) || m.email.toLowerCase().includes(term));
+    
+    if(filtered.length === 0) {
+        moderatorsTable.innerHTML = '<p style="text-align:center; padding:40px;">لا توجد نتائج</p>';
+        return;
+    }
+    
+    let html = '<table><thead><tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr></thead><tbody>';
+    filtered.forEach((mod, index) => {
         let perms = [];
         if(mod.permissions?.deleteUser) perms.push('حذف مستخدم');
         if(mod.permissions?.deleteApp) perms.push('حذف تطبيق');
@@ -138,15 +180,15 @@ function searchModerators() {
             </td>
         </tr>`;
     });
-    html += `</tbody></table>`;
-    document.getElementById('moderatorsTable').innerHTML = html;
+    html += '</tbody></table>';
+    moderatorsTable.innerHTML = html;
 }
 
-// إضافة مشرف جديد
+// إضافة مشرف جديد (للمدير فقط)
 document.getElementById('addModeratorForm')?.addEventListener('submit', function(e) {
     e.preventDefault();
     
-    if(currentUser.role !== 'admin') {
+    if(!isAdmin(currentUser)) {
         showAlert('غير مصرح بإضافة مشرفين', 'error');
         return;
     }
@@ -154,6 +196,11 @@ document.getElementById('addModeratorForm')?.addEventListener('submit', function
     let username = document.getElementById('modUsername').value.trim();
     let email = document.getElementById('modEmail').value.trim();
     let password = document.getElementById('modPassword').value;
+    
+    if(!username || !email || !password) {
+        showAlert('يرجى ملء جميع الحقول', 'error');
+        return;
+    }
     
     if(users.find(u => u.email === email)) {
         showAlert('البريد الإلكتروني مستخدم بالفعل', 'error');
@@ -178,9 +225,7 @@ document.getElementById('addModeratorForm')?.addEventListener('submit', function
     };
     
     users.push(newMod);
-    moderators.push(newMod);
     saveUsers();
-    saveModerators();
     
     showAlert('تم إضافة المشرف بنجاح', 'success');
     document.getElementById('addModeratorForm').reset();
@@ -189,27 +234,34 @@ document.getElementById('addModeratorForm')?.addEventListener('submit', function
 });
 
 function editModerator(id) {
+    if(!isAdmin(currentUser)) {
+        showAlert('غير مصرح بتعديل المشرفين', 'error');
+        return;
+    }
+    
     let mod = users.find(u => u.id === id && u.role === 'moderator');
     if(!mod) return;
     
     let newUsername = prompt('اسم المشرف الجديد:', mod.username);
     if(newUsername && newUsername.trim()) mod.username = newUsername.trim();
     
-    let newPassword = prompt('كلمة المرور الجديدة (اتركها فارغة للتغيير):', '');
+    let newPassword = prompt('كلمة المرور الجديدة (اتركها فارغة للإبقاء على نفس الكلمة):', '');
     if(newPassword && newPassword.trim()) mod.password = newPassword.trim();
     
     saveUsers();
-    saveModerators();
     displayModerators();
     showAlert('تم تعديل بيانات المشرف', 'success');
 }
 
 function deleteModerator(id) {
-    if(confirm('تأكيد حذف هذا المشرف؟')) {
+    if(!isAdmin(currentUser)) {
+        showAlert('غير مصرح بحذف المشرفين', 'error');
+        return;
+    }
+    
+    if(confirm('⚠️ تأكيد حذف هذا المشرف؟')) {
         users = users.filter(u => u.id !== id);
-        moderators = moderators.filter(m => m.id !== id);
         saveUsers();
-        saveModerators();
         displayModerators();
         displayStats();
         showAlert('تم حذف المشرف', 'success');
@@ -218,14 +270,16 @@ function deleteModerator(id) {
 
 // عرض التطبيقات
 function displayApps() {
-    if(!hasPermission(currentUser, 'deleteApp') && !hasPermission(currentUser, 'editApp') && currentUser.role !== 'admin') {
-        document.getElementById('appsTable').innerHTML = '<p style="text-align:center; padding:40px;">⚠️ لا تملك صلاحية عرض التطبيقات</p>';
+    let appsTable = document.getElementById('appsTable');
+    if(!appsTable) return;
+    
+    if(apps.length === 0) {
+        appsTable.innerHTML = '<p style="text-align:center; padding:40px;">لا يوجد تطبيقات</p>';
         return;
     }
     
-    appsData = [...apps];
-    let html = `<table><thead><tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr></thead><tbody>`;
-    appsData.forEach((app, index) => {
+    let html = '<table><thead><tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr></thead><tbody>';
+    apps.forEach((app, index) => {
         html += `<tr>
             <td>${index + 1}</td>
             <td><strong>${escapeHtml(app.name)}</strong><br><small>${escapeHtml(app.description.substring(0,40))}...</small></td>
@@ -233,22 +287,34 @@ function displayApps() {
             <td>📥 ${app.downloads}</td>
             <td>⭐ ${app.rating.toFixed(1)}</td>
             <td class="action-buttons">
-                ${hasPermission(currentUser, 'editApp') || currentUser.role === 'admin' ? `<button class="btn-edit" onclick="editAppFull(${app.id})">✏️ تعديل</button>` : ''}
-                ${hasPermission(currentUser, 'deleteApp') || currentUser.role === 'admin' ? `<button class="btn-delete" onclick="deleteAppAdmin(${app.id})">🗑️ حذف</button>` : ''}
+                <button class="btn-edit" onclick="editAppFull(${app.id})">✏️ تعديل</button>
+                <button class="btn-delete" onclick="deleteAppAdmin(${app.id})">🗑️ حذف</button>
                 <button class="btn-view" onclick="viewApp(${app.id})">👁️ عرض</button>
             </td>
         </tr>`;
     });
-    html += `</tbody></table>`;
-    if(appsData.length === 0) html = '<p style="text-align:center; padding:40px;">لا يوجد تطبيقات</p>';
-    document.getElementById('appsTable').innerHTML = html;
+    html += '</tbody></table>';
+    appsTable.innerHTML = html;
 }
 
 function searchAdminApps() {
     let term = document.getElementById('searchApps')?.value.toLowerCase();
-    if(!term) return displayApps();
+    let appsTable = document.getElementById('appsTable');
+    if(!appsTable) return;
+    
+    if(!term) {
+        displayApps();
+        return;
+    }
+    
     let filtered = apps.filter(a => a.name.toLowerCase().includes(term) || a.description.toLowerCase().includes(term));
-    let html = `<table><thead><tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr></thead><tbody>`;
+    
+    if(filtered.length === 0) {
+        appsTable.innerHTML = '<p style="text-align:center; padding:40px;">لا توجد نتائج</p>';
+        return;
+    }
+    
+    let html = '<table><thead><tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr></thead><tbody>';
     filtered.forEach((app, index) => {
         html += `<tr>
             <td>${index + 1}</td>
@@ -257,17 +323,16 @@ function searchAdminApps() {
             <td>📥 ${app.downloads}</td>
             <td>⭐ ${app.rating.toFixed(1)}</td>
             <td class="action-buttons">
-                ${hasPermission(currentUser, 'editApp') || currentUser.role === 'admin' ? `<button class="btn-edit" onclick="editAppFull(${app.id})">✏️ تعديل</button>` : ''}
-                ${hasPermission(currentUser, 'deleteApp') || currentUser.role === 'admin' ? `<button class="btn-delete" onclick="deleteAppAdmin(${app.id})">🗑️ حذف</button>` : ''}
+                <button class="btn-edit" onclick="editAppFull(${app.id})">✏️ تعديل</button>
+                <button class="btn-delete" onclick="deleteAppAdmin(${app.id})">🗑️ حذف</button>
                 <button class="btn-view" onclick="viewApp(${app.id})">👁️ عرض</button>
             </td>
         </tr>`;
     });
-    html += `</tbody></table>`;
-    document.getElementById('appsTable').innerHTML = html;
+    html += '</tbody></table>';
+    appsTable.innerHTML = html;
 }
 
-// تعديل تطبيق كامل - فتح صفحة التعديل
 function editAppFull(appId) {
     localStorage.setItem('editAppId', appId);
     window.location.href = `upload.html?edit=${appId}`;
@@ -278,25 +343,28 @@ function viewApp(appId) {
 }
 
 function deleteAppAdmin(appId) {
-    if(confirm('تأكيد حذف هذا التطبيق؟')) {
+    if(confirm('⚠️ تأكيد حذف هذا التطبيق؟')) {
         apps = apps.filter(a => a.id !== appId);
         saveApps();
         displayApps();
         displayStats();
-        showAlert('تم حذف التطبيق', 'success');
+        showAlert('تم حذف التطبيق بنجاح', 'success');
     }
 }
 
 // عرض التعليقات
 function displayComments() {
-    if(!hasPermission(currentUser, 'deleteComment') && !hasPermission(currentUser, 'editComment') && currentUser.role !== 'admin') {
-        document.getElementById('commentsTable').innerHTML = '<p style="text-align:center; padding:40px;">⚠️ لا تملك صلاحية عرض التعليقات</p>';
+    let commentsTable = document.getElementById('commentsTable');
+    if(!commentsTable) return;
+    
+    if(comments.length === 0) {
+        commentsTable.innerHTML = '<p style="text-align:center; padding:40px;">لا يوجد تعليقات</p>';
         return;
     }
     
-    commentsData = [...comments].reverse();
-    let html = `<table><thead><tr><th>#</th><th>المستخدم</th><th>التطبيق</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th></tr></thead><tbody>`;
-    commentsData.forEach((comment, index) => {
+    let html = '<table><thead><tr><th>#</th><th>المستخدم</th><th>التطبيق</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th></tr></thead><tbody>';
+    let sortedComments = [...comments].reverse();
+    sortedComments.forEach((comment, index) => {
         let app = apps.find(a => a.id === comment.appId);
         html += `<tr>
             <td>${index + 1}</td>
@@ -306,22 +374,35 @@ function displayComments() {
             <td>${'★'.repeat(comment.rating)}${'☆'.repeat(5-comment.rating)}</td>
             <td>${new Date(comment.date).toLocaleDateString('ar-EG')}</td>
             <td class="action-buttons">
-                ${hasPermission(currentUser, 'editComment') || currentUser.role === 'admin' ? `<button class="btn-edit" onclick="editCommentAdmin(${comment.id})">✏️ تعديل</button>` : ''}
-                ${hasPermission(currentUser, 'deleteComment') || currentUser.role === 'admin' ? `<button class="btn-delete" onclick="deleteCommentAdmin(${comment.id})">🗑️ حذف</button>` : ''}
+                <button class="btn-edit" onclick="editCommentAdmin(${comment.id})">✏️ تعديل</button>
+                <button class="btn-delete" onclick="deleteCommentAdmin(${comment.id})">🗑️ حذف</button>
             </td>
         </tr>`;
     });
-    html += `</tbody></table>`;
-    if(commentsData.length === 0) html = '<p style="text-align:center; padding:40px;">لا يوجد تعليقات</p>';
-    document.getElementById('commentsTable').innerHTML = html;
+    html += '</tbody></table>';
+    commentsTable.innerHTML = html;
 }
 
 function searchComments() {
     let term = document.getElementById('searchComments')?.value.toLowerCase();
-    if(!term) return displayComments();
+    let commentsTable = document.getElementById('commentsTable');
+    if(!commentsTable) return;
+    
+    if(!term) {
+        displayComments();
+        return;
+    }
+    
     let filtered = comments.filter(c => c.comment.toLowerCase().includes(term) || c.username.toLowerCase().includes(term));
-    let html = `<table><thead><tr><th>#</th><th>المستخدم</th><th>التطبيق</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th></tr></thead><tbody>`;
-    filtered.forEach((comment, index) => {
+    
+    if(filtered.length === 0) {
+        commentsTable.innerHTML = '<p style="text-align:center; padding:40px;">لا توجد نتائج</p>';
+        return;
+    }
+    
+    let html = '<table><thead><tr><th>#</th><th>المستخدم</th><th>التطبيق</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th></tr></thead><tbody>';
+    let sortedComments = [...filtered].reverse();
+    sortedComments.forEach((comment, index) => {
         let app = apps.find(a => a.id === comment.appId);
         html += `<tr>
             <td>${index + 1}</td>
@@ -331,13 +412,13 @@ function searchComments() {
             <td>${'★'.repeat(comment.rating)}${'☆'.repeat(5-comment.rating)}</td>
             <td>${new Date(comment.date).toLocaleDateString('ar-EG')}</td>
             <td class="action-buttons">
-                ${hasPermission(currentUser, 'editComment') || currentUser.role === 'admin' ? `<button class="btn-edit" onclick="editCommentAdmin(${comment.id})">✏️ تعديل</button>` : ''}
-                ${hasPermission(currentUser, 'deleteComment') || currentUser.role === 'admin' ? `<button class="btn-delete" onclick="deleteCommentAdmin(${comment.id})">🗑️ حذف</button>` : ''}
+                <button class="btn-edit" onclick="editCommentAdmin(${comment.id})">✏️ تعديل</button>
+                <button class="btn-delete" onclick="deleteCommentAdmin(${comment.id})">🗑️ حذف</button>
             </td>
         </tr>`;
     });
-    html += `</tbody></table>`;
-    document.getElementById('commentsTable').innerHTML = html;
+    html += '</tbody></table>';
+    commentsTable.innerHTML = html;
 }
 
 function editCommentAdmin(commentId) {
@@ -349,26 +430,26 @@ function editCommentAdmin(commentId) {
         comment.comment = newComment.trim();
         saveComments();
         displayComments();
-        showAlert('تم تعديل التعليق', 'success');
+        showAlert('تم تعديل التعليق بنجاح', 'success');
     }
 }
 
 function deleteCommentAdmin(commentId) {
-    if(confirm('تأكيد حذف هذا التعليق؟')) {
+    if(confirm('⚠️ تأكيد حذف هذا التعليق؟')) {
         comments = comments.filter(c => c.id !== commentId);
         saveComments();
         displayComments();
-        showAlert('تم حذف التعليق', 'success');
+        showAlert('تم حذف التعليق بنجاح', 'success');
     }
 }
 
 function deleteUser(id) {
-    if(confirm('تأكيد حذف هذا المستخدم؟')) {
+    if(confirm('⚠️ تأكيد حذف هذا المستخدم؟')) {
         users = users.filter(u => u.id !== id);
         saveUsers();
         displayUsers();
         displayStats();
-        showAlert('تم حذف المستخدم', 'success');
+        showAlert('تم حذف المستخدم بنجاح', 'success');
     }
 }
 
