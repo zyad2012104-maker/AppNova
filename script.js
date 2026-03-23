@@ -1,576 +1,267 @@
-// ==================== البيانات الأساسية ====================
-let users = JSON.parse(localStorage.getItem('users')) || [
-    { id: 1, name: 'أحمد محمد', email: 'ahmed@example.com', password: '123456', role: 'user', joinDate: '2024-01-01' },
-    { id: 2, name: 'مدير النظام', email: 'admin@example.com', password: 'admin123', role: 'admin', joinDate: '2024-01-01' }
-];
+// البيانات المخزنة
+let apps = [], users = [], comments = [], currentUser = null, selectedRating = 0, currentAppId = null, pendingDownloadApp = null;
 
-let apps = JSON.parse(localStorage.getItem('apps')) || [];
-let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
-
-// ==================== دوال النوافذ المنبثقة ====================
-function openLoginModal() {
-    const modal = document.getElementById('loginModal');
-    if (modal) modal.style.display = 'block';
-}
-
-function closeLoginModal() {
-    const modal = document.getElementById('loginModal');
-    if (modal) modal.style.display = 'none';
-}
-
-function openRegisterModal() {
-    const modal = document.getElementById('registerModal');
-    if (modal) modal.style.display = 'block';
-}
-
-function closeRegisterModal() {
-    const modal = document.getElementById('registerModal');
-    if (modal) modal.style.display = 'none';
-}
-
-function closeAppDetailsModal() {
-    const modal = document.getElementById('appDetailsModal');
-    if (modal) modal.style.display = 'none';
-}
-
-function closeDownloadModal() {
-    const modal = document.getElementById('downloadModal');
-    if (modal) modal.style.display = 'none';
-}
-
-function closeAdminPanel() {
-    const modal = document.getElementById('adminPanelModal');
-    if (modal) modal.style.display = 'none';
-}
-
-function switchToRegister() {
-    closeLoginModal();
-    openRegisterModal();
-}
-
-function switchToLogin() {
-    closeRegisterModal();
-    openLoginModal();
-}
-
-// ==================== دوال تسجيل الدخول والخروج ====================
-function login(email, password) {
-    console.log('محاولة تسجيل الدخول:', email);
-    const user = users.find(u => u.email === email && u.password === password);
+// تحميل البيانات
+function loadData() {
+    apps = JSON.parse(localStorage.getItem('apps') || '[]');
+    users = JSON.parse(localStorage.getItem('users') || '[]');
+    comments = JSON.parse(localStorage.getItem('comments') || '[]');
     
+    if (!apps.length) {
+        apps = [
+            {id:1, name:"تطبيق التواصل الاجتماعي", description:"تطبيق رائع للتواصل", version:"2.0.1", category:"social", deviceType:"both", size:"45 MB", image:"https://via.placeholder.com/300x200/667eea/ffffff?text=AppNova", downloadLink:"#", downloads:1250, rating:4.5, ratings:[5,4,5,4,5]},
+            {id:2, name:"لعبة الألغاز", description:"لعبة ألغاز ممتعة", version:"1.5.0", category:"games", deviceType:"android", size:"78 MB", image:"https://via.placeholder.com/300x200/764ba2/ffffff?text=AppNova", downloadLink:"#", downloads:890, rating:4.2, ratings:[4,5,4,4,4]},
+            {id:3, name:"تطبيق التعليم", description:"منصة تعليمية متكاملة", version:"3.0.0", category:"education", deviceType:"both", size:"120 MB", image:"https://via.placeholder.com/300x200/48c6ef/ffffff?text=AppNova", downloadLink:"#", downloads:2340, rating:4.8, ratings:[5,5,4,5,5]}
+        ];
+        saveApps();
+    }
+    
+    if (!users.find(u => u.role === 'admin')) {
+        users.push({id:1, username:"المدير", email:"admin", password:"admin2012", role:"admin"});
+        saveUsers();
+    }
+}
+
+function saveApps() { localStorage.setItem('apps', JSON.stringify(apps)); }
+function saveUsers() { localStorage.setItem('users', JSON.stringify(users)); }
+function saveComments() { localStorage.setItem('comments', JSON.stringify(comments)); }
+
+// عرض الصفحات
+function showPage(pageName) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById(`${pageName}Page`);
+    if (target) target.classList.add('active');
+    if (pageName === 'home') displayHomeContent();
+    else if (pageName === 'apps') displayAllApps();
+    else if (pageName === 'admin') displayAdminPanel();
+    updateNavBar();
+}
+
+function checkUploadAccess() {
+    currentUser ? showPage('upload') : (showAlert('يرجى تسجيل الدخول أولاً', 'error'), showPage('login'));
+}
+
+function displayHomeContent() {
+    displayAppsGrid([...apps].reverse().slice(0,6), 'latestApps');
+    displayAppsGrid([...apps].sort((a,b)=>b.downloads-a.downloads).slice(0,6), 'mostDownloadedApps');
+    displayAppsGrid([...apps].sort((a,b)=>b.rating-a.rating).slice(0,6), 'topRatedApps');
+}
+
+function displayAppsGrid(list, containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = list.length ? list.map(app => createAppCard(app)).join('') : '<p class="loading-skeleton">لا توجد تطبيقات</p>';
+}
+
+function createAppCard(app) {
+    const stars = '★'.repeat(Math.floor(app.rating)) + '☆'.repeat(5 - Math.floor(app.rating));
+    return `
+        <div class="app-card" onclick="showRatingModal(${app.id})">
+            <img src="${app.image}" alt="${app.name}" class="app-card-image" onerror="this.src='https://via.placeholder.com/300x200/cccccc/ffffff?text=No+Image'">
+            <div class="app-card-content">
+                <h3 class="app-card-title">${escapeHtml(app.name)}</h3>
+                <p class="app-card-description">${escapeHtml(app.description.substring(0,80))}${app.description.length>80?'...':''}</p>
+                <div class="app-card-meta">
+                    <span><i class="fas fa-download"></i> ${app.downloads}</span>
+                    <span><i class="fas fa-hdd"></i> ${app.size}</span>
+                    <span><i class="fas fa-code-branch"></i> ${app.version}</span>
+                </div>
+                <div class="app-card-meta">
+                    <span class="app-card-rating">${stars} (${app.rating.toFixed(1)})</span>
+                    <span><i class="fas fa-tag"></i> ${getCategoryName(app.category)}</span>
+                </div>
+                <a href="#" class="app-card-download" onclick="event.stopPropagation(); requestDownload(${app.id})"><i class="fas fa-download"></i> تحميل</a>
+            </div>
+        </div>`;
+}
+
+function requestDownload(appId) {
+    const app = apps.find(a => a.id === appId);
+    if (!app) return;
+    const hasRated = comments.find(c => c.appId === appId && c.userId === (currentUser ? currentUser.id : null));
+    hasRated ? showDownloadConfirm(app) : (pendingDownloadApp = app, showRatingModal(appId), showAlert('يرجى تقييم التطبيق قبل التحميل', 'info'));
+}
+
+function showDownloadConfirm(app) {
+    document.getElementById('downloadAppInfo').innerHTML = `<h4>${escapeHtml(app.name)}</h4><p>الإصدار: ${app.version} | الحجم: ${app.size}</p>`;
+    pendingDownloadApp = app;
+    document.getElementById('downloadModal').style.display = 'block';
+}
+
+function confirmDownload() {
+    if (pendingDownloadApp) {
+        pendingDownloadApp.downloads++;
+        saveApps();
+        window.open(pendingDownloadApp.downloadLink, '_blank');
+        closeDownloadModal();
+        showAlert('جاري التحميل...', 'success');
+        displayHomeContent();
+        displayAllApps();
+    }
+}
+
+function closeDownloadModal() { document.getElementById('downloadModal').style.display = 'none'; pendingDownloadApp = null; }
+
+function searchApps() {
+    const term = document.getElementById('searchInput').value.toLowerCase().trim();
+    const container = document.getElementById('allApps');
+    if (!container) return;
+    if (!term) return displayAllApps();
+    const filtered = apps.filter(a => a.name.toLowerCase().includes(term) || a.description.toLowerCase().includes(term));
+    container.innerHTML = filtered.length ? filtered.map(a => createAppCard(a)).join('') : '<p class="loading-skeleton">لا توجد نتائج</p>';
+}
+
+function displayAllApps() {
+    const container = document.getElementById('allApps');
+    if (container) container.innerHTML = apps.map(a => createAppCard(a)).join('');
+}
+
+function filterApps(category) {
+    const container = document.getElementById('allApps');
+    if (!container) return;
+    document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+    if (event?.target) event.target.classList.add('active');
+    const filtered = category === 'all' ? apps : apps.filter(a => a.category === category);
+    container.innerHTML = filtered.length ? filtered.map(a => createAppCard(a)).join('') : '<p class="loading-skeleton">لا توجد تطبيقات</p>';
+}
+
+function showRatingModal(appId) {
+    const app = apps.find(a => a.id === appId);
+    if (!app) return;
+    currentAppId = appId;
+    selectedRating = 0;
+    document.getElementById('modalAppInfo').innerHTML = `<h4>${escapeHtml(app.name)}</h4><p>${escapeHtml(app.description.substring(0,100))}</p>`;
+    document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
+    document.getElementById('commentText').value = '';
+    document.getElementById('ratingModal').style.display = 'block';
+}
+
+function setRating(rating) {
+    selectedRating = rating;
+    document.querySelectorAll('.star').forEach((s, i) => i < rating ? s.classList.add('active') : s.classList.remove('active'));
+}
+
+function submitRating() {
+    if (!selectedRating) return showAlert('يرجى اختيار التقييم', 'error');
+    const comment = document.getElementById('commentText').value.trim();
+    if (!comment) return showAlert('يرجى إضافة تعليق', 'error');
+    const app = apps.find(a => a.id === currentAppId);
+    if (app) {
+        app.ratings.push(selectedRating);
+        app.rating = app.ratings.reduce((s, r) => s + r, 0) / app.ratings.length;
+        comments.push({id:Date.now(), appId:currentAppId, userId:currentUser?.id || null, username:currentUser?.username || 'زائر', comment, rating:selectedRating, date:new Date().toISOString()});
+        saveApps();
+        saveComments();
+        showAlert('تم إضافة التقييم', 'success');
+        closeModal();
+        displayHomeContent();
+        if (document.getElementById('appsPage').classList.contains('active')) displayAllApps();
+        if (pendingDownloadApp?.id === currentAppId) showDownloadConfirm(pendingDownloadApp);
+    }
+}
+
+function closeModal() {
+    document.getElementById('ratingModal').style.display = 'none';
+    document.getElementById('commentText').value = '';
+    selectedRating = 0;
+}
+
+function uploadApp(e) {
+    e.preventDefault();
+    if (!currentUser) return showAlert('يرجى تسجيل الدخول', 'error'), showPage('login'), false;
+    apps.push({id:Date.now(), name:document.getElementById('appName').value.trim(), description:document.getElementById('appDescription').value.trim(), version:document.getElementById('appVersion').value.trim(), category:document.getElementById('appCategory').value, deviceType:document.getElementById('appDeviceType').value, size:document.getElementById('appSize').value.trim(), image:document.getElementById('appImage').value || 'https://via.placeholder.com/300x200/cccccc/ffffff?text=No+Image', downloadLink:document.getElementById('appDownloadLink').value, downloads:0, rating:0, ratings:[], userId:currentUser.id, userName:currentUser.username, date:new Date().toISOString()});
+    saveApps();
+    showAlert('تم رفع التطبيق', 'success');
+    document.getElementById('uploadForm').reset();
+    showPage('apps');
+    return false;
+}
+
+function login(e) {
+    e.preventDefault();
+    const input = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPassword').value;
+    if (input === "admin" && pass === "admin2012") {
+        currentUser = {id:1, username:"المدير", email:"admin", password:"admin2012", role:"admin"};
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        showAlert('مرحباً المدير', 'success');
+        updateNavBar();
+        showPage('admin');
+        return false;
+    }
+    const user = users.find(u => (u.email === input || u.username === input) && u.password === pass);
     if (user) {
         currentUser = user;
         localStorage.setItem('currentUser', JSON.stringify(user));
-        updateUIForUser();
-        showNotification(`مرحباً ${user.name}! تم تسجيل الدخول بنجاح`, 'success');
-        closeLoginModal();
-        
-        if (user.role === 'admin') {
-            setTimeout(() => {
-                showAdminPanel();
-            }, 500);
-        }
-        return true;
-    } else {
-        showNotification('البريد الإلكتروني أو كلمة المرور غير صحيحة', 'error');
-        return false;
-    }
+        showAlert(`مرحباً ${user.username}`, 'success');
+        updateNavBar();
+        showPage(user.role === 'admin' ? 'admin' : 'home');
+    } else showAlert('بيانات غير صحيحة', 'error');
+    return false;
 }
 
-function register(name, email, password, confirmPassword) {
-    if (password !== confirmPassword) {
-        showNotification('كلمة المرور غير متطابقة', 'error');
-        return false;
+function register(e) {
+    e.preventDefault();
+    const username = document.getElementById('regUsername').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const pass = document.getElementById('regPassword').value;
+    const confirm = document.getElementById('regConfirmPassword').value;
+    if (username.length < 3) return showAlert('اسم المستخدم 3 أحرف على الأقل', 'error');
+    if (email === "admin") return showAlert('لا يمكن استخدام هذا الاسم', 'error');
+    if (pass.length < 6) return showAlert('كلمة المرور 6 أحرف على الأقل', 'error');
+    if (pass !== confirm) return showAlert('كلمة المرور غير متطابقة', 'error');
+    if (users.find(u => u.email === email)) return showAlert('البريد مستخدم', 'error');
+    users.push({id:Date.now(), username, email, password:pass, role:'user', date:new Date().toISOString()});
+    saveUsers();
+    showAlert('تم إنشاء الحساب', 'success');
+    showPage('login');
+    return false;
+}
+
+function updateNavBar() {
+    const loginNav = document.getElementById('loginNav');
+    const adminNav = document.getElementById('adminNav');
+    const userInfo = document.getElementById('userInfo');
+    const uploadNav = document.getElementById('uploadNav');
+    if (currentUser) {
+        loginNav.style.display = 'none';
+        userInfo.style.display = 'block';
+        uploadNav.style.display = 'block';
+        userInfo.innerHTML = `<span style="color:#667eea"><i class="fas ${currentUser.role === 'admin' ? 'fa-user-shield' : 'fa-user'}"></i> ${escapeHtml(currentUser.username)} <a href="#" onclick="logout()" style="color:#f44336;margin-right:10px"><i class="fas fa-sign-out-alt"></i> خروج</a></span>`;
+        adminNav.style.display = currentUser.role === 'admin' ? 'block' : 'none';
+    } else {
+        loginNav.style.display = 'block';
+        userInfo.style.display = 'none';
+        adminNav.style.display = 'none';
+        uploadNav.style.display = 'block';
     }
-    
-    if (users.find(u => u.email === email)) {
-        showNotification('البريد الإلكتروني مسجل بالفعل', 'error');
-        return false;
-    }
-    
-    const newUser = {
-        id: users.length + 1,
-        name: name,
-        email: email,
-        password: password,
-        role: 'user',
-        joinDate: new Date().toISOString().split('T')[0]
-    };
-    
-    users.push(newUser);
-    localStorage.setItem('users', JSON.stringify(users));
-    
-    currentUser = newUser;
-    localStorage.setItem('currentUser', JSON.stringify(newUser));
-    updateUIForUser();
-    showNotification('تم إنشاء الحساب بنجاح!', 'success');
-    closeRegisterModal();
-    return true;
 }
 
 function logout() {
     currentUser = null;
     localStorage.removeItem('currentUser');
-    updateUIForUser();
-    showNotification('تم تسجيل الخروج بنجاح', 'success');
-    closeAdminPanel();
+    showAlert('تم تسجيل الخروج', 'info');
+    updateNavBar();
+    showPage('home');
 }
 
-// ==================== تحديث واجهة المستخدم (المفتاح الرئيسي) ====================
-function updateUIForUser() {
-    const authButtons = document.getElementById('authButtons');
-    const userInfo = document.getElementById('userInfo');
-    const userNameSpan = document.getElementById('userName');
-    const adminPanelBtn = document.getElementById('adminPanelBtn');
-    
-    console.log('تحديث واجهة المستخدم...');
-    console.log('المستخدم الحالي:', currentUser);
-    
-    if (currentUser) {
-        // إخفاء أزرار تسجيل الدخول
-        if (authButtons) authButtons.style.display = 'none';
-        
-        // إظهار معلومات المستخدم
-        if (userInfo) {
-            userInfo.style.display = 'flex';
-            if (userNameSpan) userNameSpan.textContent = currentUser.name;
-        }
-        
-        // **الجزء الأهم: إظهار زر لوحة التحكم إذا كان المستخدم مديراً**
-        if (adminPanelBtn) {
-            if (currentUser.role === 'admin') {
-                adminPanelBtn.style.display = 'block';
-                console.log('✅ تم إظهار زر لوحة التحكم للمدير');
-            } else {
-                adminPanelBtn.style.display = 'none';
-                console.log('المستخدم ليس مديراً، إخفاء زر لوحة التحكم');
-            }
-        } else {
-            console.log('❌ لم يتم العثور على عنصر adminPanelBtn في الصفحة');
-        }
-    } else {
-        // إظهار أزرار تسجيل الدخول
-        if (authButtons) authButtons.style.display = 'flex';
-        
-        // إخفاء معلومات المستخدم
-        if (userInfo) userInfo.style.display = 'none';
-        
-        // إخفاء زر لوحة التحكم
-        if (adminPanelBtn) adminPanelBtn.style.display = 'none';
-    }
-    
-    updateStats();
+function displayAdminPanel() {
+    if (!currentUser || currentUser.role !== 'admin') return showAlert('غير مصرح', 'error'), showPage('home');
+    document.getElementById('usersList').innerHTML = users.filter(u => u.role !== 'admin').map(u => `<div class="admin-item"><div><strong>${escapeHtml(u.username)}</strong><br><small>${escapeHtml(u.email)}</small></div><div class="admin-actions"><button class="delete-btn" onclick="deleteUser(${u.id})">حذف</button></div></div>`).join('');
+    document.getElementById('appsList').innerHTML = apps.map(a => `<div class="admin-item"><div><strong>${escapeHtml(a.name)}</strong><br><small>${escapeHtml(a.description.substring(0,50))}...</small></div><div class="admin-actions"><button class="edit-btn" onclick="editApp(${a.id})">تعديل</button><button class="delete-btn" onclick="deleteApp(${a.id})">حذف</button></div></div>`).join('');
+    document.getElementById('commentsList').innerHTML = comments.map(c => `<div class="admin-item"><div><strong>${escapeHtml(c.username)}</strong><br><small>${escapeHtml(c.comment)}</small></div><div class="admin-actions"><button class="delete-btn" onclick="deleteComment(${c.id})">حذف</button></div></div>`).join('');
 }
 
-// ==================== إحصائيات الموقع ====================
-function updateStats() {
-    const appsCount = document.getElementById('appsCount');
-    const usersCount = document.getElementById('usersCount');
-    const downloadsCount = document.getElementById('downloadsCount');
-    
-    if (appsCount) appsCount.textContent = apps.length;
-    if (usersCount) usersCount.textContent = users.filter(u => u.role !== 'admin').length;
-    if (downloadsCount) downloadsCount.textContent = apps.reduce((sum, app) => sum + (app.downloads || 0), 0);
-}
-
-// ==================== لوحة تحكم المدير ====================
-function showAdminPanel() {
-    console.log('محاولة فتح لوحة التحكم');
-    
-    if (!currentUser) {
-        showNotification('الرجاء تسجيل الدخول أولاً', 'warning');
-        openLoginModal();
-        return;
-    }
-    
-    if (currentUser.role !== 'admin') {
-        showNotification('غير مصرح لك بالدخول إلى لوحة التحكم', 'error');
-        return;
-    }
-    
-    const modal = document.getElementById('adminPanelModal');
-    if (!modal) {
-        console.error('لم يتم العثور على عنصر adminPanelModal');
-        showNotification('حدث خطأ في فتح لوحة التحكم', 'error');
-        return;
-    }
-    
-    updateAdminPanelContent();
-    modal.style.display = 'block';
-    console.log('تم فتح لوحة التحكم بنجاح');
-}
-
-function updateAdminPanelContent() {
-    const totalDownloads = apps.reduce((s, a) => s + (a.downloads || 0), 0);
-    const totalComments = apps.reduce((s, a) => s + (a.comments?.length || 0), 0);
-    const regularUsers = users.filter(u => u.role !== 'admin');
-    
-    const content = document.getElementById('adminPanelContent');
-    if (!content) return;
-    
-    content.innerHTML = `
-        <div class="admin-stats">
-            <div class="admin-stat-card"><i class="fas fa-mobile-alt"></i><div><h3>${apps.length}</h3><p>التطبيقات</p></div></div>
-            <div class="admin-stat-card"><i class="fas fa-users"></i><div><h3>${regularUsers.length}</h3><p>المستخدمين</p></div></div>
-            <div class="admin-stat-card"><i class="fas fa-download"></i><div><h3>${totalDownloads}</h3><p>التحميلات</p></div></div>
-            <div class="admin-stat-card"><i class="fas fa-comments"></i><div><h3>${totalComments}</h3><p>التعليقات</p></div></div>
-        </div>
-        <div class="admin-tabs">
-            <button class="admin-tab-btn active" onclick="showAdminTab('apps')"><i class="fas fa-mobile-alt"></i> التطبيقات</button>
-            <button class="admin-tab-btn" onclick="showAdminTab('users')"><i class="fas fa-users"></i> المستخدمين</button>
-            <button class="admin-tab-btn" onclick="showAdminTab('comments')"><i class="fas fa-comments"></i> التعليقات</button>
-        </div>
-        <div id="adminTabContent">${renderAppsTable()}</div>
-    `;
-}
-
-function showAdminTab(tab) {
-    const btns = document.querySelectorAll('.admin-tab-btn');
-    btns.forEach(btn => btn.classList.remove('active'));
-    if (event && event.target) event.target.classList.add('active');
-    
-    const content = document.getElementById('adminTabContent');
-    if (tab === 'apps') content.innerHTML = renderAppsTable();
-    else if (tab === 'users') content.innerHTML = renderUsersTable();
-    else content.innerHTML = renderCommentsTable();
-}
-
-function renderAppsTable() {
-    if (!apps.length) return '<div class="admin-empty">لا توجد تطبيقات</div>';
-    return `
-        <div class="admin-table">
-            <table>
-                <thead><tr><th>#</th><th>الصورة</th><th>الاسم</th><th>المطور</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr></thead>
-                <tbody>
-                    ${apps.map(a => `
-                        <tr>
-                            <td>${a.id}</td>
-                            <td><div class="admin-app-icon">${a.iconUrl ? `<img src="${a.iconUrl}" width="40" height="40">` : `<i class="fas ${a.icon}"></i>`}</div></td>
-                            <td><strong>${a.name}</strong><br><small>${a.categoryName}</small></td>
-                            <td>${a.developer}</td>
-                            <td>${a.downloads}</td>
-                            <td>${(a.rating||0).toFixed(1)} (${a.ratingCount})</td>
-                            <td class="admin-actions">
-                                <button class="admin-btn-edit" onclick="editApp(${a.id})"><i class="fas fa-edit"></i> تعديل</button>
-                                <button class="admin-btn-danger" onclick="deleteAppAdmin(${a.id})"><i class="fas fa-trash"></i> حذف</button>
-                            </td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        </div>
-    `;
-}
-
-function renderUsersTable() {
-    const normalUsers = users.filter(u => u.role !== 'admin');
-    if (!normalUsers.length) return '<div class="admin-empty">لا يوجد مستخدمين</div>';
-    return `
-        <div class="admin-table">
-            <table>
-                <thead><tr><th>#</th><th>الاسم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead>
-                <tbody>
-                    ${normalUsers.map(u => `
-                        <tr>
-                            <td>${u.id}</td>
-                            <td><strong>${u.name}</strong></td>
-                            <td>${u.email}</td>
-                            <td>${u.joinDate || 'غير محدد'}</td>
-                            <td class="admin-actions">
-                                <button class="admin-btn-edit" onclick="editUser(${u.id})"><i class="fas fa-edit"></i> تعديل</button>
-                                <button class="admin-btn-danger" onclick="deleteUserAdmin(${u.id})"><i class="fas fa-trash"></i> حذف</button>
-                            </td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        </div>
-    `;
-}
-
-function renderCommentsTable() {
-    const allComments = [];
-    apps.forEach(app => { if (app.comments) app.comments.forEach(c => allComments.push({...c, appId: app.id, appName: app.name})); });
-    if (!allComments.length) return '<div class="admin-empty">لا توجد تعليقات</div>';
-    return `
-        <div class="admin-table">
-            <table>
-                <thead><tr><th>التطبيق</th><th>المستخدم</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th></tr></thead>
-                <tbody>
-                    ${allComments.map(c => `
-                        <tr>
-                            <td><strong>${c.appName}</strong></td>
-                            <td>${c.userName}</td>
-                            <td>${c.text.substring(0, 50)}${c.text.length > 50 ? '...' : ''}</td>
-                            <td>${c.rating || 0} <i class="fas fa-star" style="color:#ffc107;"></i></td>
-                            <td>${c.date}</td>
-                            <td class="admin-actions">
-                                <button class="admin-btn-edit" onclick="editComment(${c.appId}, ${c.id})"><i class="fas fa-edit"></i> تعديل</button>
-                                <button class="admin-btn-danger" onclick="deleteCommentAdmin(${c.appId}, ${c.id})"><i class="fas fa-trash"></i> حذف</button>
-                            </td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        </div>
-    `;
-}
-
-// ==================== دوال التعديل والحذف ====================
-function editApp(appId) {
-    showNotification('سيتم إضافة نافذة تعديل قريباً', 'info');
-}
-
-function editUser(userId) {
-    showNotification('سيتم إضافة نافذة تعديل قريباً', 'info');
-}
-
-function editComment(appId, commentId) {
-    showNotification('سيتم إضافة نافذة تعديل قريباً', 'info');
-}
-
-function deleteAppAdmin(id) {
-    if (confirm('⚠️ هل أنت متأكد من حذف هذا التطبيق؟')) {
-        apps = apps.filter(a => a.id !== id);
-        localStorage.setItem('apps', JSON.stringify(apps));
-        showNotification('✅ تم حذف التطبيق بنجاح', 'success');
-        updateAdminPanelContent();
-        displayFeaturedApps();
-        updateStats();
-    }
-}
-
-function deleteUserAdmin(id) {
-    const user = users.find(u => u.id === id);
-    if (user && user.role === 'admin') {
-        showNotification('لا يمكن حذف المدير الرئيسي', 'error');
-        return;
-    }
-    if (confirm(`⚠️ هل أنت متأكد من حذف المستخدم "${user?.name}"؟`)) {
-        apps = apps.filter(a => a.developerId !== id);
-        apps.forEach(a => {
-            if (a.comments) a.comments = a.comments.filter(c => c.userId !== id);
-        });
-        users = users.filter(u => u.id !== id);
-        localStorage.setItem('apps', JSON.stringify(apps));
-        localStorage.setItem('users', JSON.stringify(users));
-        showNotification('✅ تم حذف المستخدم', 'success');
-        updateAdminPanelContent();
-        updateStats();
-    }
-}
-
-function deleteCommentAdmin(appId, commentId) {
-    if (confirm('⚠️ هل أنت متأكد من حذف هذا التعليق؟')) {
-        const app = apps.find(a => a.id === appId);
-        if (app && app.comments) {
-            app.comments = app.comments.filter(c => c.id !== commentId);
-            localStorage.setItem('apps', JSON.stringify(apps));
-            showNotification('✅ تم حذف التعليق', 'success');
-            updateAdminPanelContent();
-        }
-    }
-}
-
-// ==================== دوال عرض التطبيقات ====================
-function createAppCard(app) {
-    const priceClass = app.price === 'paid' ? 'paid' : 'free';
-    const priceText = app.priceText || (app.price === 'paid' ? 'مدفوع' : 'مجاني');
-    const ratingStars = generateRatingStars(app.rating, true);
-    const iconHtml = app.iconUrl ? `<img src="${app.iconUrl}" alt="${app.name}">` : `<i class="fas ${app.icon}"></i>`;
-    
-    return `
-        <div class="app-card">
-            <div class="app-icon">
-                ${iconHtml}
-                <span class="app-platform"><i class="fas ${app.platform === 'android' ? 'fa-android' : 'fa-apple'}"></i> ${app.platformName}</span>
-            </div>
-            <div class="app-info">
-                <h3>${app.name}</h3>
-                <span class="app-category">${app.categoryName}</span>
-                <p class="app-description">${app.description.substring(0, 80)}${app.description.length > 80 ? '...' : ''}</p>
-                <div class="app-rating">${ratingStars}<span class="rating-count">(${app.ratingCount})</span></div>
-                <div class="app-meta"><span class="app-size"><i class="fas fa-database"></i> ${app.size} MB</span><span class="app-price ${priceClass}">${priceText}</span></div>
-                <div class="app-actions">
-                    <button onclick="showDownloadModal(${app.id})" class="btn-download"><i class="fas fa-download"></i> تحميل (${app.downloads})</button>
-                    <button onclick="showAppDetails(${app.id})" class="btn-details"><i class="fas fa-info-circle"></i> تفاصيل</button>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function generateRatingStars(rating, isSmall = false) {
-    const full = Math.floor(rating);
-    const half = rating % 1 >= 0.5;
-    const empty = 5 - full - (half ? 1 : 0);
-    let stars = '';
-    for (let i = 0; i < full; i++) stars += '<i class="fas fa-star"></i>';
-    if (half) stars += '<i class="fas fa-star-half-alt"></i>';
-    for (let i = 0; i < empty; i++) stars += '<i class="far fa-star"></i>';
-    return `<div class="stars-container">${stars}</div>`;
-}
-
-function showAppDetails(appId) {
-    const app = apps.find(a => a.id === appId);
-    if (!app) return;
-    const modal = document.getElementById('appDetailsModal');
-    document.getElementById('modalAppTitle').textContent = app.name;
-    const iconHtml = app.iconUrl ? `<img src="${app.iconUrl}" alt="${app.name}">` : `<i class="fas ${app.icon}"></i>`;
-    
-    document.getElementById('appDetailsContent').innerHTML = `
-        <div class="app-details">
-            <div class="app-details-header">
-                <div class="app-details-icon">${iconHtml}</div>
-                <div class="app-details-info">
-                    <h2>${app.name}</h2>
-                    <p class="developer">المطور: ${app.developer}</p>
-                    <div class="app-details-rating">${generateRatingStars(app.rating)}<span>(${app.ratingCount} تقييم)</span></div>
-                    <div class="app-details-meta">
-                        <span><i class="fas fa-tag"></i> ${app.categoryName}</span>
-                        <span><i class="fas fa-mobile-alt"></i> ${app.platformName}</span>
-                        <span><i class="fas fa-database"></i> ${app.size} MB</span>
-                        <span><i class="fas fa-download"></i> ${app.downloads} تحميل</span>
-                    </div>
-                    <button onclick="showDownloadModal(${app.id})" class="btn-primary"><i class="fas fa-download"></i> تحميل التطبيق</button>
-                </div>
-            </div>
-            <div class="app-details-description"><h3>عن التطبيق</h3><p>${app.description}</p></div>
-        </div>
-    `;
-    modal.style.display = 'block';
-}
-
-function showDownloadModal(appId) {
-    const app = apps.find(a => a.id === appId);
-    if (!app) return;
-    showNotification(`جاري تحميل ${app.name}...`, 'success');
-    if (app.downloadLink) {
-        window.open(app.downloadLink, '_blank');
-        app.downloads++;
-        localStorage.setItem('apps', JSON.stringify(apps));
-        updateStats();
-    }
-}
-
-function displayFeaturedApps() {
-    const container = document.getElementById('featuredApps');
-    if (container && apps.length > 0) {
-        container.innerHTML = apps.slice(0, 3).map(createAppCard).join('');
-    } else if (container) {
-        container.innerHTML = '<div class="no-results">لا توجد تطبيقات حالياً</div>';
-    }
-}
-
-// ==================== دوال مساعدة ====================
-function getCategoryName(c) {
-    const map = { educational: 'تعليمي', entertainment: 'ترفيهي', productivity: 'إنتاجية', social: 'تواصل اجتماعي', games: 'ألعاب', business: 'أعمال', health: 'صحة ولياقة' };
-    return map[c] || c;
-}
-
-function getPlatformName(p) {
-    const map = { android: 'أندرويد', ios: 'iOS', both: 'أندرويد و iOS' };
-    return map[p] || p;
-}
-
-function getCategoryIcon(c) {
-    const map = { educational: 'fa-graduation-cap', entertainment: 'fa-film', productivity: 'fa-chart-line', social: 'fa-users', games: 'fa-gamepad', business: 'fa-briefcase', health: 'fa-heartbeat' };
-    return map[c] || 'fa-mobile-alt';
-}
-
-function showNotification(message, type = 'success') {
-    const notification = document.createElement('div');
-    notification.className = 'notification';
-    const colors = { success: '#10b981', error: '#ef4444', warning: '#f59e0b', info: '#3b82f6' };
-    notification.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i><span>${message}</span>`;
-    notification.style.cssText = `position:fixed;top:100px;left:50%;transform:translateX(-50%);background:${colors[type] || colors.success};color:white;padding:12px 24px;border-radius:50px;z-index:10001;display:flex;align-items:center;gap:10px;animation:slideDown 0.3s ease;`;
-    document.body.appendChild(notification);
-    setTimeout(() => {
-        notification.style.animation = 'slideUp 0.3s ease';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
-function closeTopAd() {
-    const ad = document.querySelector('.ad-top');
-    if (ad) { ad.style.animation = 'slideUp 0.3s ease'; setTimeout(() => ad.style.display = 'none', 300); }
-}
-
-function closeBottomAd() {
-    const ad = document.querySelector('.ad-bottom');
-    if (ad) { ad.style.animation = 'slideUp 0.3s ease'; setTimeout(() => ad.style.display = 'none', 300); }
-}
-
-// ==================== إعداد النماذج ====================
-function setupForms() {
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            login(email, password);
-        });
-    }
-    
-    const registerForm = document.getElementById('registerForm');
-    if (registerForm) {
-        registerForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = document.getElementById('regName').value;
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPassword').value;
-            const confirmPassword = document.getElementById('regConfirmPassword').value;
-            register(name, email, password, confirmPassword);
-        });
-    }
-}
-
-function setupMobileMenu() {
-    const btn = document.querySelector('.mobile-menu-btn');
-    const nav = document.querySelector('nav');
-    if (btn && nav) {
-        btn.addEventListener('click', () => nav.classList.toggle('active'));
-    }
-}
-
-// ==================== التهيئة ====================
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('تم تحميل الصفحة - بدء التهيئة');
-    updateUIForUser();
-    displayFeaturedApps();
-    setupForms();
-    setupMobileMenu();
-    
-    window.onclick = (e) => {
-        if (e.target === document.getElementById('loginModal')) closeLoginModal();
-        if (e.target === document.getElementById('registerModal')) closeRegisterModal();
-        if (e.target === document.getElementById('appDetailsModal')) closeAppDetailsModal();
-        if (e.target === document.getElementById('adminPanelModal')) closeAdminPanel();
-        if (e.target === document.getElementById('downloadModal')) closeDownloadModal();
-    };
-});
-
-// جعل الدوال متاحة عالمياً
-window.openLoginModal = openLoginModal;
-window.closeLoginModal = closeLoginModal;
-window.openRegisterModal = openRegisterModal;
-window.closeRegisterModal = closeRegisterModal;
-window.closeAppDetailsModal = closeAppDetailsModal;
-window.closeDownloadModal = closeDownloadModal;
-window.closeAdminPanel = closeAdminPanel;
-window.switchToRegister = switchToRegister;
-window.switchToLogin = switchToLogin;
-window.logout = logout;
-window.showAdminPanel = showAdminPanel;
-window.showAdminTab = showAdminTab;
-window.deleteAppAdmin = deleteAppAdmin;
-window.deleteUserAdmin = deleteUserAdmin;
-window.deleteCommentAdmin = deleteCommentAdmin;
-window.editApp = editApp;
-window.editUser = editUser;
-window.editComment = editComment;
-window.showAppDetails = showAppDetails;
-window.showDownloadModal = showDownloadModal;
-window.closeTopAd = closeTopAd;
-window.closeBottomAd = closeBottomAd;
+function deleteUser(id) { if(confirm('تأكيد؟')){ users = users.filter(u=>u.id!==id); saveUsers(); displayAdminPanel(); showAlert('تم الحذف','success'); } }
+function deleteApp(id) { if(confirm('تأكيد؟')){ apps = apps.filter(a=>a.id!==id); saveApps(); displayAdminPanel(); displayHomeContent(); showAlert('تم الحذف','success'); } }
+function deleteComment(id) { if(confirm('تأكيد؟')){ comments = comments.filter(c=>c.id!==id); saveComments(); displayAdminPanel(); showAlert('تم الحذف','success'); } }
+function editApp(id) { const app = apps.find(a=>a.id===id); if(!app) return; const newName=prompt('الاسم الجديد:',app.name); if(newName?.trim()) app.name=newName.trim(); const newDesc=prompt('الوصف الجديد:',app.description); if(newDesc?.trim()) app.description=newDesc.trim(); saveApps(); displayAdminPanel(); displayHomeContent(); showAlert('تم التعديل','success'); }
+function saveAdminChanges() { saveApps(); saveUsers(); saveComments(); showAlert('تم الحفظ','success'); }
+function sendContactMessage(e) { e.preventDefault(); showAlert('تم الإرسال','success'); document.getElementById('contactForm').reset(); return false; }
+function subscribeNewsletter() { const email=document.querySelector('#newsletterEmailFooter').value; email?.includes('@')? (showAlert('تم الاشتراك','success'), document.querySelector('#newsletterEmailFooter').value='') : showAlert('بريد صحيح','error'); }
+function escapeHtml(t) { return t; }
+function getCategoryName(c) { const n={games:'ألعاب',social:'تواصل',education:'تعليم',productivity:'إنتاجية',entertainment:'ترفيه'}; return n[c]||c; }
+function showAlert(m,t) { const d=document.createElement('div'); d.className=`alert alert-${t}`; d.innerHTML=`<i class="fas ${t==='success'?'fa-check-circle':'fa-exclamation-circle'}"></i> ${m}`; document.body.appendChild(d); setTimeout(()=>{ d.style.animation='slideOut 0.3s'; setTimeout(()=>d.remove(),300); },3000); }
+function loadCurrentUser() { const u=localStorage.getItem('currentUser'); if(u){ currentUser=JSON.parse(u); if(currentUser.role==='admin' && currentUser.email!=="admin") logout(); else updateNavBar(); } }
+function init() { loadData(); loadCurrentUser(); displayHomeContent(); updateNavBar(); window.onclick=e=>{ if(e.target===document.getElementById('ratingModal')) closeModal(); if(e.target===document.getElementById('downloadModal')) closeDownloadModal(); }; }
+init();
