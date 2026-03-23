@@ -4,8 +4,12 @@
 function displayAllApps() {
     let container = document.getElementById('allApps');
     if(!container) return;
+    
+    console.log('🔄 عرض جميع التطبيقات...');
+    console.log(`📱 عدد التطبيقات: ${apps.length}`);
+    
     if(!apps || apps.length === 0) {
-        container.innerHTML = '<div class="loading-skeleton">لا توجد تطبيقات</div>';
+        container.innerHTML = '<div class="loading-skeleton">📱 لا توجد تطبيقات حالياً</div>';
         return;
     }
     container.innerHTML = apps.map(app => createAppCard(app)).join('');
@@ -16,8 +20,11 @@ function filterApps(category) {
     let filtered = category === 'all' ? apps : apps.filter(a => a.category === category);
     let container = document.getElementById('allApps');
     if(!container) return;
+    
+    console.log(`🔍 تصفية حسب: ${category}, النتائج: ${filtered.length}`);
+    
     if(!filtered.length) {
-        container.innerHTML = '<div class="loading-skeleton">لا توجد تطبيقات في هذا التصنيف</div>';
+        container.innerHTML = '<div class="loading-skeleton">📱 لا توجد تطبيقات في هذا التصنيف</div>';
         return;
     }
     container.innerHTML = filtered.map(app => createAppCard(app)).join('');
@@ -43,7 +50,7 @@ function searchApps() {
     );
     
     if(!filtered.length) {
-        container.innerHTML = '<div class="loading-skeleton">لا توجد نتائج مطابقة</div>';
+        container.innerHTML = '<div class="loading-skeleton">🔍 لا توجد نتائج مطابقة</div>';
         return;
     }
     container.innerHTML = filtered.map(app => createAppCard(app)).join('');
@@ -157,10 +164,15 @@ function closeModal() {
 
 // تهيئة الصفحة - انتظر تحميل البيانات
 (async function initAppsPage() {
+    console.log('📱 تهيئة صفحة التطبيقات...');
+    
     // انتظر حتى يتم تحميل البيانات من JSONBin
     while (!jsonbinReady) {
+        console.log('⏳ انتظار تحميل البيانات...');
         await new Promise(resolve => setTimeout(resolve, 100));
     }
+    
+    console.log('✅ البيانات جاهزة، عرض التطبيقات');
     displayAllApps();
     
     // بحث من الرابط

@@ -4,15 +4,27 @@
 function displayAppsGrid(list, containerId) {
     let container = document.getElementById(containerId);
     if(!container) return;
+    
     if(!list || list.length === 0) {
-        container.innerHTML = '<div class="loading-skeleton">لا توجد تطبيقات</div>';
+        container.innerHTML = '<div class="loading-skeleton">📱 لا توجد تطبيقات حالياً</div>';
         return;
     }
+    
     container.innerHTML = list.map(app => createAppCard(app)).join('');
 }
 
 // عرض المحتوى الرئيسي
 function displayHomeContent() {
+    console.log('🔄 عرض المحتوى الرئيسي...');
+    console.log(`📱 عدد التطبيقات: ${apps.length}`);
+    
+    if(!apps || apps.length === 0) {
+        document.getElementById('latestApps').innerHTML = '<div class="loading-skeleton">📱 لا توجد تطبيقات حالياً</div>';
+        document.getElementById('mostDownloadedApps').innerHTML = '<div class="loading-skeleton">📱 لا توجد تطبيقات حالياً</div>';
+        document.getElementById('topRatedApps').innerHTML = '<div class="loading-skeleton">📱 لا توجد تطبيقات حالياً</div>';
+        return;
+    }
+    
     let latestApps = [...apps].reverse().slice(0, 6);
     let mostDownloaded = [...apps].sort((a,b) => b.downloads - a.downloads).slice(0, 6);
     let topRated = [...apps].sort((a,b) => b.rating - a.rating).slice(0, 6);
@@ -75,15 +87,19 @@ function showRatingModal(appId) {
     let infoDiv = document.getElementById('modalAppInfo');
     if(infoDiv) infoDiv.innerHTML = `<h4>${escapeHtml(app.name)}</h4><p>${escapeHtml(app.description.substring(0,100))}</p>`;
     
-    document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
+    let stars = document.querySelectorAll('.star');
+    stars.forEach(s => s.classList.remove('active'));
+    
     let commentText = document.getElementById('commentText');
     if(commentText) commentText.value = '';
+    
     document.getElementById('ratingModal').style.display = 'block';
 }
 
 function setRating(rating) {
     selectedRating = rating;
-    document.querySelectorAll('.star').forEach((s, i) => {
+    let stars = document.querySelectorAll('.star');
+    stars.forEach((s, i) => {
         if(i < rating) s.classList.add('active');
         else s.classList.remove('active');
     });
@@ -134,10 +150,15 @@ function closeModal() {
 
 // تهيئة الصفحة - انتظر تحميل البيانات
 (async function initHome() {
+    console.log('🏠 تهيئة الصفحة الرئيسية...');
+    
     // انتظر حتى يتم تحميل البيانات من JSONBin
     while (!jsonbinReady) {
+        console.log('⏳ انتظار تحميل البيانات...');
         await new Promise(resolve => setTimeout(resolve, 100));
     }
+    
+    console.log('✅ البيانات جاهزة، عرض المحتوى');
     displayHomeContent();
 })();
 

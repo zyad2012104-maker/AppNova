@@ -51,28 +51,39 @@ async function loadConfig() {
     try {
         console.log('🔄 جاري تحميل التكوين...');
         
-        const response = await fetch('get-config.php');
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        // محاولة تحميل من get-config.php أولاً
+        let response;
+        try {
+            response = await fetch('get-config.php');
+        } catch(e) {
+            console.log('لا يوجد ملف get-config.php، استخدام config.js');
         }
         
-        const config = await response.json();
-        
-        if (config.error) {
-            throw new Error(config.error);
+        if (response && response.ok) {
+            const config = await response.json();
+            if (!config.error) {
+                BIN_ID = config.BIN_ID;
+                MASTER_KEY = config.MASTER_KEY;
+                BASE_URL = config.BASE_URL || 'https://api.jsonbin.io/v3/b/';
+                console.log('✅ تم تحميل التكوين من get-config.php');
+                return true;
+            }
         }
         
-        BIN_ID = config.BIN_ID;
-        MASTER_KEY = config.MASTER_KEY;
-        BASE_URL = config.BASE_URL || 'https://api.jsonbin.io/v3/b/';
+        // استخدام config.js مباشرة
+        if (typeof CONFIG !== 'undefined' && CONFIG.JSONBIN) {
+            BIN_ID = CONFIG.JSONBIN.BIN_ID;
+            MASTER_KEY = CONFIG.JSONBIN.MASTER_KEY;
+            BASE_URL = CONFIG.JSONBIN.BASE_URL;
+            console.log('✅ تم تحميل التكوين من config.js');
+            return true;
+        }
         
-        console.log('✅ تم تحميل التكوين بنجاح');
-        return true;
+        throw new Error('لم يتم العثور على إعدادات JSONBin');
         
     } catch (error) {
         console.error('❌ خطأ في تحميل التكوين:', error);
-        showAlert('خطأ في تحميل إعدادات الاتصال', 'error');
+        showAlert('خطأ في تحميل إعدادات الاتصال: ' + error.message, 'error');
         return false;
     }
 }
@@ -82,6 +93,7 @@ async function loadConfig() {
 async function loadDataFromJSONBin() {
     try {
         console.log('🔄 جاري تحميل البيانات من JSONBin.io...');
+        console.log('📡 الرابط:', `${BASE_URL}${BIN_ID}`);
         
         const response = await fetch(`${BASE_URL}${BIN_ID}`, {
             method: 'GET',
@@ -162,21 +174,62 @@ function saveToLocalBackup() {
     localStorage.setItem('comments_backup', JSON.stringify(comments));
     localStorage.setItem('categories_backup', JSON.stringify(categories));
     localStorage.setItem('last_backup', new Date().toISOString());
+    console.log('💾 تم حفظ النسخة الاحتياطية محلياً');
 }
 
 function loadFromLocalBackup() {
+    console.log('📦 محاولة التحميل من النسخة الاحتياطية المحلية...');
+    
     const backupApps = localStorage.getItem('apps_backup');
     const backupUsers = localStorage.getItem('users_backup');
     const backupComments = localStorage.getItem('comments_backup');
     const backupCategories = localStorage.getItem('categories_backup');
     
-    if (backupApps) apps = JSON.parse(backupApps);
-    if (backupUsers) users = JSON.parse(backupUsers);
-    if (backupComments) comments = JSON.parse(backupComments);
-    if (backupCategories) categories = JSON.parse(backupCategories);
-    if (!categories || categories.length === 0) categories = defaultCategories;
+    if (backupApps) {
+        apps = JSON.parse(backupApps);
+        console.log(`📱 تم تحميل ${apps.length} تطبيق من النسخة الاحتياطية`);
+    }
+    if (backupUsers) {
+        users = JSON.parse(backupUsers);
+        console.log(`👥 تم تحميل ${users.length} مستخدم من النسخة الاحتياطية`);
+    }
+    if (backupComments) {
+        comments = JSON.parse(backupComments);
+        console.log(`💬 تم تحميل ${comments.length} تعليق من النسخة الاحتياطية`);
+    }
+    if (backupCategories) {
+        categories = JSON.parse(backupCategories);
+        console.log(`🏷️ تم تحميل ${categories.length} تصنيف من النسخة الاحتياطية`);
+    }
     
-    console.log('📦 تم التحميل من النسخة الاحتياطية المحلية');
+    if (!categories || categories.length === 0) {
+        categories = defaultCategories;
+        console.log('🏷️ استخدام التصنيفات الافتراضية');
+    }
+    
+    // إذا لم توجد بيانات احتياطية، استخدم البيانات الافتراضية
+    if (apps.length === 0) {
+        apps = [
+            {id:1, name:"تطبيق التواصل الاجتماعي", description:"تطبيق رائع للتواصل مع الأصدقاء", version:"2.0.1", category:"social", deviceType:"both", size:"45 MB", image:"https://via.placeholder.com/300x180/667eea/ffffff?text=Social+App", downloadLink:"#", downloads:1250, rating:4.5, ratings:[5,4,5,4,5], userId:1, userName:"المدير", date:"2024-01-01"},
+            {id:2, name:"لعبة الألغاز", description:"لعبة ألغاز ممتعة وتحدي للعقل", version:"1.5.0", category:"games", deviceType:"android", size:"78 MB", image:"https://via.placeholder.com/300x180/764ba2/ffffff?text=Puzzle+Game", downloadLink:"#", downloads:890, rating:4.2, ratings:[4,5,4,4,4], userId:1, userName:"المدير", date:"2024-01-02"},
+            {id:3, name:"تطبيق التعليم", description:"منصة تعليمية متكاملة للطلاب", version:"3.0.0", category:"education", deviceType:"both", size:"120 MB", image:"https://via.placeholder.com/300x180/48c6ef/ffffff?text=Education+App", downloadLink:"#", downloads:2340, rating:4.8, ratings:[5,5,4,5,5], userId:1, userName:"المدير", date:"2024-01-03"}
+        ];
+        console.log('📱 تم إنشاء تطبيقات افتراضية');
+    }
+    
+    if (users.length === 0) {
+        users = [{
+            id: 1,
+            username: "المدير",
+            email: "admin",
+            password: "admin2012",
+            role: "admin",
+            date: new Date().toISOString()
+        }];
+        console.log('👑 تم إنشاء مستخدم admin افتراضي');
+    }
+    
+    console.log('✅ تم تحميل البيانات من النسخة الاحتياطية بنجاح');
 }
 
 async function ensureDefaultData() {
@@ -203,11 +256,13 @@ async function ensureDefaultData() {
             {id:3, name:"تطبيق التعليم", description:"منصة تعليمية متكاملة للطلاب", version:"3.0.0", category:"education", deviceType:"both", size:"120 MB", image:"https://via.placeholder.com/300x180/48c6ef/ffffff?text=Education+App", downloadLink:"#", downloads:2340, rating:4.8, ratings:[5,5,4,5,5], userId:1, userName:"المدير", date:"2024-01-03"}
         );
         needsSave = true;
+        console.log('📱 تم إضافة تطبيقات افتراضية');
     }
     
     if (categories.length === 0) {
         categories = defaultCategories;
         needsSave = true;
+        console.log('🏷️ تم إضافة تصنيفات افتراضية');
     }
     
     if (needsSave) {
@@ -395,6 +450,22 @@ function loadSiteFavicon() {
     }
 }
 
+// ========== انتظار تحميل البيانات ==========
+function waitForData() {
+    return new Promise((resolve) => {
+        if (jsonbinReady) {
+            resolve();
+        } else {
+            const checkInterval = setInterval(() => {
+                if (jsonbinReady) {
+                    clearInterval(checkInterval);
+                    resolve();
+                }
+            }, 100);
+        }
+    });
+}
+
 // ========== تهيئة الصفحة ==========
 
 let storedUser = localStorage.getItem('currentUser');
@@ -407,14 +478,21 @@ if(storedUser) {
 }
 
 (async function init() {
+    console.log('🚀 بدء تهيئة AppNova...');
+    
     const configLoaded = await loadConfig();
     if (!configLoaded) {
-        console.error('❌ فشل تحميل التكوين');
-        showAlert('فشل تحميل إعدادات الاتصال، حاول تحديث الصفحة', 'error');
-        return;
+        console.error('❌ فشل تحميل التكوين، استخدام البيانات المحلية');
+        loadFromLocalBackup();
+        jsonbinReady = true;
+    } else {
+        await loadDataFromJSONBin();
     }
-    await loadDataFromJSONBin();
+    
     updateNavBar();
     loadSiteFavicon();
-    console.log('🚀 AppNova جاهز للعمل مع JSONBin.io');
+    
+    console.log('✅ AppNova جاهز للعمل');
+    console.log(`📊 عدد التطبيقات: ${apps.length}`);
+    console.log(`👥 عدد المستخدمين: ${users.length}`);
 })();

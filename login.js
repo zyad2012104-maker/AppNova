@@ -19,9 +19,16 @@ document.getElementById('loginForm')?.addEventListener('submit', async function(
         });
     }
     
+    console.log('🔍 محاولة تسجيل الدخول...');
+    console.log(`👤 المستخدم: ${input}`);
+    console.log(`👥 عدد المستخدمين: ${users.length}`);
+    
     let user = users.find(u => (u.email === input || u.username === input) && u.password === password);
+    
     if(user) {
         localStorage.setItem('currentUser', JSON.stringify(user));
+        console.log(`✅ تم تسجيل الدخول بنجاح: ${user.username} (${user.role})`);
+        
         showAdModal(() => {
             showAlert(`مرحباً ${user.username}`, 'success');
             if(user.role === 'admin' || user.role === 'moderator') {
@@ -31,6 +38,7 @@ document.getElementById('loginForm')?.addEventListener('submit', async function(
             }
         });
     } else {
+        console.log('❌ فشل تسجيل الدخول');
         showAlert('بيانات الدخول غير صحيحة', 'error');
     }
 });
