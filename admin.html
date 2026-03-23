@@ -205,10 +205,8 @@
                 <p>إدارة المستخدمين والمشرفين والتطبيقات والتعليقات</p>
             </div>
             
-            <!-- إحصائيات -->
             <div class="stats-cards" id="statsCards"></div>
             
-            <!-- أزرار التبويب -->
             <div class="admin-tabs">
                 <button class="admin-tab active" onclick="showAdminPanel('users')">👥 المستخدمين</button>
                 <button class="admin-tab" onclick="showAdminPanel('moderators')">👑 المشرفين</button>
@@ -216,7 +214,6 @@
                 <button class="admin-tab" onclick="showAdminPanel('comments')">💬 التعليقات</button>
             </div>
             
-            <!-- لوحة المستخدمين -->
             <div id="usersPanel" class="admin-panel active">
                 <div class="search-admin">
                     <input type="text" id="searchUsers" placeholder="ابحث عن مستخدم..." onkeyup="searchUsers()">
@@ -225,7 +222,6 @@
                 <div class="admin-table" id="usersTable"></div>
             </div>
             
-            <!-- لوحة المشرفين -->
             <div id="moderatorsPanel" class="admin-panel">
                 <div class="search-admin">
                     <input type="text" id="searchModerators" placeholder="ابحث عن مشرف..." onkeyup="searchModerators()">
@@ -233,7 +229,6 @@
                 </div>
                 <div class="admin-table" id="moderatorsTable"></div>
                 
-                <!-- إضافة مشرف جديد - فقط للمدير -->
                 <div id="addModeratorSection" class="add-moderator-form">
                     <h3 style="margin-bottom: 15px;">➕ إضافة مشرف جديد</h3>
                     <form id="addModeratorForm">
@@ -255,7 +250,6 @@
                 </div>
             </div>
             
-            <!-- لوحة التطبيقات -->
             <div id="appsPanel" class="admin-panel">
                 <div class="search-admin">
                     <input type="text" id="searchApps" placeholder="ابحث عن تطبيق..." onkeyup="searchAdminApps()">
@@ -264,7 +258,6 @@
                 <div class="admin-table" id="appsTable"></div>
             </div>
             
-            <!-- لوحة التعليقات -->
             <div id="commentsPanel" class="admin-panel">
                 <div class="search-admin">
                     <input type="text" id="searchComments" placeholder="ابحث عن تعليق..." onkeyup="searchComments()">
@@ -304,6 +297,7 @@
         </div>
     </div>
 
+    <script src="config.js"></script>
     <script src="common.js"></script>
     <script src="admin.js"></script>
 </body>

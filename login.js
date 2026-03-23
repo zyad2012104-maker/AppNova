@@ -1,9 +1,23 @@
-// login.js
-document.getElementById('loginForm')?.addEventListener('submit', function(e) {
+// login.js - تسجيل الدخول مع JSONBin.io
+
+document.getElementById('loginForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     let input = document.getElementById('loginEmail').value.trim();
     let password = document.getElementById('loginPassword').value;
+    
+    // انتظر تحميل البيانات إذا لم تكن جاهزة
+    if (!jsonbinReady) {
+        showAlert('جاري تحميل البيانات...', 'info');
+        await new Promise(resolve => {
+            const checkReady = setInterval(() => {
+                if (jsonbinReady) {
+                    clearInterval(checkReady);
+                    resolve();
+                }
+            }, 100);
+        });
+    }
     
     let user = users.find(u => (u.email === input || u.username === input) && u.password === password);
     if(user) {

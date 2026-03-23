@@ -1,6 +1,20 @@
+// register.js - إنشاء حساب جديد مع JSONBin.io
+
 // تسجيل مستخدم جديد
-document.getElementById('registerForm')?.addEventListener('submit', function(e) {
+document.getElementById('registerForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
+    
+    // انتظر تحميل البيانات
+    if (!jsonbinReady) {
+        await new Promise(resolve => {
+            const checkReady = setInterval(() => {
+                if (jsonbinReady) {
+                    clearInterval(checkReady);
+                    resolve();
+                }
+            }, 100);
+        });
+    }
     
     let username = document.getElementById('regUsername').value.trim();
     let email = document.getElementById('regEmail').value.trim();
@@ -37,7 +51,7 @@ document.getElementById('registerForm')?.addEventListener('submit', function(e) 
     };
     
     users.push(newUser);
-    saveUsers();
+    await saveUsers();
     
     showAlert('تم إنشاء الحساب بنجاح', 'success');
     setTimeout(() => {

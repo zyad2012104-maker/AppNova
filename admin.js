@@ -1,7 +1,9 @@
+// admin.js - لوحة الإدارة مع JSONBin.io
+
 let currentAdminPanel = 'users';
 
 // عرض الإحصائيات
-function displayStats() {
+async function displayStats() {
     let statsContainer = document.getElementById('statsCards');
     if(!statsContainer) return;
     
@@ -44,7 +46,7 @@ function displayUsers() {
         return;
     }
     
-    let html = '<table><thead><tr><th>#</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead><tr><th>#</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead><tbody>';
     regularUsers.forEach((user, index) => {
         html += `<tr>
             <td>${index + 1}</td>
@@ -78,7 +80,7 @@ function searchUsers() {
         return;
     }
     
-    let html = '<table><thead><tr><th>#</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead><tr><th>#</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead><tbody>';
     filtered.forEach((user, index) => {
         html += `<tr>
             <td>${index + 1}</td>
@@ -99,7 +101,6 @@ function displayModerators() {
     let moderatorsTable = document.getElementById('moderatorsTable');
     if(!moderatorsTable) return;
     
-    // فقط المدير يمكنه رؤية وإدارة المشرفين
     if(!isAdmin(currentUser)) {
         moderatorsTable.innerHTML = '<p style="text-align:center; padding:40px;">⚠️ فقط المدير يمكنه إدارة المشرفين</p>';
         return;
@@ -112,7 +113,7 @@ function displayModerators() {
         return;
     }
     
-    let html = '<table><thead><tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead><tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr></thead><tbody>';
     moderatorsList.forEach((mod, index) => {
         let perms = [];
         if(mod.permissions?.deleteUser) perms.push('حذف مستخدم');
@@ -158,7 +159,7 @@ function searchModerators() {
         return;
     }
     
-    let html = '<table><thead><tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead><tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr></thead><tbody>';
     filtered.forEach((mod, index) => {
         let perms = [];
         if(mod.permissions?.deleteUser) perms.push('حذف مستخدم');
@@ -185,7 +186,7 @@ function searchModerators() {
 }
 
 // إضافة مشرف جديد (للمدير فقط)
-document.getElementById('addModeratorForm')?.addEventListener('submit', function(e) {
+document.getElementById('addModeratorForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     if(!isAdmin(currentUser)) {
@@ -225,7 +226,7 @@ document.getElementById('addModeratorForm')?.addEventListener('submit', function
     };
     
     users.push(newMod);
-    saveUsers();
+    await saveUsers();
     
     showAlert('تم إضافة المشرف بنجاح', 'success');
     document.getElementById('addModeratorForm').reset();
@@ -233,7 +234,7 @@ document.getElementById('addModeratorForm')?.addEventListener('submit', function
     displayStats();
 });
 
-function editModerator(id) {
+async function editModerator(id) {
     if(!isAdmin(currentUser)) {
         showAlert('غير مصرح بتعديل المشرفين', 'error');
         return;
@@ -248,12 +249,12 @@ function editModerator(id) {
     let newPassword = prompt('كلمة المرور الجديدة (اتركها فارغة للإبقاء على نفس الكلمة):', '');
     if(newPassword && newPassword.trim()) mod.password = newPassword.trim();
     
-    saveUsers();
+    await saveUsers();
     displayModerators();
     showAlert('تم تعديل بيانات المشرف', 'success');
 }
 
-function deleteModerator(id) {
+async function deleteModerator(id) {
     if(!isAdmin(currentUser)) {
         showAlert('غير مصرح بحذف المشرفين', 'error');
         return;
@@ -261,7 +262,7 @@ function deleteModerator(id) {
     
     if(confirm('⚠️ تأكيد حذف هذا المشرف؟')) {
         users = users.filter(u => u.id !== id);
-        saveUsers();
+        await saveUsers();
         displayModerators();
         displayStats();
         showAlert('تم حذف المشرف', 'success');
@@ -278,7 +279,7 @@ function displayApps() {
         return;
     }
     
-    let html = '<table><thead><tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead><tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr></thead><tbody>';
     apps.forEach((app, index) => {
         html += `<tr>
             <td>${index + 1}</td>
@@ -314,7 +315,7 @@ function searchAdminApps() {
         return;
     }
     
-    let html = '<table><thead><tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead><tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr></thead><tbody>';
     filtered.forEach((app, index) => {
         html += `<tr>
             <td>${index + 1}</td>
@@ -342,10 +343,10 @@ function viewApp(appId) {
     window.location.href = `apps.html?view=${appId}`;
 }
 
-function deleteAppAdmin(appId) {
+async function deleteAppAdmin(appId) {
     if(confirm('⚠️ تأكيد حذف هذا التطبيق؟')) {
         apps = apps.filter(a => a.id !== appId);
-        saveApps();
+        await saveApps();
         displayApps();
         displayStats();
         showAlert('تم حذف التطبيق بنجاح', 'success');
@@ -362,7 +363,7 @@ function displayComments() {
         return;
     }
     
-    let html = '<table><thead><tr><th>#</th><th>المستخدم</th><th>التطبيق</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead><tr><th>#</th><th>المستخدم</th><th>التطبيق</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th></tr></thead><tbody>';
     let sortedComments = [...comments].reverse();
     sortedComments.forEach((comment, index) => {
         let app = apps.find(a => a.id === comment.appId);
@@ -400,7 +401,7 @@ function searchComments() {
         return;
     }
     
-    let html = '<table><thead><tr><th>#</th><th>المستخدم</th><th>التطبيق</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead><tr><th>#</th><th>المستخدم</th><th>التطبيق</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th></tr></thead><tbody>';
     let sortedComments = [...filtered].reverse();
     sortedComments.forEach((comment, index) => {
         let app = apps.find(a => a.id === comment.appId);
@@ -421,42 +422,49 @@ function searchComments() {
     commentsTable.innerHTML = html;
 }
 
-function editCommentAdmin(commentId) {
+async function editCommentAdmin(commentId) {
     let comment = comments.find(c => c.id === commentId);
     if(!comment) return;
     
     let newComment = prompt('التعليق الجديد:', comment.comment);
     if(newComment && newComment.trim()) {
         comment.comment = newComment.trim();
-        saveComments();
+        await saveComments();
         displayComments();
         showAlert('تم تعديل التعليق بنجاح', 'success');
     }
 }
 
-function deleteCommentAdmin(commentId) {
+async function deleteCommentAdmin(commentId) {
     if(confirm('⚠️ تأكيد حذف هذا التعليق؟')) {
         comments = comments.filter(c => c.id !== commentId);
-        saveComments();
+        await saveComments();
         displayComments();
         showAlert('تم حذف التعليق بنجاح', 'success');
     }
 }
 
-function deleteUser(id) {
+async function deleteUser(id) {
     if(confirm('⚠️ تأكيد حذف هذا المستخدم؟')) {
         users = users.filter(u => u.id !== id);
-        saveUsers();
+        await saveUsers();
         displayUsers();
         displayStats();
         showAlert('تم حذف المستخدم بنجاح', 'success');
     }
 }
 
-// تهيئة الصفحة
-if(currentUser && (currentUser.role === 'admin' || currentUser.role === 'moderator')) {
-    displayStats();
-    displayUsers();
-} else {
-    window.location.href = 'index.html';
-}
+// تهيئة الصفحة - انتظر تحميل البيانات
+(async function initAdmin() {
+    // انتظر حتى يتم تحميل البيانات من JSONBin
+    while (!jsonbinReady) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    if(currentUser && (currentUser.role === 'admin' || currentUser.role === 'moderator')) {
+        displayStats();
+        displayUsers();
+    } else {
+        window.location.href = 'index.html';
+    }
+})();

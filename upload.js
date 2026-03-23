@@ -1,34 +1,46 @@
+// upload.js - رفع وتعديل التطبيقات مع JSONBin.io
+
 // التحقق من وجود تطبيق للتعديل
 let editAppId = null;
 let urlParams = new URLSearchParams(window.location.search);
 let editId = urlParams.get('edit');
 if(editId) {
     editAppId = parseInt(editId);
-    let appToEdit = apps.find(a => a.id === editAppId);
-    if(appToEdit && (currentUser?.role === 'admin' || (currentUser?.role === 'moderator' && hasPermission(currentUser, 'editApp')))) {
-        document.getElementById('pageTitle').innerHTML = '✏️ تعديل التطبيق';
-        document.getElementById('pageDesc').innerHTML = 'قم بتعديل بيانات التطبيق';
-        document.getElementById('submitBtn').innerHTML = '💾 حفظ التغييرات';
-        document.getElementById('cancelBtn').style.display = 'inline-block';
-        
-        // ملء البيانات
-        document.getElementById('appId').value = appToEdit.id;
-        document.getElementById('appName').value = appToEdit.name;
-        document.getElementById('appDescription').value = appToEdit.description;
-        document.getElementById('appVersion').value = appToEdit.version;
-        document.getElementById('appCategory').value = appToEdit.category;
-        document.getElementById('appDeviceType').value = appToEdit.deviceType;
-        document.getElementById('appSize').value = appToEdit.size;
-        document.getElementById('appImage').value = appToEdit.image;
-        document.getElementById('appDownloadLink').value = appToEdit.downloadLink;
-    } else if(appToEdit) {
-        showAlert('لا تملك صلاحية تعديل هذا التطبيق', 'error');
-        window.location.href = 'admin.html';
-    }
 }
 
+// انتظر تحميل البيانات قبل معالجة التعديل
+(async function checkEditMode() {
+    while (!jsonbinReady) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    if(editAppId) {
+        let appToEdit = apps.find(a => a.id === editAppId);
+        if(appToEdit && (currentUser?.role === 'admin' || (currentUser?.role === 'moderator' && hasPermission(currentUser, 'editApp')))) {
+            document.getElementById('pageTitle').innerHTML = '✏️ تعديل التطبيق';
+            document.getElementById('pageDesc').innerHTML = 'قم بتعديل بيانات التطبيق';
+            document.getElementById('submitBtn').innerHTML = '💾 حفظ التغييرات';
+            document.getElementById('cancelBtn').style.display = 'inline-block';
+            
+            // ملء البيانات
+            document.getElementById('appId').value = appToEdit.id;
+            document.getElementById('appName').value = appToEdit.name;
+            document.getElementById('appDescription').value = appToEdit.description;
+            document.getElementById('appVersion').value = appToEdit.version;
+            document.getElementById('appCategory').value = appToEdit.category;
+            document.getElementById('appDeviceType').value = appToEdit.deviceType;
+            document.getElementById('appSize').value = appToEdit.size;
+            document.getElementById('appImage').value = appToEdit.image;
+            document.getElementById('appDownloadLink').value = appToEdit.downloadLink;
+        } else if(appToEdit) {
+            showAlert('لا تملك صلاحية تعديل هذا التطبيق', 'error');
+            window.location.href = 'admin.html';
+        }
+    }
+})();
+
 // رفع أو تعديل التطبيق
-document.getElementById('uploadForm')?.addEventListener('submit', function(e) {
+document.getElementById('uploadForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     if(!currentUser) {
@@ -64,14 +76,14 @@ document.getElementById('uploadForm')?.addEventListener('submit', function(e) {
             appData.rating = apps[index].rating;
             appData.ratings = apps[index].ratings;
             apps[index] = appData;
-            saveApps();
+            await saveApps();
             showAlert('تم تعديل التطبيق بنجاح', 'success');
             window.location.href = 'admin.html';
         }
     } else {
         // رفع تطبيق جديد
         apps.push(appData);
-        saveApps();
+        await saveApps();
         showAdModal(() => {
             showAlert('تم رفع التطبيق بنجاح', 'success');
             window.location.href = 'apps.html';

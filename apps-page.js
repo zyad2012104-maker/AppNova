@@ -1,3 +1,5 @@
+// apps-page.js - صفحة التطبيقات مع JSONBin.io
+
 // عرض جميع التطبيقات
 function displayAllApps() {
     let container = document.getElementById('allApps');
@@ -69,11 +71,11 @@ function showDownloadConfirm(app) {
     document.getElementById('downloadModal').style.display = 'block';
 }
 
-function confirmDownload() {
+async function confirmDownload() {
     if(pendingDownloadApp) {
-        showAdModal(() => {
+        showAdModal(async () => {
             pendingDownloadApp.downloads++;
-            saveApps();
+            await saveApps();
             window.open(pendingDownloadApp.downloadLink, '_blank');
             closeDownloadModal();
             showAlert('جاري التحميل...', 'success');
@@ -110,7 +112,7 @@ function setRating(rating) {
     });
 }
 
-function submitRating() {
+async function submitRating() {
     if(!selectedRating) {
         showAlert('يرجى اختيار التقييم', 'error');
         return;
@@ -137,8 +139,8 @@ function submitRating() {
             date: new Date().toISOString()
         });
         
-        saveApps();
-        saveComments();
+        await saveApps();
+        await saveComments();
         showAlert('تم إضافة التقييم بنجاح', 'success');
         closeModal();
         displayAllApps();
@@ -153,25 +155,31 @@ function closeModal() {
     document.getElementById('ratingModal').style.display = 'none';
 }
 
-// تهيئة الصفحة
-displayAllApps();
-
-// بحث من الرابط
-let urlParams = new URLSearchParams(window.location.search);
-let searchTerm = urlParams.get('search');
-if(searchTerm && document.getElementById('searchInput')) {
-    document.getElementById('searchInput').value = searchTerm;
-    searchApps();
-}
-
-// عرض تطبيق معين
-let viewId = urlParams.get('view');
-if(viewId) {
-    let app = apps.find(a => a.id === parseInt(viewId));
-    if(app) {
-        setTimeout(() => showRatingModal(app.id), 500);
+// تهيئة الصفحة - انتظر تحميل البيانات
+(async function initAppsPage() {
+    // انتظر حتى يتم تحميل البيانات من JSONBin
+    while (!jsonbinReady) {
+        await new Promise(resolve => setTimeout(resolve, 100));
     }
-}
+    displayAllApps();
+    
+    // بحث من الرابط
+    let urlParams = new URLSearchParams(window.location.search);
+    let searchTerm = urlParams.get('search');
+    if(searchTerm && document.getElementById('searchInput')) {
+        document.getElementById('searchInput').value = searchTerm;
+        searchApps();
+    }
+    
+    // عرض تطبيق معين
+    let viewId = urlParams.get('view');
+    if(viewId) {
+        let app = apps.find(a => a.id === parseInt(viewId));
+        if(app) {
+            setTimeout(() => showRatingModal(app.id), 500);
+        }
+    }
+})();
 
 // أحداث النوافذ
 window.onclick = function(e) {

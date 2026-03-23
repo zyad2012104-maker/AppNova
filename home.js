@@ -1,3 +1,5 @@
+// home.js - الصفحة الرئيسية مع JSONBin.io
+
 // عرض التطبيقات في الشبكة
 function displayAppsGrid(list, containerId) {
     let container = document.getElementById(containerId);
@@ -44,11 +46,11 @@ function showDownloadConfirm(app) {
 }
 
 // تأكيد التحميل
-function confirmDownload() {
+async function confirmDownload() {
     if(pendingDownloadApp) {
-        showAdModal(() => {
+        showAdModal(async () => {
             pendingDownloadApp.downloads++;
-            saveApps();
+            await saveApps();
             window.open(pendingDownloadApp.downloadLink, '_blank');
             closeDownloadModal();
             showAlert('جاري التحميل...', 'success');
@@ -74,7 +76,8 @@ function showRatingModal(appId) {
     if(infoDiv) infoDiv.innerHTML = `<h4>${escapeHtml(app.name)}</h4><p>${escapeHtml(app.description.substring(0,100))}</p>`;
     
     document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
-    document.getElementById('commentText').value = '';
+    let commentText = document.getElementById('commentText');
+    if(commentText) commentText.value = '';
     document.getElementById('ratingModal').style.display = 'block';
 }
 
@@ -86,7 +89,7 @@ function setRating(rating) {
     });
 }
 
-function submitRating() {
+async function submitRating() {
     if(!selectedRating) {
         showAlert('يرجى اختيار التقييم', 'error');
         return;
@@ -113,8 +116,8 @@ function submitRating() {
             date: new Date().toISOString()
         });
         
-        saveApps();
-        saveComments();
+        await saveApps();
+        await saveComments();
         showAlert('تم إضافة التقييم بنجاح', 'success');
         closeModal();
         displayHomeContent();
@@ -129,8 +132,14 @@ function closeModal() {
     document.getElementById('ratingModal').style.display = 'none';
 }
 
-// تهيئة الصفحة
-displayHomeContent();
+// تهيئة الصفحة - انتظر تحميل البيانات
+(async function initHome() {
+    // انتظر حتى يتم تحميل البيانات من JSONBin
+    while (!jsonbinReady) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    displayHomeContent();
+})();
 
 // أحداث النوافذ
 window.onclick = function(e) {
