@@ -27,14 +27,16 @@ document.getElementById('registerForm')?.addEventListener('submit', function(e) 
         return;
     }
     
-    users.push({
+    let newUser = {
         id: Date.now(),
         username: username,
         email: email,
         password: password,
         role: 'user',
         date: new Date().toISOString()
-    });
+    };
+    
+    users.push(newUser);
     saveUsers();
     
     showAlert('تم إنشاء الحساب بنجاح', 'success');

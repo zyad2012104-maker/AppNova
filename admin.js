@@ -1,124 +1,381 @@
+let currentAdminPanel = 'users';
+let usersData = [];
+let appsData = [];
+let commentsData = [];
+
+// عرض الإحصائيات
+function displayStats() {
+    if(!hasPermission(currentUser, 'viewStats') && currentUser.role !== 'admin') return;
+    
+    let statsHtml = `
+        <div class="stat-card"><h3>${users.filter(u => u.role === 'user').length}</h3><p>👥 مستخدمين</p></div>
+        <div class="stat-card"><h3>${moderators.length}</h3><p>🛡️ مشرفين</p></div>
+        <div class="stat-card"><h3>${apps.length}</h3><p>📱 تطبيقات</p></div>
+        <div class="stat-card"><h3>${comments.length}</h3><p>💬 تعليقات</p></div>
+        <div class="stat-card"><h3>${apps.reduce((sum, a) => sum + a.downloads, 0)}</h3><p>📥 إجمالي التحميلات</p></div>
+    `;
+    let statsContainer = document.getElementById('statsCards');
+    if(statsContainer) statsContainer.innerHTML = statsHtml;
+}
+
 // عرض لوحة الإدارة
-function displayAdminPanel() {
-    if(!currentUser || currentUser.role !== 'admin') {
-        showAlert('غير مصرح بالدخول إلى لوحة الإدارة', 'error');
-        window.location.href = 'index.html';
+function showAdminPanel(panel) {
+    currentAdminPanel = panel;
+    document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`${panel}Panel`).classList.add('active');
+    document.querySelectorAll('.admin-tab').forEach(tab => tab.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    if(panel === 'users') displayUsers();
+    else if(panel === 'moderators') displayModerators();
+    else if(panel === 'apps') displayApps();
+    else if(panel === 'comments') displayComments();
+}
+
+// عرض المستخدمين
+function displayUsers() {
+    if(!hasPermission(currentUser, 'deleteUser') && currentUser.role !== 'admin') {
+        document.getElementById('usersTable').innerHTML = '<p style="text-align:center; padding:40px;">⚠️ لا تملك صلاحية عرض المستخدمين</p>';
         return;
     }
     
-    let adminContent = document.getElementById('adminContent');
-    if(!adminContent) return;
-    
-    // المستخدمين
-    let regularUsers = users.filter(u => u.role !== 'admin');
-    let usersHtml = `<div style="background:white; padding:20px; border-radius:15px; margin-bottom:20px;">
-        <h3 style="margin-bottom:15px;">👥 المستخدمين (${regularUsers.length})</h3>`;
-    if(regularUsers.length) {
-        regularUsers.forEach(u => {
-            usersHtml += `<div style="padding:12px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
-                <div><strong>${u.username}</strong><br><small>${u.email}</small></div>
-                <button onclick="deleteUser(${u.id})" style="background:#ef4444; color:white; border:none; padding:6px 15px; border-radius:8px; cursor:pointer;">حذف</button>
-            </div>`;
-        });
-    } else {
-        usersHtml += '<p>لا يوجد مستخدمين</p>';
-    }
-    usersHtml += '</div>';
-    
-    // التطبيقات
-    let appsHtml = `<div style="background:white; padding:20px; border-radius:15px; margin-bottom:20px;">
-        <h3 style="margin-bottom:15px;">📱 التطبيقات (${apps.length})</h3>`;
-    if(apps.length) {
-        apps.forEach(a => {
-            appsHtml += `<div style="padding:12px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
-                <div><strong>${a.name}</strong><br><small>📥 ${a.downloads} | ⭐ ${a.rating.toFixed(1)}</small></div>
-                <div>
-                    <button onclick="editApp(${a.id})" style="background:#10b981; color:white; border:none; padding:6px 15px; border-radius:8px; margin-left:8px; cursor:pointer;">تعديل</button>
-                    <button onclick="deleteApp(${a.id})" style="background:#ef4444; color:white; border:none; padding:6px 15px; border-radius:8px; cursor:pointer;">حذف</button>
-                </div>
-            </div>`;
-        });
-    } else {
-        appsHtml += '<p>لا يوجد تطبيقات</p>';
-    }
-    appsHtml += '</div>';
-    
-    // التعليقات
-    let commentsHtml = `<div style="background:white; padding:20px; border-radius:15px;">
-        <h3 style="margin-bottom:15px;">💬 التعليقات (${comments.length})</h3>`;
-    if(comments.length) {
-        comments.forEach(c => {
-            commentsHtml += `<div style="padding:12px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
-                <div><strong>${c.username}</strong>: ${c.comment.substring(0,60)}${c.comment.length>60?'...':''}<br><small>⭐ ${'★'.repeat(c.rating)}${'☆'.repeat(5-c.rating)}</small></div>
-                <button onclick="deleteComment(${c.id})" style="background:#ef4444; color:white; border:none; padding:6px 15px; border-radius:8px; cursor:pointer;">حذف</button>
-            </div>`;
-        });
-    } else {
-        commentsHtml += '<p>لا يوجد تعليقات</p>';
-    }
-    commentsHtml += '</div>';
-    
-    adminContent.innerHTML = usersHtml + appsHtml + commentsHtml;
+    usersData = users.filter(u => u.role === 'user');
+    let html = `<table><thead><tr><th>#</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead><tbody>`;
+    usersData.forEach((user, index) => {
+        html += `<tr>
+            <td>${index + 1}</td>
+            <td><strong>${escapeHtml(user.username)}</strong></td>
+            <td>${escapeHtml(user.email)}</td>
+            <td>${new Date(user.date).toLocaleDateString('ar-EG')}</td>
+            <td class="action-buttons">
+                ${hasPermission(currentUser, 'deleteUser') || currentUser.role === 'admin' ? `<button class="btn-delete" onclick="deleteUser(${user.id})">🗑️ حذف</button>` : ''}
+            </td>
+        </tr>`;
+    });
+    html += `</tbody></table>`;
+    if(usersData.length === 0) html = '<p style="text-align:center; padding:40px;">لا يوجد مستخدمين</p>';
+    document.getElementById('usersTable').innerHTML = html;
 }
 
-function deleteUser(id) {
-    if(confirm('تأكيد حذف المستخدم؟')) {
+function searchUsers() {
+    let term = document.getElementById('searchUsers')?.value.toLowerCase();
+    if(!term) return displayUsers();
+    let filtered = usersData.filter(u => u.username.toLowerCase().includes(term) || u.email.toLowerCase().includes(term));
+    let html = `<table><thead><tr><th>#</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead><tbody>`;
+    filtered.forEach((user, index) => {
+        html += `<tr>
+            <td>${index + 1}</td>
+            <td><strong>${escapeHtml(user.username)}</strong></td>
+            <td>${escapeHtml(user.email)}</td>
+            <td>${new Date(user.date).toLocaleDateString('ar-EG')}</td>
+            <td class="action-buttons">
+                ${hasPermission(currentUser, 'deleteUser') || currentUser.role === 'admin' ? `<button class="btn-delete" onclick="deleteUser(${user.id})">🗑️ حذف</button>` : ''}
+            </td>
+        </tr>`;
+    });
+    html += `</tbody></table>`;
+    document.getElementById('usersTable').innerHTML = html;
+}
+
+// عرض المشرفين
+function displayModerators() {
+    if(currentUser.role !== 'admin') {
+        document.getElementById('moderatorsTable').innerHTML = '<p style="text-align:center; padding:40px;">⚠️ فقط المدير يمكنه إدارة المشرفين</p>';
+        return;
+    }
+    
+    let mods = users.filter(u => u.role === 'moderator');
+    let html = `<table><thead><tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr></thead><tbody>`;
+    mods.forEach((mod, index) => {
+        let perms = [];
+        if(mod.permissions?.deleteUser) perms.push('حذف مستخدم');
+        if(mod.permissions?.deleteApp) perms.push('حذف تطبيق');
+        if(mod.permissions?.editApp) perms.push('تعديل تطبيق');
+        if(mod.permissions?.deleteComment) perms.push('حذف تعليق');
+        if(mod.permissions?.editComment) perms.push('تعديل تعليق');
+        if(mod.permissions?.viewStats) perms.push('عرض إحصائيات');
+        
+        html += `<tr>
+            <td>${index + 1}</td>
+            <td><strong>${escapeHtml(mod.username)}</strong></td>
+            <td>${escapeHtml(mod.email)}</td>
+            <td><small>${perms.join(', ') || 'لا توجد'}</small></td>
+            <td>${new Date(mod.date).toLocaleDateString('ar-EG')}</td>
+            <td class="action-buttons">
+                <button class="btn-edit" onclick="editModerator(${mod.id})">✏️ تعديل</button>
+                <button class="btn-delete" onclick="deleteModerator(${mod.id})">🗑️ حذف</button>
+            </td>
+        </tr>`;
+    });
+    html += `</tbody></table>`;
+    if(mods.length === 0) html = '<p style="text-align:center; padding:40px;">لا يوجد مشرفين</p>';
+    document.getElementById('moderatorsTable').innerHTML = html;
+}
+
+function searchModerators() {
+    let term = document.getElementById('searchModerators')?.value.toLowerCase();
+    if(!term) return displayModerators();
+    let mods = users.filter(u => u.role === 'moderator' && (u.username.toLowerCase().includes(term) || u.email.toLowerCase().includes(term)));
+    let html = `<table><thead><tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr></thead><tbody>`;
+    mods.forEach((mod, index) => {
+        let perms = [];
+        if(mod.permissions?.deleteUser) perms.push('حذف مستخدم');
+        if(mod.permissions?.deleteApp) perms.push('حذف تطبيق');
+        if(mod.permissions?.editApp) perms.push('تعديل تطبيق');
+        if(mod.permissions?.deleteComment) perms.push('حذف تعليق');
+        if(mod.permissions?.editComment) perms.push('تعديل تعليق');
+        if(mod.permissions?.viewStats) perms.push('عرض إحصائيات');
+        
+        html += `<tr>
+            <td>${index + 1}</td>
+            <td><strong>${escapeHtml(mod.username)}</strong></td>
+            <td>${escapeHtml(mod.email)}</td>
+            <td><small>${perms.join(', ') || 'لا توجد'}</small></td>
+            <td>${new Date(mod.date).toLocaleDateString('ar-EG')}</td>
+            <td class="action-buttons">
+                <button class="btn-edit" onclick="editModerator(${mod.id})">✏️ تعديل</button>
+                <button class="btn-delete" onclick="deleteModerator(${mod.id})">🗑️ حذف</button>
+            </td>
+        </tr>`;
+    });
+    html += `</tbody></table>`;
+    document.getElementById('moderatorsTable').innerHTML = html;
+}
+
+// إضافة مشرف جديد
+document.getElementById('addModeratorForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if(currentUser.role !== 'admin') {
+        showAlert('غير مصرح بإضافة مشرفين', 'error');
+        return;
+    }
+    
+    let username = document.getElementById('modUsername').value.trim();
+    let email = document.getElementById('modEmail').value.trim();
+    let password = document.getElementById('modPassword').value;
+    
+    if(users.find(u => u.email === email)) {
+        showAlert('البريد الإلكتروني مستخدم بالفعل', 'error');
+        return;
+    }
+    
+    let newMod = {
+        id: Date.now(),
+        username: username,
+        email: email,
+        password: password,
+        role: 'moderator',
+        permissions: {
+            deleteUser: document.getElementById('permDeleteUser').checked,
+            deleteApp: document.getElementById('permDeleteApp').checked,
+            editApp: document.getElementById('permEditApp').checked,
+            deleteComment: document.getElementById('permDeleteComment').checked,
+            editComment: document.getElementById('permEditComment').checked,
+            viewStats: document.getElementById('permViewStats').checked
+        },
+        date: new Date().toISOString()
+    };
+    
+    users.push(newMod);
+    moderators.push(newMod);
+    saveUsers();
+    saveModerators();
+    
+    showAlert('تم إضافة المشرف بنجاح', 'success');
+    document.getElementById('addModeratorForm').reset();
+    displayModerators();
+    displayStats();
+});
+
+function editModerator(id) {
+    let mod = users.find(u => u.id === id && u.role === 'moderator');
+    if(!mod) return;
+    
+    let newUsername = prompt('اسم المشرف الجديد:', mod.username);
+    if(newUsername && newUsername.trim()) mod.username = newUsername.trim();
+    
+    let newPassword = prompt('كلمة المرور الجديدة (اتركها فارغة للتغيير):', '');
+    if(newPassword && newPassword.trim()) mod.password = newPassword.trim();
+    
+    saveUsers();
+    saveModerators();
+    displayModerators();
+    showAlert('تم تعديل بيانات المشرف', 'success');
+}
+
+function deleteModerator(id) {
+    if(confirm('تأكيد حذف هذا المشرف؟')) {
         users = users.filter(u => u.id !== id);
+        moderators = moderators.filter(m => m.id !== id);
         saveUsers();
-        displayAdminPanel();
-        showAlert('تم حذف المستخدم', 'success');
+        saveModerators();
+        displayModerators();
+        displayStats();
+        showAlert('تم حذف المشرف', 'success');
     }
 }
 
-function deleteApp(id) {
-    if(confirm('تأكيد حذف التطبيق؟')) {
-        apps = apps.filter(a => a.id !== id);
+// عرض التطبيقات
+function displayApps() {
+    if(!hasPermission(currentUser, 'deleteApp') && !hasPermission(currentUser, 'editApp') && currentUser.role !== 'admin') {
+        document.getElementById('appsTable').innerHTML = '<p style="text-align:center; padding:40px;">⚠️ لا تملك صلاحية عرض التطبيقات</p>';
+        return;
+    }
+    
+    appsData = [...apps];
+    let html = `<table><thead><tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr></thead><tbody>`;
+    appsData.forEach((app, index) => {
+        html += `<tr>
+            <td>${index + 1}</td>
+            <td><strong>${escapeHtml(app.name)}</strong><br><small>${escapeHtml(app.description.substring(0,40))}...</small></td>
+            <td>${getCategoryIcon(app.category)} ${getCategoryName(app.category)}</td>
+            <td>📥 ${app.downloads}</td>
+            <td>⭐ ${app.rating.toFixed(1)}</td>
+            <td class="action-buttons">
+                ${hasPermission(currentUser, 'editApp') || currentUser.role === 'admin' ? `<button class="btn-edit" onclick="editAppFull(${app.id})">✏️ تعديل</button>` : ''}
+                ${hasPermission(currentUser, 'deleteApp') || currentUser.role === 'admin' ? `<button class="btn-delete" onclick="deleteAppAdmin(${app.id})">🗑️ حذف</button>` : ''}
+                <button class="btn-view" onclick="viewApp(${app.id})">👁️ عرض</button>
+            </td>
+        </tr>`;
+    });
+    html += `</tbody></table>`;
+    if(appsData.length === 0) html = '<p style="text-align:center; padding:40px;">لا يوجد تطبيقات</p>';
+    document.getElementById('appsTable').innerHTML = html;
+}
+
+function searchAdminApps() {
+    let term = document.getElementById('searchApps')?.value.toLowerCase();
+    if(!term) return displayApps();
+    let filtered = apps.filter(a => a.name.toLowerCase().includes(term) || a.description.toLowerCase().includes(term));
+    let html = `<table><thead><tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr></thead><tbody>`;
+    filtered.forEach((app, index) => {
+        html += `<tr>
+            <td>${index + 1}</td>
+            <td><strong>${escapeHtml(app.name)}</strong><br><small>${escapeHtml(app.description.substring(0,40))}...</small></td>
+            <td>${getCategoryIcon(app.category)} ${getCategoryName(app.category)}</td>
+            <td>📥 ${app.downloads}</td>
+            <td>⭐ ${app.rating.toFixed(1)}</td>
+            <td class="action-buttons">
+                ${hasPermission(currentUser, 'editApp') || currentUser.role === 'admin' ? `<button class="btn-edit" onclick="editAppFull(${app.id})">✏️ تعديل</button>` : ''}
+                ${hasPermission(currentUser, 'deleteApp') || currentUser.role === 'admin' ? `<button class="btn-delete" onclick="deleteAppAdmin(${app.id})">🗑️ حذف</button>` : ''}
+                <button class="btn-view" onclick="viewApp(${app.id})">👁️ عرض</button>
+            </td>
+        </tr>`;
+    });
+    html += `</tbody></table>`;
+    document.getElementById('appsTable').innerHTML = html;
+}
+
+// تعديل تطبيق كامل - فتح صفحة التعديل
+function editAppFull(appId) {
+    localStorage.setItem('editAppId', appId);
+    window.location.href = `upload.html?edit=${appId}`;
+}
+
+function viewApp(appId) {
+    window.location.href = `apps.html?view=${appId}`;
+}
+
+function deleteAppAdmin(appId) {
+    if(confirm('تأكيد حذف هذا التطبيق؟')) {
+        apps = apps.filter(a => a.id !== appId);
         saveApps();
-        displayAdminPanel();
+        displayApps();
+        displayStats();
         showAlert('تم حذف التطبيق', 'success');
     }
 }
 
-function deleteComment(id) {
-    if(confirm('تأكيد حذف التعليق؟')) {
-        comments = comments.filter(c => c.id !== id);
+// عرض التعليقات
+function displayComments() {
+    if(!hasPermission(currentUser, 'deleteComment') && !hasPermission(currentUser, 'editComment') && currentUser.role !== 'admin') {
+        document.getElementById('commentsTable').innerHTML = '<p style="text-align:center; padding:40px;">⚠️ لا تملك صلاحية عرض التعليقات</p>';
+        return;
+    }
+    
+    commentsData = [...comments].reverse();
+    let html = `<table><thead><tr><th>#</th><th>المستخدم</th><th>التطبيق</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th></tr></thead><tbody>`;
+    commentsData.forEach((comment, index) => {
+        let app = apps.find(a => a.id === comment.appId);
+        html += `<tr>
+            <td>${index + 1}</td>
+            <td><strong>${escapeHtml(comment.username)}</strong></td>
+            <td>${app ? escapeHtml(app.name) : 'تطبيق محذوف'}</td>
+            <td><small>${escapeHtml(comment.comment.substring(0,50))}${comment.comment.length>50?'...':''}</small></td>
+            <td>${'★'.repeat(comment.rating)}${'☆'.repeat(5-comment.rating)}</td>
+            <td>${new Date(comment.date).toLocaleDateString('ar-EG')}</td>
+            <td class="action-buttons">
+                ${hasPermission(currentUser, 'editComment') || currentUser.role === 'admin' ? `<button class="btn-edit" onclick="editCommentAdmin(${comment.id})">✏️ تعديل</button>` : ''}
+                ${hasPermission(currentUser, 'deleteComment') || currentUser.role === 'admin' ? `<button class="btn-delete" onclick="deleteCommentAdmin(${comment.id})">🗑️ حذف</button>` : ''}
+            </td>
+        </tr>`;
+    });
+    html += `</tbody></table>`;
+    if(commentsData.length === 0) html = '<p style="text-align:center; padding:40px;">لا يوجد تعليقات</p>';
+    document.getElementById('commentsTable').innerHTML = html;
+}
+
+function searchComments() {
+    let term = document.getElementById('searchComments')?.value.toLowerCase();
+    if(!term) return displayComments();
+    let filtered = comments.filter(c => c.comment.toLowerCase().includes(term) || c.username.toLowerCase().includes(term));
+    let html = `<table><thead><tr><th>#</th><th>المستخدم</th><th>التطبيق</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th></tr></thead><tbody>`;
+    filtered.forEach((comment, index) => {
+        let app = apps.find(a => a.id === comment.appId);
+        html += `<tr>
+            <td>${index + 1}</td>
+            <td><strong>${escapeHtml(comment.username)}</strong></td>
+            <td>${app ? escapeHtml(app.name) : 'تطبيق محذوف'}</td>
+            <td><small>${escapeHtml(comment.comment.substring(0,50))}${comment.comment.length>50?'...':''}</small></td>
+            <td>${'★'.repeat(comment.rating)}${'☆'.repeat(5-comment.rating)}</td>
+            <td>${new Date(comment.date).toLocaleDateString('ar-EG')}</td>
+            <td class="action-buttons">
+                ${hasPermission(currentUser, 'editComment') || currentUser.role === 'admin' ? `<button class="btn-edit" onclick="editCommentAdmin(${comment.id})">✏️ تعديل</button>` : ''}
+                ${hasPermission(currentUser, 'deleteComment') || currentUser.role === 'admin' ? `<button class="btn-delete" onclick="deleteCommentAdmin(${comment.id})">🗑️ حذف</button>` : ''}
+            </td>
+        </tr>`;
+    });
+    html += `</tbody></table>`;
+    document.getElementById('commentsTable').innerHTML = html;
+}
+
+function editCommentAdmin(commentId) {
+    let comment = comments.find(c => c.id === commentId);
+    if(!comment) return;
+    
+    let newComment = prompt('التعليق الجديد:', comment.comment);
+    if(newComment && newComment.trim()) {
+        comment.comment = newComment.trim();
         saveComments();
-        displayAdminPanel();
+        displayComments();
+        showAlert('تم تعديل التعليق', 'success');
+    }
+}
+
+function deleteCommentAdmin(commentId) {
+    if(confirm('تأكيد حذف هذا التعليق؟')) {
+        comments = comments.filter(c => c.id !== commentId);
+        saveComments();
+        displayComments();
         showAlert('تم حذف التعليق', 'success');
     }
 }
 
-function editApp(id) {
-    let app = apps.find(a => a.id === id);
-    if(!app) return;
-    
-    let newName = prompt('الاسم الجديد:', app.name);
-    if(newName && newName.trim()) app.name = newName.trim();
-    
-    let newDesc = prompt('الوصف الجديد:', app.description);
-    if(newDesc && newDesc.trim()) app.description = newDesc.trim();
-    
-    saveApps();
-    displayAdminPanel();
-    showAlert('تم تعديل التطبيق', 'success');
-}
-
-function saveAdminChanges() {
-    saveApps();
-    saveUsers();
-    saveComments();
-    showAlert('تم حفظ جميع التغييرات', 'success');
-}
-
-function searchApps() {
-    let term = document.getElementById('searchInput')?.value.toLowerCase().trim();
-    if(term) window.location.href = `apps.html?search=${encodeURIComponent(term)}`;
+function deleteUser(id) {
+    if(confirm('تأكيد حذف هذا المستخدم؟')) {
+        users = users.filter(u => u.id !== id);
+        saveUsers();
+        displayUsers();
+        displayStats();
+        showAlert('تم حذف المستخدم', 'success');
+    }
 }
 
 // تهيئة الصفحة
-displayAdminPanel();
-
-window.onclick = function(e) {
-    let adModal = document.getElementById('adModal');
-    if(e.target === adModal) closeAdModal();
-};
+if(currentUser && (currentUser.role === 'admin' || currentUser.role === 'moderator')) {
+    displayStats();
+    displayUsers();
+} else {
+    window.location.href = 'index.html';
+}

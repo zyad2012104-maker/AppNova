@@ -38,7 +38,7 @@ function requestDownload(appId) {
 // عرض تأكيد التحميل
 function showDownloadConfirm(app) {
     let infoDiv = document.getElementById('downloadAppInfo');
-    if(infoDiv) infoDiv.innerHTML = `<h4>${app.name}</h4><p>الإصدار: ${app.version} | الحجم: ${app.size}</p>`;
+    if(infoDiv) infoDiv.innerHTML = `<h4>${escapeHtml(app.name)}</h4><p>الإصدار: ${app.version} | الحجم: ${app.size}</p>`;
     pendingDownloadApp = app;
     document.getElementById('downloadModal').style.display = 'block';
 }
@@ -71,7 +71,7 @@ function showRatingModal(appId) {
     selectedRating = 0;
     
     let infoDiv = document.getElementById('modalAppInfo');
-    if(infoDiv) infoDiv.innerHTML = `<h4>${app.name}</h4><p>${app.description.substring(0,100)}</p>`;
+    if(infoDiv) infoDiv.innerHTML = `<h4>${escapeHtml(app.name)}</h4><p>${escapeHtml(app.description.substring(0,100))}</p>`;
     
     document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
     document.getElementById('commentText').value = '';
@@ -129,11 +129,6 @@ function closeModal() {
     document.getElementById('ratingModal').style.display = 'none';
 }
 
-function searchApps() {
-    let term = document.getElementById('searchInput')?.value.toLowerCase().trim();
-    if(term) window.location.href = `apps.html?search=${encodeURIComponent(term)}`;
-}
-
 // تهيئة الصفحة
 displayHomeContent();
 
@@ -147,11 +142,3 @@ window.onclick = function(e) {
     if(e.target === downloadModal) closeDownloadModal();
     if(e.target === adModal) closeAdModal();
 };
-
-// بحث من الرابط
-let urlParams = new URLSearchParams(window.location.search);
-let searchTerm = urlParams.get('search');
-if(searchTerm && document.getElementById('searchInput')) {
-    document.getElementById('searchInput').value = searchTerm;
-    searchApps();
-}

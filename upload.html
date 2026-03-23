@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AppNova - رفع تطبيق | شارك تطبيقك مع العالم</title>
+    <title>AppNova - رفع/تعديل تطبيق</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -38,37 +38,64 @@
 
         <main class="content-wrapper">
             <div class="hero" style="padding: 30px;">
-                <h1>رفع تطبيق جديد</h1>
-                <p>شارك تطبيقك مع آلاف المستخدمين</p>
+                <h1 id="pageTitle">رفع تطبيق جديد</h1>
+                <p id="pageDesc">شارك تطبيقك مع آلاف المستخدمين</p>
             </div>
             
             <div class="upload-form-container">
                 <form id="uploadForm">
-                    <div class="form-group"><input type="text" id="appName" placeholder="اسم التطبيق" required></div>
-                    <div class="form-group"><textarea id="appDescription" placeholder="وصف التطبيق" rows="4" required></textarea></div>
-                    <div class="form-row">
-                        <input type="text" id="appVersion" placeholder="الإصدار" required>
-                        <select id="appCategory" required>
-                            <option value="">التصنيف</option>
-                            <option value="games">🎮 ألعاب</option>
-                            <option value="social">💬 تواصل</option>
-                            <option value="education">📚 تعليم</option>
-                            <option value="productivity">💼 إنتاجية</option>
-                            <option value="entertainment">🎬 ترفيه</option>
-                        </select>
+                    <input type="hidden" id="appId" value="">
+                    <div class="form-group">
+                        <label>اسم التطبيق *</label>
+                        <input type="text" id="appName" required placeholder="أدخل اسم التطبيق">
+                    </div>
+                    <div class="form-group">
+                        <label>وصف التطبيق *</label>
+                        <textarea id="appDescription" rows="4" required placeholder="وصف تفصيلي للتطبيق"></textarea>
                     </div>
                     <div class="form-row">
-                        <select id="appDeviceType" required>
-                            <option value="">نوع الجهاز</option>
-                            <option value="android">🤖 Android</option>
-                            <option value="ios">🍎 iOS</option>
-                            <option value="both">📱 كلا النظامين</option>
-                        </select>
-                        <input type="text" id="appSize" placeholder="الحجم" required>
+                        <div class="form-group">
+                            <label>الإصدار *</label>
+                            <input type="text" id="appVersion" required placeholder="مثال: 1.0.0">
+                        </div>
+                        <div class="form-group">
+                            <label>التصنيف *</label>
+                            <select id="appCategory" required>
+                                <option value="">اختر التصنيف</option>
+                                <option value="games">🎮 ألعاب</option>
+                                <option value="social">💬 تواصل اجتماعي</option>
+                                <option value="education">📚 تعليم</option>
+                                <option value="productivity">💼 إنتاجية</option>
+                                <option value="entertainment">🎬 ترفيه</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="form-group"><input type="url" id="appImage" placeholder="رابط الصورة" required></div>
-                    <div class="form-group"><input type="url" id="appDownloadLink" placeholder="رابط التحميل" required></div>
-                    <button type="submit" class="submit-btn">🚀 رفع التطبيق</button>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>نوع الجهاز *</label>
+                            <select id="appDeviceType" required>
+                                <option value="">اختر نوع الجهاز</option>
+                                <option value="android">🤖 Android</option>
+                                <option value="ios">🍎 iOS</option>
+                                <option value="both">📱 كلا النظامين</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>حجم التطبيق *</label>
+                            <input type="text" id="appSize" required placeholder="مثال: 25 MB">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>رابط صورة التطبيق *</label>
+                        <input type="url" id="appImage" required placeholder="https://example.com/image.jpg">
+                        <small>يمكنك استخدام رابط صورة من الإنترنت</small>
+                    </div>
+                    <div class="form-group">
+                        <label>رابط تحميل التطبيق *</label>
+                        <input type="url" id="appDownloadLink" required placeholder="رابط تحميل التطبيق">
+                    </div>
+                    <button type="submit" class="submit-btn" id="submitBtn">🚀 رفع التطبيق</button>
+                    <button type="button" onclick="cancelEdit()" class="submit-btn" style="background:#94a3b8; margin-top:10px;" id="cancelBtn" style="display:none;">إلغاء</button>
                 </form>
             </div>
         </main>

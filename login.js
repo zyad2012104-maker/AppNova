@@ -7,23 +7,28 @@ document.getElementById('loginForm')?.addEventListener('submit', function(e) {
     
     // مدير الموقع
     if(input === "admin" && password === "admin2012") {
-        let adminUser = {id:1, username:"المدير", email:"admin", role:"admin"};
-        localStorage.setItem('currentUser', JSON.stringify(adminUser));
-        
-        showAdModal(() => {
-            showAlert('مرحباً مدير AppNova', 'success');
-            window.location.href = 'admin.html';
-        });
+        let adminUser = users.find(u => u.email === "admin");
+        if(adminUser) {
+            localStorage.setItem('currentUser', JSON.stringify(adminUser));
+            showAdModal(() => {
+                showAlert('مرحباً مدير AppNova', 'success');
+                window.location.href = 'admin.html';
+            });
+        }
         return;
     }
     
-    // مستخدم عادي
+    // مشرف أو مستخدم عادي
     let user = users.find(u => (u.email === input || u.username === input) && u.password === password);
     if(user) {
         localStorage.setItem('currentUser', JSON.stringify(user));
         showAdModal(() => {
             showAlert(`مرحباً ${user.username}`, 'success');
-            window.location.href = 'index.html';
+            if(user.role === 'admin' || user.role === 'moderator') {
+                window.location.href = 'admin.html';
+            } else {
+                window.location.href = 'index.html';
+            }
         });
     } else {
         showAlert('بيانات الدخول غير صحيحة', 'error');

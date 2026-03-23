@@ -63,7 +63,7 @@ function requestDownload(appId) {
 
 function showDownloadConfirm(app) {
     let infoDiv = document.getElementById('downloadAppInfo');
-    if(infoDiv) infoDiv.innerHTML = `<h4>${app.name}</h4><p>الإصدار: ${app.version} | الحجم: ${app.size}</p>`;
+    if(infoDiv) infoDiv.innerHTML = `<h4>${escapeHtml(app.name)}</h4><p>الإصدار: ${app.version} | الحجم: ${app.size}</p>`;
     pendingDownloadApp = app;
     document.getElementById('downloadModal').style.display = 'block';
 }
@@ -94,7 +94,7 @@ function showRatingModal(appId) {
     selectedRating = 0;
     
     let infoDiv = document.getElementById('modalAppInfo');
-    if(infoDiv) infoDiv.innerHTML = `<h4>${app.name}</h4><p>${app.description.substring(0,100)}</p>`;
+    if(infoDiv) infoDiv.innerHTML = `<h4>${escapeHtml(app.name)}</h4><p>${escapeHtml(app.description.substring(0,100))}</p>`;
     
     document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
     document.getElementById('commentText').value = '';
@@ -161,6 +161,15 @@ let searchTerm = urlParams.get('search');
 if(searchTerm && document.getElementById('searchInput')) {
     document.getElementById('searchInput').value = searchTerm;
     searchApps();
+}
+
+// عرض تطبيق معين
+let viewId = urlParams.get('view');
+if(viewId) {
+    let app = apps.find(a => a.id === parseInt(viewId));
+    if(app) {
+        showRatingModal(app.id);
+    }
 }
 
 // أحداث النوافذ

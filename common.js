@@ -1,4 +1,4 @@
-// البيانات المشتركة
+// البيانات المخزنة
 let apps = [];
 let users = [];
 let comments = [];
@@ -6,29 +6,70 @@ let currentUser = null;
 let selectedRating = 0;
 let currentAppId = null;
 let pendingDownloadApp = null;
+let moderators = [];
 
 // تحميل البيانات
 function loadData() {
     apps = JSON.parse(localStorage.getItem('apps') || '[]');
     users = JSON.parse(localStorage.getItem('users') || '[]');
     comments = JSON.parse(localStorage.getItem('comments') || '[]');
+    moderators = JSON.parse(localStorage.getItem('moderators') || '[]');
     
+    // بيانات افتراضية للتطبيقات
     if(!apps.length) {
         apps = [
-            {id:1, name:"تطبيق التواصل", description:"تطبيق تواصل اجتماعي مميز", version:"2.0", category:"social", size:"45 MB", image:"https://via.placeholder.com/300x180/667eea/ffffff?text=Social", downloadLink:"#", downloads:1250, rating:4.5, ratings:[5,4,5,4,5]},
-            {id:2, name:"لعبة الألغاز", description:"لعبة ألغاز ممتعة", version:"1.5", category:"games", size:"78 MB", image:"https://via.placeholder.com/300x180/764ba2/ffffff?text=Game", downloadLink:"#", downloads:890, rating:4.2, ratings:[4,5,4,4,4]},
-            {id:3, name:"تطبيق التعليم", description:"منصة تعليمية متكاملة", version:"3.0", category:"education", size:"120 MB", image:"https://via.placeholder.com/300x180/48c6ef/ffffff?text=Education", downloadLink:"#", downloads:2340, rating:4.8, ratings:[5,5,4,5,5]}
+            {id:1, name:"تطبيق التواصل الاجتماعي", description:"تطبيق رائع للتواصل مع الأصدقاء", version:"2.0.1", category:"social", deviceType:"both", size:"45 MB", image:"https://via.placeholder.com/300x180/667eea/ffffff?text=Social", downloadLink:"#", downloads:1250, rating:4.5, ratings:[5,4,5,4,5], userId:1, date:"2024-01-01"},
+            {id:2, name:"لعبة الألغاز", description:"لعبة ألغاز ممتعة وتحدي للعقل", version:"1.5.0", category:"games", deviceType:"android", size:"78 MB", image:"https://via.placeholder.com/300x180/764ba2/ffffff?text=Game", downloadLink:"#", downloads:890, rating:4.2, ratings:[4,5,4,4,4], userId:1, date:"2024-01-02"},
+            {id:3, name:"تطبيق التعليم", description:"منصة تعليمية متكاملة للطلاب", version:"3.0.0", category:"education", deviceType:"both", size:"120 MB", image:"https://via.placeholder.com/300x180/48c6ef/ffffff?text=Education", downloadLink:"#", downloads:2340, rating:4.8, ratings:[5,5,4,5,5], userId:1, date:"2024-01-03"}
         ];
         saveApps();
     }
-    if(!users.find(u=>u.role==='admin')) users.push({id:1, username:"المدير", email:"admin", password:"admin2012", role:"admin"});
+    
+    // إضافة المستخدم admin إذا لم يوجد
+    if(!users.find(u => u.role === 'admin')) {
+        users.push({
+            id: 1,
+            username: "المدير",
+            email: "admin",
+            password: "admin2012",
+            role: "admin",
+            permissions: {
+                deleteUser: true,
+                deleteApp: true,
+                editApp: true,
+                deleteComment: true,
+                editComment: true,
+                viewStats: true,
+                manageModerators: true
+            },
+            date: new Date().toISOString()
+        });
+        saveUsers();
+    }
+    
+    // إضافة المشرفين إلى users مع تحديد الصلاحيات
+    moderators.forEach(mod => {
+        if(!users.find(u => u.id === mod.id)) {
+            users.push(mod);
+        }
+    });
     saveUsers();
 }
 
 function saveApps() { localStorage.setItem('apps', JSON.stringify(apps)); }
 function saveUsers() { localStorage.setItem('users', JSON.stringify(users)); }
 function saveComments() { localStorage.setItem('comments', JSON.stringify(comments)); }
+function saveModerators() { localStorage.setItem('moderators', JSON.stringify(moderators)); }
 
+// التحقق من صلاحيات المستخدم
+function hasPermission(user, permission) {
+    if(!user) return false;
+    if(user.role === 'admin') return true;
+    if(user.role === 'moderator' && user.permissions && user.permissions[permission]) return true;
+    return false;
+}
+
+// عرض التنبيهات
 function showAlert(message, type) {
     let div = document.createElement('div');
     div.className = `alert alert-${type}`;
@@ -37,6 +78,7 @@ function showAlert(message, type) {
     setTimeout(() => div.remove(), 3000);
 }
 
+// تحديث شريط التنقل
 function updateNavBar() {
     let loginNav = document.getElementById('loginNav');
     let adminNav = document.getElementById('adminNav');
@@ -50,13 +92,16 @@ function updateNavBar() {
         if(loginNav) loginNav.style.display = 'none';
         if(userInfo) {
             userInfo.style.display = 'block';
-            userInfo.innerHTML = `<span style="display:flex; align-items:center; gap:12px; background:#f0f4ff; padding:8px 16px; border-radius:50px;">👤 ${currentUser.username} <a href="#" onclick="logout()" style="color:#f44336;">🚪 خروج</a></span>`;
+            let roleIcon = currentUser.role === 'admin' ? '👑' : (currentUser.role === 'moderator' ? '🛡️' : '👤');
+            userInfo.innerHTML = `<span style="display:flex; align-items:center; gap:12px; background:#f0f4ff; padding:8px 16px; border-radius:50px;">${roleIcon} ${currentUser.username} <a href="#" onclick="logout()" style="color:#f44336;">🚪 خروج</a></span>`;
         }
-        if(adminNav) adminNav.style.display = currentUser.role === 'admin' ? 'block' : 'none';
+        if(adminNav) adminNav.style.display = (currentUser.role === 'admin' || currentUser.role === 'moderator') ? 'block' : 'none';
+        if(uploadNav) uploadNav.style.display = 'block';
     } else {
         if(loginNav) loginNav.style.display = 'block';
         if(userInfo) userInfo.style.display = 'none';
         if(adminNav) adminNav.style.display = 'none';
+        if(uploadNav) uploadNav.style.display = 'block';
     }
 }
 
@@ -72,18 +117,33 @@ function getCategoryIcon(cat) {
     return icons[cat] || cat;
 }
 
+function getCategoryName(cat) {
+    const names = {games:'ألعاب', social:'تواصل', education:'تعليم', productivity:'إنتاجية', entertainment:'ترفيه'};
+    return names[cat] || cat;
+}
+
 function createAppCard(app) {
     let stars = '★'.repeat(Math.floor(app.rating)) + '☆'.repeat(5-Math.floor(app.rating));
     return `<div class="app-card" onclick="showRatingModal(${app.id})">
         <img src="${app.image}" class="app-card-image" onerror="this.src='https://via.placeholder.com/300x180/cccccc/ffffff?text=No+Image'">
         <div class="app-card-content">
-            <div class="app-card-title">${app.name}</div>
-            <div class="app-card-description">${app.description.substring(0,80)}${app.description.length>80?'...':''}</div>
+            <div class="app-card-title">${escapeHtml(app.name)}</div>
+            <div class="app-card-description">${escapeHtml(app.description.substring(0,80))}${app.description.length>80?'...':''}</div>
             <div class="app-card-meta"><span>📥 ${app.downloads}</span><span>💾 ${app.size}</span></div>
             <div class="app-card-meta"><span class="app-card-rating">${stars} (${app.rating.toFixed(1)})</span><span>${getCategoryIcon(app.category)}</span></div>
             <a href="#" class="app-card-download" onclick="event.stopPropagation(); requestDownload(${app.id})">📥 تحميل</a>
         </div>
     </div>`;
+}
+
+function escapeHtml(text) {
+    if(!text) return '';
+    return text.replace(/[&<>]/g, function(m) {
+        if(m === '&') return '&amp;';
+        if(m === '<') return '&lt;';
+        if(m === '>') return '&gt;';
+        return m;
+    });
 }
 
 function showAdModal(callback) {
@@ -114,6 +174,11 @@ function subscribeNewsletter() {
     } else {
         showAlert('يرجى إدخال بريد إلكتروني صحيح', 'error');
     }
+}
+
+function searchApps() {
+    let term = document.getElementById('searchInput')?.value.toLowerCase().trim();
+    if(term) window.location.href = `apps.html?search=${encodeURIComponent(term)}`;
 }
 
 // تحميل المستخدم الحالي
