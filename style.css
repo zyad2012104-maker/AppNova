@@ -516,7 +516,6 @@ body {
         margin-top: 8px;
     }
     
-    /* تعديل عرض الصفحة الرئيسية */
     .apps-section {
         padding: 12px;
         margin-bottom: 15px;
@@ -527,7 +526,6 @@ body {
         margin-bottom: 12px;
     }
     
-    /* تعديل الإحصائيات */
     .stats-cards {
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
@@ -545,7 +543,6 @@ body {
         font-size: 0.7rem;
     }
     
-    /* تعديل جداول الإدارة */
     .admin-table {
         font-size: 0.7rem;
         overflow-x: auto;
@@ -566,7 +563,6 @@ body {
         font-size: 0.6rem;
     }
     
-    /* تعديل أزرار التبويب */
     .admin-tabs {
         gap: 5px;
         justify-content: center;
@@ -578,7 +574,6 @@ body {
         font-size: 0.7rem;
     }
     
-    /* تعديل نموذج إضافة المشرف */
     .permissions-group {
         gap: 8px;
         flex-wrap: wrap;
@@ -588,7 +583,6 @@ body {
         font-size: 0.7rem;
     }
     
-    /* تعديل الفوتر */
     .footer {
         margin: 10px;
         padding: 20px 15px;
@@ -607,7 +601,6 @@ body {
         width: 100%;
     }
     
-    /* تعديل إدارة التصنيفات */
     .categories-admin {
         padding: 12px;
     }
@@ -772,14 +765,13 @@ body {
     color: #64748b;
 }
 
-/* تبويبات الإدارة للمشرفين */
 .admin-tab.disabled {
     opacity: 0.5;
     cursor: not-allowed;
     pointer-events: none;
 }
 
-/* ========== أيقونة الموقع ========== */
+/* أيقونة الموقع */
 .favicon-upload {
     display: flex;
     align-items: center;
@@ -837,4 +829,20 @@ body {
 
 .favicon-upload .remove-favicon:hover {
     background: #dc2626;
+}
+
+/* أنيميشن التحميل للإعلان */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 10px auto;
 }

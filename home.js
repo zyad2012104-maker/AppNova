@@ -57,10 +57,10 @@ function showDownloadConfirm(app) {
     document.getElementById('downloadModal').style.display = 'block';
 }
 
-// تأكيد التحميل
+// تأكيد التحميل - مع إضافة الإعلان
 async function confirmDownload() {
     if(pendingDownloadApp) {
-        showAdModal(async () => {
+        showProfitableAd(async () => {
             pendingDownloadApp.downloads++;
             await saveApps();
             window.open(pendingDownloadApp.downloadLink, '_blank');
@@ -152,7 +152,6 @@ function closeModal() {
 (async function initHome() {
     console.log('🏠 تهيئة الصفحة الرئيسية...');
     
-    // انتظر حتى يتم تحميل البيانات من JSONBin
     while (!jsonbinReady) {
         console.log('⏳ انتظار تحميل البيانات...');
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -162,7 +161,6 @@ function closeModal() {
     displayHomeContent();
 })();
 
-// أحداث النوافذ
 window.onclick = function(e) {
     let ratingModal = document.getElementById('ratingModal');
     let downloadModal = document.getElementById('downloadModal');

@@ -1,10 +1,8 @@
 // register.js - إنشاء حساب جديد مع JSONBin.io
 
-// تسجيل مستخدم جديد
 document.getElementById('registerForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
     
-    // انتظر تحميل البيانات
     if (!jsonbinReady) {
         await new Promise(resolve => {
             const checkReady = setInterval(() => {

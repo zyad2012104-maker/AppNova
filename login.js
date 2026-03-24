@@ -6,7 +6,6 @@ document.getElementById('loginForm')?.addEventListener('submit', async function(
     let input = document.getElementById('loginEmail').value.trim();
     let password = document.getElementById('loginPassword').value;
     
-    // انتظر تحميل البيانات إذا لم تكن جاهزة
     if (!jsonbinReady) {
         showAlert('جاري تحميل البيانات...', 'info');
         await new Promise(resolve => {
@@ -29,7 +28,7 @@ document.getElementById('loginForm')?.addEventListener('submit', async function(
         localStorage.setItem('currentUser', JSON.stringify(user));
         console.log(`✅ تم تسجيل الدخول بنجاح: ${user.username} (${user.role})`);
         
-        showAdModal(() => {
+        showProfitableAd(() => {
             showAlert(`مرحباً ${user.username}`, 'success');
             if(user.role === 'admin' || user.role === 'moderator') {
                 window.location.href = 'admin.html';

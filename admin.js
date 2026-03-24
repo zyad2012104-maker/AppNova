@@ -444,7 +444,7 @@ function displayApps() {
         return;
     }
     
-    let html = '<table><thead> ocean<th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th> </thead><tbody>';
+    let html = '<table><thead><tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr></thead><tbody>';
     apps.forEach((app, index) => {
         html += `<tr>
             <td>${index + 1}</td>
@@ -480,7 +480,7 @@ function searchAdminApps() {
         return;
     }
     
-    let html = '序号<table><thead><tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = '<table><thead><tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr></thead><tbody>';
     filtered.forEach((app, index) => {
         html += `<tr>
             <td>${index + 1}</td>

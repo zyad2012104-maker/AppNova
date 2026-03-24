@@ -16,6 +16,9 @@ let BIN_ID = '';
 let MASTER_KEY = '';
 let BASE_URL = 'https://api.jsonbin.io/v3/b/';
 
+// متغيرات الإعلان
+let adScriptLoaded = false;
+
 // التصنيفات الافتراضية
 const defaultCategories = [
     { id: 1, name: 'ألعاب', icon: '🎮', key: 'games' },
@@ -51,7 +54,6 @@ async function loadConfig() {
     try {
         console.log('🔄 جاري تحميل التكوين...');
         
-        // محاولة تحميل من get-config.php أولاً
         let response;
         try {
             response = await fetch('get-config.php');
@@ -70,7 +72,6 @@ async function loadConfig() {
             }
         }
         
-        // استخدام config.js مباشرة
         if (typeof CONFIG !== 'undefined' && CONFIG.JSONBIN) {
             BIN_ID = CONFIG.JSONBIN.BIN_ID;
             MASTER_KEY = CONFIG.JSONBIN.MASTER_KEY;
@@ -207,7 +208,6 @@ function loadFromLocalBackup() {
         console.log('🏷️ استخدام التصنيفات الافتراضية');
     }
     
-    // إذا لم توجد بيانات احتياطية، استخدم البيانات الافتراضية
     if (apps.length === 0) {
         apps = [
             {id:1, name:"تطبيق التواصل الاجتماعي", description:"تطبيق رائع للتواصل مع الأصدقاء", version:"2.0.1", category:"social", deviceType:"both", size:"45 MB", image:"https://via.placeholder.com/300x180/667eea/ffffff?text=Social+App", downloadLink:"#", downloads:1250, rating:4.5, ratings:[5,4,5,4,5], userId:1, userName:"المدير", date:"2024-01-01"},
@@ -399,24 +399,93 @@ function createAppCard(app) {
     </div>`;
 }
 
-function showAdModal(callback) {
-    let modal = document.getElementById('adModal');
-    if(modal) {
+// ========== إعلانات ProfitableCPM ==========
+
+function loadAdScript() {
+    if (adScriptLoaded) return;
+    
+    return new Promise((resolve, reject) => {
+        try {
+            if (document.querySelector('script[src*="profitablecpmratenetwork"]')) {
+                adScriptLoaded = true;
+                resolve();
+                return;
+            }
+            
+            let script = document.createElement('script');
+            script.src = 'https://pl28941680.profitablecpmratenetwork.com/8b/d5/21/8bd5212efbe7fc123c0c78afb316cd4f.js';
+            script.async = true;
+            script.onload = () => {
+                adScriptLoaded = true;
+                console.log('✅ تم تحميل سكريبت الإعلان');
+                resolve();
+            };
+            script.onerror = () => {
+                console.error('❌ فشل تحميل سكريبت الإعلان');
+                resolve();
+            };
+            document.head.appendChild(script);
+        } catch(e) {
+            console.error('خطأ في تحميل الإعلان:', e);
+            resolve();
+        }
+    });
+}
+
+function showProfitableAd(callback) {
+    loadAdScript().then(() => {
+        let modal = document.getElementById('adModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'adModal';
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close" onclick="closeAdModal()">&times;</span>
+                    <div id="modalAdContent"></div>
+                    <button onclick="closeAdModal()" class="submit-btn" style="margin-top:15px;">إغلاق</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
         let content = document.getElementById('modalAdContent');
-        if(content) content.innerHTML = '<div style="padding:20px; text-align:center;">📢 إعلان<br><small>سيتم توجيهك بعد 3 ثواني</small></div>';
+        if (content) {
+            content.innerHTML = `
+                <div style="padding:20px; text-align:center;">
+                    <h3>📢 إعلان</h3>
+                    <div id="profitableAdContainer" style="min-height:250px; margin:15px 0;"></div>
+                    <p style="color:#666; font-size:12px;">سيتم توجيهك بعد 5 ثواني...</p>
+                    <div class="loading-spinner"></div>
+                </div>
+            `;
+        }
+        
         modal.style.display = 'flex';
+        
+        setTimeout(() => {
+            let adContainer = document.getElementById('profitableAdContainer');
+            if (adContainer) {
+                adContainer.innerHTML = '<div style="background:#f0f0f0; padding:20px; border-radius:10px; text-align:center;">📢 إعلان مدعوم<br><small>شكراً لدعمك</small></div>';
+            }
+        }, 500);
+        
         setTimeout(() => {
             modal.style.display = 'none';
-            if(callback) callback();
-        }, 3000);
-    } else {
-        if(callback) callback();
-    }
+            if (callback) callback();
+        }, 5000);
+    }).catch(() => {
+        if (callback) callback();
+    });
+}
+
+function showAdModal(callback) {
+    showProfitableAd(callback);
 }
 
 function closeAdModal() {
     let modal = document.getElementById('adModal');
-    if(modal) modal.style.display = 'none';
+    if (modal) modal.style.display = 'none';
 }
 
 function subscribeNewsletter() {
@@ -450,7 +519,6 @@ function loadSiteFavicon() {
     }
 }
 
-// ========== انتظار تحميل البيانات ==========
 function waitForData() {
     return new Promise((resolve) => {
         if (jsonbinReady) {

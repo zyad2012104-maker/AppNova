@@ -1,6 +1,5 @@
 // upload.js - رفع وتعديل التطبيقات مع JSONBin.io
 
-// التحقق من وجود تطبيق للتعديل
 let editAppId = null;
 let urlParams = new URLSearchParams(window.location.search);
 let editId = urlParams.get('edit');
@@ -8,7 +7,6 @@ if(editId) {
     editAppId = parseInt(editId);
 }
 
-// انتظر تحميل البيانات قبل معالجة التعديل
 (async function checkEditMode() {
     while (!jsonbinReady) {
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -22,7 +20,6 @@ if(editId) {
             document.getElementById('submitBtn').innerHTML = '💾 حفظ التغييرات';
             document.getElementById('cancelBtn').style.display = 'inline-block';
             
-            // ملء البيانات
             document.getElementById('appId').value = appToEdit.id;
             document.getElementById('appName').value = appToEdit.name;
             document.getElementById('appDescription').value = appToEdit.description;
@@ -39,7 +36,6 @@ if(editId) {
     }
 })();
 
-// رفع أو تعديل التطبيق
 document.getElementById('uploadForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -69,7 +65,6 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
     };
     
     if(appId) {
-        // تعديل تطبيق موجود
         let index = apps.findIndex(a => a.id === parseInt(appId));
         if(index !== -1) {
             appData.downloads = apps[index].downloads;
@@ -81,10 +76,9 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
             window.location.href = 'admin.html';
         }
     } else {
-        // رفع تطبيق جديد
-        apps.push(appData);
-        await saveApps();
-        showAdModal(() => {
+        showProfitableAd(async () => {
+            apps.push(appData);
+            await saveApps();
             showAlert('تم رفع التطبيق بنجاح', 'success');
             window.location.href = 'apps.html';
         });

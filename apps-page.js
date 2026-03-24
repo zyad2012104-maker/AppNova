@@ -1,6 +1,5 @@
 // apps-page.js - صفحة التطبيقات مع JSONBin.io
 
-// عرض جميع التطبيقات
 function displayAllApps() {
     let container = document.getElementById('allApps');
     if(!container) return;
@@ -15,7 +14,6 @@ function displayAllApps() {
     container.innerHTML = apps.map(app => createAppCard(app)).join('');
 }
 
-// تصفية التطبيقات حسب الفئة
 function filterApps(category) {
     let filtered = category === 'all' ? apps : apps.filter(a => a.category === category);
     let container = document.getElementById('allApps');
@@ -33,7 +31,6 @@ function filterApps(category) {
     if(event && event.target) event.target.classList.add('active');
 }
 
-// البحث في التطبيقات
 function searchApps() {
     let term = document.getElementById('searchInput')?.value.toLowerCase().trim();
     let container = document.getElementById('allApps');
@@ -56,7 +53,6 @@ function searchApps() {
     container.innerHTML = filtered.map(app => createAppCard(app)).join('');
 }
 
-// طلب تحميل التطبيق
 function requestDownload(appId) {
     let app = apps.find(a => a.id === appId);
     if(!app) return;
@@ -80,7 +76,7 @@ function showDownloadConfirm(app) {
 
 async function confirmDownload() {
     if(pendingDownloadApp) {
-        showAdModal(async () => {
+        showProfitableAd(async () => {
             pendingDownloadApp.downloads++;
             await saveApps();
             window.open(pendingDownloadApp.downloadLink, '_blank');
@@ -162,11 +158,9 @@ function closeModal() {
     document.getElementById('ratingModal').style.display = 'none';
 }
 
-// تهيئة الصفحة - انتظر تحميل البيانات
 (async function initAppsPage() {
     console.log('📱 تهيئة صفحة التطبيقات...');
     
-    // انتظر حتى يتم تحميل البيانات من JSONBin
     while (!jsonbinReady) {
         console.log('⏳ انتظار تحميل البيانات...');
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -175,7 +169,6 @@ function closeModal() {
     console.log('✅ البيانات جاهزة، عرض التطبيقات');
     displayAllApps();
     
-    // بحث من الرابط
     let urlParams = new URLSearchParams(window.location.search);
     let searchTerm = urlParams.get('search');
     if(searchTerm && document.getElementById('searchInput')) {
@@ -183,7 +176,6 @@ function closeModal() {
         searchApps();
     }
     
-    // عرض تطبيق معين
     let viewId = urlParams.get('view');
     if(viewId) {
         let app = apps.find(a => a.id === parseInt(viewId));
@@ -193,7 +185,6 @@ function closeModal() {
     }
 })();
 
-// أحداث النوافذ
 window.onclick = function(e) {
     let ratingModal = document.getElementById('ratingModal');
     let downloadModal = document.getElementById('downloadModal');
