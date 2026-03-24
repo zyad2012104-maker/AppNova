@@ -1,9 +1,8 @@
-// admin.js - لوحة الإدارة الكاملة مع إدارة التصنيفات وتعديل صلاحيات المشرف
+// admin.js - لوحة الإدارة الكاملة
 
 let currentAdminPanel = 'users';
 let editingModeratorId = null;
 
-// ========== التحقق من صلاحيات الوصول ==========
 function checkAdminAccess() {
     if (!currentUser) {
         window.location.href = 'login.html';
@@ -27,7 +26,6 @@ function checkAdminAccess() {
     return true;
 }
 
-// ========== عرض الأقسام حسب الصلاحيات ==========
 function filterTabsByPermissions() {
     if (!currentUser) return;
     
@@ -47,7 +45,6 @@ function filterTabsByPermissions() {
     }
 }
 
-// ========== عرض الإحصائيات ==========
 async function displayStats() {
     let statsContainer = document.getElementById('statsCards');
     if(!statsContainer) return;
@@ -71,7 +68,6 @@ async function displayStats() {
     `;
 }
 
-// ========== عرض لوحة الإدارة ==========
 function showAdminPanel(panel) {
     if (panel === 'moderators' && !isAdmin(currentUser)) {
         showAlert('غير مصرح لك بالوصول إلى إدارة المشرفين', 'error');
@@ -99,7 +95,6 @@ function showAdminPanel(panel) {
     else if(panel === 'favicon') loadCurrentFavicon();
 }
 
-// ========== عرض المستخدمين ==========
 function displayUsers() {
     let usersTable = document.getElementById('usersTable');
     if(!usersTable) return;
@@ -111,7 +106,7 @@ function displayUsers() {
         return;
     }
     
-    let html = '<table><thead><tr><th>#</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = ' <table class="admin-table"><thead><tr><th>#</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead><tbody>';
     regularUsers.forEach((user, index) => {
         html += `<tr>
             <td>${index + 1}</td>
@@ -145,7 +140,7 @@ function searchUsers() {
         return;
     }
     
-    let html = '<table><thead><tr><th>#</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = ' <table class="admin-table"><thead><tr><th>#</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead><tbody>';
     filtered.forEach((user, index) => {
         html += `<tr>
             <td>${index + 1}</td>
@@ -176,7 +171,6 @@ async function deleteUser(id) {
     }
 }
 
-// ========== عرض المشرفين ==========
 function displayModerators() {
     let moderatorsTable = document.getElementById('moderatorsTable');
     if(!moderatorsTable) return;
@@ -193,7 +187,7 @@ function displayModerators() {
         return;
     }
     
-    let html = '<table><thead><tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = ' <table class="admin-table"><thead><tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr></thead><tbody>';
     moderatorsList.forEach((mod, index) => {
         let perms = [];
         if(mod.permissions?.deleteUser) perms.push('حذف مستخدم');
@@ -241,7 +235,7 @@ function searchModerators() {
         return;
     }
     
-    let html = '<table><thead><tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = ' <table class="admin-table"><thead><tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr></thead><tbody>';
     filtered.forEach((mod, index) => {
         let perms = [];
         if(mod.permissions?.deleteUser) perms.push('حذف مستخدم');
@@ -262,14 +256,13 @@ function searchModerators() {
                 <button class="btn-permissions" onclick="openPermissionsModal(${mod.id})">🔧 صلاحيات</button>
                 <button class="btn-edit" onclick="editModerator(${mod.id})">✏️ تعديل</button>
                 <button class="btn-delete" onclick="deleteModerator(${mod.id})">🗑️ حذف</button>
-            </td>
-        </tr>`;
+             </td>
+         </tr>`;
     });
     html += '</tbody></table>';
     moderatorsTable.innerHTML = html;
 }
 
-// ========== نافذة تعديل الصلاحيات ==========
 function openPermissionsModal(modId) {
     let mod = users.find(u => u.id === modId && u.role === 'moderator');
     if(!mod) return;
@@ -349,7 +342,6 @@ async function savePermissionsChanges() {
     showAlert('تم تحديث صلاحيات المشرف بنجاح', 'success');
 }
 
-// ========== إضافة مشرف جديد ==========
 document.getElementById('addModeratorForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -434,7 +426,6 @@ async function deleteModerator(id) {
     }
 }
 
-// ========== عرض التطبيقات ==========
 function displayApps() {
     let appsTable = document.getElementById('appsTable');
     if(!appsTable) return;
@@ -444,7 +435,7 @@ function displayApps() {
         return;
     }
     
-    let html = '<table><thead><tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = ' <table class="admin-table"><thead> <tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th> </tr></thead><tbody>';
     apps.forEach((app, index) => {
         html += `<tr>
             <td>${index + 1}</td>
@@ -480,7 +471,7 @@ function searchAdminApps() {
         return;
     }
     
-    let html = '<table><thead><tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = ' <table class="admin-table"><thead> <tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th> </tr></thead><tbody>';
     filtered.forEach((app, index) => {
         html += `<tr>
             <td>${index + 1}</td>
@@ -523,7 +514,6 @@ async function deleteAppAdmin(appId) {
     }
 }
 
-// ========== عرض التعليقات ==========
 function displayComments() {
     let commentsTable = document.getElementById('commentsTable');
     if(!commentsTable) return;
@@ -533,7 +523,7 @@ function displayComments() {
         return;
     }
     
-    let html = '<table><thead><tr><th>#</th><th>المستخدم</th><th>التطبيق</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = ' <table class="admin-table"><thead> <tr><th>#</th><th>المستخدم</th><th>التطبيق</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th> </tr></thead><tbody>';
     let sortedComments = [...comments].reverse();
     sortedComments.forEach((comment, index) => {
         let app = apps.find(a => a.id === comment.appId);
@@ -571,7 +561,7 @@ function searchComments() {
         return;
     }
     
-    let html = '<table><thead><tr><th>#</th><th>المستخدم</th><th>التطبيق</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = ' <table class="admin-table"><thead> <tr><th>#</th><th>المستخدم</th><th>التطبيق</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th> </tr></thead><tbody>';
     let sortedComments = [...filtered].reverse();
     sortedComments.forEach((comment, index) => {
         let app = apps.find(a => a.id === comment.appId);
@@ -625,7 +615,6 @@ async function deleteCommentAdmin(commentId) {
     }
 }
 
-// ========== إدارة التصنيفات ==========
 function displayCategories() {
     let categoriesList = document.getElementById('categoriesList');
     if(!categoriesList) return;
@@ -746,8 +735,6 @@ async function deleteCategory(id) {
     showAlert('تم حذف التصنيف بنجاح', 'success');
 }
 
-// ========== إدارة أيقونة الموقع ==========
-
 function loadCurrentFavicon() {
     let savedFavicon = localStorage.getItem('site_favicon');
     let previewImg = document.getElementById('faviconPreviewImg');
@@ -864,7 +851,6 @@ function addFaviconTab() {
     }
 }
 
-// ========== تهيئة الصفحة ==========
 (async function initAdminPage() {
     while (!jsonbinReady) {
         await new Promise(resolve => setTimeout(resolve, 100));

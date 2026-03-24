@@ -399,12 +399,12 @@ function createAppCard(app) {
     </div>`;
 }
 
-// ========== إعلانات ProfitableCPM ==========
+// ========== إعلانات ProfitableCPM (عند الضغط على تحميل/رفع/دخول) ==========
 
 function loadAdScript() {
-    if (adScriptLoaded) return;
+    if (adScriptLoaded) return Promise.resolve();
     
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         try {
             if (document.querySelector('script[src*="profitablecpmratenetwork"]')) {
                 adScriptLoaded = true;

@@ -1,6 +1,5 @@
 // home.js - الصفحة الرئيسية مع JSONBin.io
 
-// عرض التطبيقات في الشبكة
 function displayAppsGrid(list, containerId) {
     let container = document.getElementById(containerId);
     if(!container) return;
@@ -13,7 +12,6 @@ function displayAppsGrid(list, containerId) {
     container.innerHTML = list.map(app => createAppCard(app)).join('');
 }
 
-// عرض المحتوى الرئيسي
 function displayHomeContent() {
     console.log('🔄 عرض المحتوى الرئيسي...');
     console.log(`📱 عدد التطبيقات: ${apps.length}`);
@@ -34,7 +32,6 @@ function displayHomeContent() {
     displayAppsGrid(topRated, 'topRatedApps');
 }
 
-// طلب تحميل التطبيق
 function requestDownload(appId) {
     let app = apps.find(a => a.id === appId);
     if(!app) return;
@@ -49,7 +46,6 @@ function requestDownload(appId) {
     }
 }
 
-// عرض تأكيد التحميل
 function showDownloadConfirm(app) {
     let infoDiv = document.getElementById('downloadAppInfo');
     if(infoDiv) infoDiv.innerHTML = `<h4>${escapeHtml(app.name)}</h4><p>الإصدار: ${app.version} | الحجم: ${app.size}</p>`;
@@ -57,7 +53,6 @@ function showDownloadConfirm(app) {
     document.getElementById('downloadModal').style.display = 'block';
 }
 
-// تأكيد التحميل - مع إضافة الإعلان
 async function confirmDownload() {
     if(pendingDownloadApp) {
         showProfitableAd(async () => {
@@ -76,7 +71,6 @@ function closeDownloadModal() {
     pendingDownloadApp = null;
 }
 
-// عرض نافذة التقييم
 function showRatingModal(appId) {
     let app = apps.find(a => a.id === appId);
     if(!app) return;
@@ -148,7 +142,6 @@ function closeModal() {
     document.getElementById('ratingModal').style.display = 'none';
 }
 
-// تهيئة الصفحة - انتظر تحميل البيانات
 (async function initHome() {
     console.log('🏠 تهيئة الصفحة الرئيسية...');
     
