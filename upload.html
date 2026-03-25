@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AppNova - رفع/تعديل تطبيق</title>
-    <meta name="description" content="شارك تطبيقك مع آلاف المستخدمين على منصة AppNova">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
@@ -55,10 +54,6 @@
             margin-bottom: 8px;
             display: block;
         }
-        .gallery-field small {
-            color: #64748b;
-            font-size: 0.75rem;
-        }
         .gallery-number {
             display: inline-block;
             background: #667eea;
@@ -78,10 +73,6 @@
             border-radius: 12px;
             font-family: inherit;
             direction: ltr;
-        }
-        .image-url-input:focus {
-            outline: none;
-            border-color: #667eea;
         }
     </style>
 </head>
@@ -164,7 +155,7 @@
                     <div class="form-group">
                         <label>🖼️ رابط صورة التطبيق الرئيسية *</label>
                         <input type="url" id="appImage" class="image-url-input" required placeholder="https://example.com/image.jpg">
-                        <small>يمكنك استخدام رابط صورة من الإنترنت (يفضل حجم 300x180 بكسل)</small>
+                        <small>يمكنك استخدام رابط صورة من الإنترنت</small>
                         <div id="mainImagePreview" class="image-preview"></div>
                     </div>
                     
@@ -176,35 +167,30 @@
                         <div class="gallery-field">
                             <label><span class="gallery-number">1</span> الصورة الأولى</label>
                             <input type="url" id="galleryImage1" class="image-url-input" placeholder="https://example.com/screenshot1.jpg">
-                            <small>رابط الصورة الأولى من داخل التطبيق</small>
                             <div id="preview1" class="image-preview"></div>
                         </div>
                         
                         <div class="gallery-field">
                             <label><span class="gallery-number">2</span> الصورة الثانية</label>
                             <input type="url" id="galleryImage2" class="image-url-input" placeholder="https://example.com/screenshot2.jpg">
-                            <small>رابط الصورة الثانية من داخل التطبيق</small>
                             <div id="preview2" class="image-preview"></div>
                         </div>
                         
                         <div class="gallery-field">
                             <label><span class="gallery-number">3</span> الصورة الثالثة</label>
                             <input type="url" id="galleryImage3" class="image-url-input" placeholder="https://example.com/screenshot3.jpg">
-                            <small>رابط الصورة الثالثة من داخل التطبيق</small>
                             <div id="preview3" class="image-preview"></div>
                         </div>
                     </div>
                     
                     <div class="form-group">
                         <label>🔗 رابط تحميل التطبيق *</label>
-                        <input type="url" id="appDownloadLink" class="image-url-input" required placeholder="رابط تحميل التطبيق (Google Play, Direct Link, etc.)">
-                        <small>رابط مباشر لتحميل التطبيق</small>
+                        <input type="url" id="appDownloadLink" class="image-url-input" required placeholder="رابط تحميل التطبيق">
                     </div>
                     
                     <div class="form-group">
                         <label>👨‍💻 اسم المطور</label>
                         <input type="text" id="appDeveloper" placeholder="اسم المطور أو الشركة">
-                        <small>اختياري - سيظهر في صفحة تفاصيل التطبيق</small>
                     </div>
                     
                     <button type="submit" class="submit-btn" id="submitBtn">🚀 رفع التطبيق</button>
@@ -265,11 +251,10 @@
             if(term) window.location.href = `apps.html?search=${encodeURIComponent(term)}`;
         }
         
-        // دالة معاينة الصورة
+        // معاينة الصور
         function previewImage(inputId, previewId) {
             const input = document.getElementById(inputId);
             const preview = document.getElementById(previewId);
-            
             if (!input || !preview) return;
             
             input.addEventListener('input', function() {
@@ -277,7 +262,7 @@
                 if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
                     preview.innerHTML = `
                         <div class="preview-item">
-                            <img src="${url}" onerror="this.src='https://placehold.co/100x100/ef4444/white?text=خطأ+في+الرابط'">
+                            <img src="${url}" onerror="this.src='https://placehold.co/100x100/ef4444/white?text=خطأ'">
                             <button class="remove-image" onclick="clearImage('${inputId}', '${previewId}')">×</button>
                         </div>
                     `;
@@ -294,7 +279,7 @@
             document.getElementById(previewId).innerHTML = '';
         }
         
-        // تفعيل معاينة الصور لجميع الحقول
+        // تفعيل المعاينة
         previewImage('appImage', 'mainImagePreview');
         previewImage('galleryImage1', 'preview1');
         previewImage('galleryImage2', 'preview2');
