@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AppNova - رفع/تعديل تطبيق</title>
+    <meta name="description" content="شارك تطبيقك مع آلاف المستخدمين على منصة AppNova">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- الإعلان العلوي -->
-    <div style="text-align: center; margin: 10px auto; max-width: 1200px;">
-        <script src="https://pl28941417.profitablecpmratenetwork.com/56/78/41/567841b929b9b0b5da580931d4c9140c.js"></script>
-    </div>
+    <!-- إعلان أعلى الصفحة -->
+    <div id="topAdContainer" style="text-align: center; margin: 10px auto; max-width: 1200px;"></div>
 
     <nav class="navbar">
         <div class="nav-container">
@@ -34,51 +33,45 @@
 
     <div class="main-layout">
         <aside class="ad-sidebar ad-left">
-            <div class="ad-container">
-                <script>
-                    atOptions = {'key': 'd97eda55927b2ccbf2ad42d5cb6201f8', 'format': 'iframe', 'height': 600, 'width': 160};
-                </script>
-                <script src="https://www.highperformanceformat.com/d97eda55927b2ccbf2ad42d5cb6201f8/invoke.js"></script>
-            </div>
+            <div id="leftAdContainer" class="ad-container"></div>
         </aside>
 
         <main class="content-wrapper">
-            <div class="hero" style="padding: 30px;">
-                <h1 id="pageTitle">رفع تطبيق جديد</h1>
+            <div class="hero">
+                <h1 id="pageTitle">🚀 رفع تطبيق جديد</h1>
                 <p id="pageDesc">شارك تطبيقك مع آلاف المستخدمين</p>
             </div>
             
             <div class="upload-form-container">
                 <form id="uploadForm">
                     <input type="hidden" id="appId" value="">
+                    
                     <div class="form-group">
-                        <label>اسم التطبيق *</label>
+                        <label>📱 اسم التطبيق *</label>
                         <input type="text" id="appName" required placeholder="أدخل اسم التطبيق">
                     </div>
+                    
                     <div class="form-group">
-                        <label>وصف التطبيق *</label>
+                        <label>📝 وصف التطبيق *</label>
                         <textarea id="appDescription" rows="4" required placeholder="وصف تفصيلي للتطبيق"></textarea>
                     </div>
+                    
                     <div class="form-row">
                         <div class="form-group">
-                            <label>الإصدار *</label>
+                            <label>📌 الإصدار *</label>
                             <input type="text" id="appVersion" required placeholder="مثال: 1.0.0">
                         </div>
                         <div class="form-group">
-                            <label>التصنيف *</label>
+                            <label>🏷️ التصنيف *</label>
                             <select id="appCategory" required>
                                 <option value="">اختر التصنيف</option>
-                                <option value="games">🎮 ألعاب</option>
-                                <option value="social">💬 تواصل اجتماعي</option>
-                                <option value="education">📚 تعليم</option>
-                                <option value="productivity">💼 إنتاجية</option>
-                                <option value="entertainment">🎬 ترفيه</option>
                             </select>
                         </div>
                     </div>
+                    
                     <div class="form-row">
                         <div class="form-group">
-                            <label>نوع الجهاز *</label>
+                            <label>📱 نوع الجهاز *</label>
                             <select id="appDeviceType" required>
                                 <option value="">اختر نوع الجهاز</option>
                                 <option value="android">🤖 Android</option>
@@ -87,55 +80,72 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>حجم التطبيق *</label>
+                            <label>💾 حجم التطبيق *</label>
                             <input type="text" id="appSize" required placeholder="مثال: 25 MB">
                         </div>
                     </div>
+                    
                     <div class="form-group">
-                        <label>رابط صورة التطبيق *</label>
+                        <label>🖼️ رابط صورة التطبيق الرئيسية *</label>
                         <input type="url" id="appImage" required placeholder="https://example.com/image.jpg">
-                        <small>يمكنك استخدام رابط صورة من الإنترنت</small>
+                        <small>يمكنك استخدام رابط صورة من الإنترنت (يفضل حجم 300x180 بكسل)</small>
                     </div>
+                    
                     <div class="form-group">
-                        <label>رابط تحميل التطبيق *</label>
-                        <input type="url" id="appDownloadLink" required placeholder="رابط تحميل التطبيق">
+                        <label>📸 معرض الصور (5 صور)</label>
+                        <textarea id="appGallery" rows="4" placeholder="أضف روابط الصور (كل رابط في سطر جديد)&#10;مثال:&#10;https://example.com/screenshot1.jpg&#10;https://example.com/screenshot2.jpg&#10;https://example.com/screenshot3.jpg&#10;https://example.com/screenshot4.jpg&#10;https://example.com/screenshot5.jpg"></textarea>
+                        <small>أضف روابط صور من داخل التطبيق (اختياري، يفضل إضافة 5 صور لتظهر في صفحة التفاصيل)</small>
                     </div>
+                    
+                    <div class="form-group">
+                        <label>🔗 رابط تحميل التطبيق *</label>
+                        <input type="url" id="appDownloadLink" required placeholder="رابط تحميل التطبيق (Google Play, Direct Link, etc.)">
+                        <small>رابط مباشر لتحميل التطبيق</small>
+                    </div>
+                    
                     <button type="submit" class="submit-btn" id="submitBtn">🚀 رفع التطبيق</button>
-                    <button type="button" onclick="cancelEdit()" class="submit-btn" style="background:#94a3b8; margin-top:10px; display:none;" id="cancelBtn">إلغاء</button>
+                    <button type="button" onclick="cancelEdit()" class="submit-btn" style="background:#94a3b8; margin-top:10px; display:none;" id="cancelBtn">❌ إلغاء التعديل</button>
                 </form>
             </div>
         </main>
 
         <aside class="ad-sidebar ad-right">
-            <div class="ad-container">
-                <script>
-                    atOptions = {'key': 'd97eda55927b2ccbf2ad42d5cb6201f8', 'format': 'iframe', 'height': 600, 'width': 160};
-                </script>
-                <script src="https://www.highperformanceformat.com/d97eda55927b2ccbf2ad42d5cb6201f8/invoke.js"></script>
-            </div>
-            <div class="ad-container" style="margin-top: 20px;">
-                <script>
-                    atOptions = {'key': 'd97eda55927b2ccbf2ad42d5cb6201f8', 'format': 'iframe', 'height': 600, 'width': 160};
-                </script>
-                <script src="https://www.highperformanceformat.com/d97eda55927b2ccbf2ad42d5cb6201f8/invoke.js"></script>
-            </div>
+            <div id="rightAdContainer" class="ad-container"></div>
         </aside>
     </div>
 
     <footer class="footer">
         <div class="footer-content">
-            <div class="footer-section"><h3>AppNova</h3><p>منصة عربية لتطبيقات الموبيل</p></div>
-            <div class="footer-section"><h3>روابط</h3><ul><li><a href="index.html">الرئيسية</a></li><li><a href="apps.html">التطبيقات</a></li><li><a href="upload.html">رفع تطبيق</a></li></ul></div>
-            <div class="footer-section"><h3>النشرة</h3><div class="newsletter"><input type="email" id="newsletterEmail" placeholder="بريدك"><button onclick="subscribeNewsletter()">اشتراك</button></div></div>
+            <div class="footer-section">
+                <h3>AppNova</h3>
+                <p>منصة عربية لتطبيقات الموبيل</p>
+            </div>
+            <div class="footer-section">
+                <h3>روابط</h3>
+                <ul>
+                    <li><a href="index.html">🏠 الرئيسية</a></li>
+                    <li><a href="apps.html">📱 التطبيقات</a></li>
+                    <li><a href="upload.html">⬆️ رفع تطبيق</a></li>
+                    <li><a href="privacy.html">🔒 سياسة الخصوصية</a></li>
+                    <li><a href="about.html">👥 من نحن</a></li>
+                    <li><a href="contact.html">📞 اتصل بنا</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>📧 النشرة البريدية</h3>
+                <div class="newsletter">
+                    <input type="email" id="newsletterEmail" placeholder="بريدك الإلكتروني">
+                    <button onclick="subscribeNewsletter()">اشتراك</button>
+                </div>
+            </div>
         </div>
-        <div class="footer-bottom">© 2024 AppNova</div>
+        <div class="footer-bottom">© 2024 AppNova. جميع الحقوق محفوظة</div>
     </footer>
 
-    <!-- الإعلان السفلي -->
-    <div style="text-align: center; margin: 10px auto; max-width: 1200px;">
-        <script src="https://pl28941417.profitablecpmratenetwork.com/56/78/41/567841b929b9b0b5da580931d4c9140c.js"></script>
-    </div>
+    <!-- إعلان أسفل الصفحة -->
+    <div id="bottomAdContainer" style="text-align: center; margin: 10px auto; max-width: 1200px;"></div>
 
+    <!-- نافذة الإعلان -->
     <div id="adModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeAdModal()">&times;</span>

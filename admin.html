@@ -8,10 +8,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- الإعلان العلوي -->
-    <div style="text-align: center; margin: 10px auto; max-width: 1200px;">
-        <script src="https://pl28941417.profitablecpmratenetwork.com/56/78/41/567841b929b9b0b5da580931d4c9140c.js"></script>
-    </div>
+    <div id="topAdContainer" style="text-align: center; margin: 10px auto; max-width: 1200px;"></div>
 
     <nav class="navbar">
         <div class="nav-container">
@@ -34,18 +31,13 @@
 
     <div class="main-layout">
         <aside class="ad-sidebar ad-left">
-            <div class="ad-container">
-                <script>
-                    atOptions = {'key': 'd97eda55927b2ccbf2ad42d5cb6201f8', 'format': 'iframe', 'height': 600, 'width': 160};
-                </script>
-                <script src="https://www.highperformanceformat.com/d97eda55927b2ccbf2ad42d5cb6201f8/invoke.js"></script>
-            </div>
+            <div id="leftAdContainer" class="ad-container"></div>
         </aside>
 
         <main class="content-wrapper">
-            <div class="hero" style="padding: 30px;">
+            <div class="hero">
                 <h1 id="adminPageTitle">⚙️ لوحة التحكم - الإدارة</h1>
-                <p id="adminPageDesc">إدارة المستخدمين والمشرفين والتطبيقات والتعليقات والتصنيفات</p>
+                <p id="adminPageDesc">إدارة المستخدمين والمشرفين والتطبيقات والتعليقات والتصنيفات والإعلانات</p>
             </div>
             
             <div class="stats-cards" id="statsCards"></div>
@@ -56,6 +48,8 @@
                 <button class="admin-tab" data-panel="apps" onclick="showAdminPanel('apps')">📱 التطبيقات</button>
                 <button class="admin-tab" data-panel="comments" onclick="showAdminPanel('comments')">💬 التعليقات</button>
                 <button class="admin-tab" data-panel="categories" onclick="showAdminPanel('categories')">🏷️ التصنيفات</button>
+                <button class="admin-tab" data-panel="favicon" onclick="showAdminPanel('favicon')">🖼️ أيقونة الموقع</button>
+                <button class="admin-tab" data-panel="ads" onclick="showAdminPanel('ads')">📢 الإعلانات</button>
             </div>
             
             <div id="usersPanel" class="admin-panel active">
@@ -74,12 +68,12 @@
                 <div class="admin-table" id="moderatorsTable"></div>
                 
                 <div id="addModeratorSection" class="add-moderator-form">
-                    <h3 style="margin-bottom: 15px;">➕ إضافة مشرف جديد</h3>
+                    <h3>➕ إضافة مشرف جديد</h3>
                     <form id="addModeratorForm">
                         <div class="form-row">
-                            <input type="text" id="modUsername" placeholder="اسم المستخدم" required style="padding:10px; border:2px solid #e2e8f0; border-radius:8px;">
-                            <input type="email" id="modEmail" placeholder="البريد الإلكتروني" required style="padding:10px; border:2px solid #e2e8f0; border-radius:8px;">
-                            <input type="password" id="modPassword" placeholder="كلمة المرور" required style="padding:10px; border:2px solid #e2e8f0; border-radius:8px;">
+                            <input type="text" id="modUsername" placeholder="اسم المستخدم" required>
+                            <input type="email" id="modEmail" placeholder="البريد الإلكتروني" required>
+                            <input type="password" id="modPassword" placeholder="كلمة المرور" required>
                         </div>
                         <div class="permissions-group">
                             <label><input type="checkbox" id="permDeleteUser"> 🗑️ حذف المستخدمين</label>
@@ -90,7 +84,7 @@
                             <label><input type="checkbox" id="permViewStats"> 📊 عرض الإحصائيات</label>
                             <label><input type="checkbox" id="permManageCategories"> 🏷️ إدارة التصنيفات</label>
                         </div>
-                        <button type="submit" class="submit-btn" style="margin-top:10px;">➕ إضافة مشرف</button>
+                        <button type="submit" class="submit-btn">➕ إضافة مشرف</button>
                     </form>
                 </div>
             </div>
@@ -113,7 +107,7 @@
             
             <div id="categoriesPanel" class="admin-panel">
                 <div class="categories-admin">
-                    <h3 style="margin-bottom: 15px;">🏷️ قائمة التصنيفات</h3>
+                    <h3>🏷️ قائمة التصنيفات</h3>
                     <div id="categoriesList"></div>
                     <div class="add-category-form">
                         <input type="text" id="newCategoryName" placeholder="اسم التصنيف الجديد">
@@ -124,57 +118,109 @@
                 </div>
             </div>
             
-            <div id="faviconPanel" class="admin-panel" style="margin-top: 30px;">
+            <div id="faviconPanel" class="admin-panel">
                 <div class="categories-admin">
-                    <h3 style="margin-bottom: 15px;">🖼️ إدارة أيقونة الموقع (Favicon)</h3>
-                    <p style="color: #64748b; margin-bottom: 15px;">يمكنك رفع صورة لتكون أيقونة الموقع التي تظهر في علامة التبويب</p>
+                    <h3>🖼️ إدارة أيقونة الموقع (Favicon)</h3>
+                    <p>يمكنك رفع صورة لتكون أيقونة الموقع التي تظهر في علامة التبويب</p>
                     
                     <div class="favicon-upload">
                         <div class="favicon-preview" id="faviconPreview">
                             <img id="faviconPreviewImg" src="" onerror="this.style.display='none'" style="display:none;">
-                            <span id="noFaviconText" style="color:#94a3b8; font-size:12px;">لا توجد أيقونة</span>
+                            <span id="noFaviconText">لا توجد أيقونة</span>
                         </div>
                         <input type="file" id="faviconFile" accept="image/png,image/jpeg,image/jpg,image/ico,image/x-icon">
                         <button onclick="uploadFavicon()">📤 رفع أيقونة</button>
                         <button onclick="removeFavicon()" class="remove-favicon">🗑️ إزالة الأيقونة</button>
                     </div>
                     
-                    <div style="margin-top: 15px; padding: 10px; background: #e6f7e6; border-radius: 8px;">
+                    <div class="info-box">
                         <small>💡 ملاحظة: يفضل استخدام صورة مربعة بحجم 32x32 أو 64x64 بكسل بصيغة PNG أو ICO</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="adsPanel" class="admin-panel">
+                <div class="categories-admin">
+                    <h3>📢 إدارة إعلانات Google AdSense</h3>
+                    <p>يمكنك إضافة أكواد إعلانات Google AdSense في الأماكن المحددة</p>
+                    
+                    <div class="ad-item">
+                        <h4>📌 إعلان أعلى الصفحة (Top Banner)</h4>
+                        <textarea id="topBannerCode" class="ad-code" rows="3" placeholder="أضف كود إعلان Google AdSense هنا"></textarea>
+                        <div class="ad-actions">
+                            <button onclick="saveAdCode('topBanner')" class="submit-btn" style="width:auto;">💾 حفظ</button>
+                        </div>
+                    </div>
+                    
+                    <div class="ad-item">
+                        <h4>📌 إعلان أسفل الصفحة (Bottom Banner)</h4>
+                        <textarea id="bottomBannerCode" class="ad-code" rows="3" placeholder="أضف كود إعلان Google AdSense هنا"></textarea>
+                        <div class="ad-actions">
+                            <button onclick="saveAdCode('bottomBanner')" class="submit-btn" style="width:auto;">💾 حفظ</button>
+                        </div>
+                    </div>
+                    
+                    <div class="ad-item">
+                        <h4>📌 إعلان جانبي أيسر (Left Sidebar)</h4>
+                        <textarea id="leftSidebarCode" class="ad-code" rows="3" placeholder="أضف كود إعلان Google AdSense هنا"></textarea>
+                        <div class="ad-actions">
+                            <button onclick="saveAdCode('leftSidebar')" class="submit-btn" style="width:auto;">💾 حفظ</button>
+                        </div>
+                    </div>
+                    
+                    <div class="ad-item">
+                        <h4>📌 إعلان جانبي أيمن (Right Sidebar)</h4>
+                        <textarea id="rightSidebarCode" class="ad-code" rows="3" placeholder="أضف كود إعلان Google AdSense هنا"></textarea>
+                        <div class="ad-actions">
+                            <button onclick="saveAdCode('rightSidebar')" class="submit-btn" style="width:auto;">💾 حفظ</button>
+                        </div>
+                    </div>
+                    
+                    <div class="ad-item">
+                        <h4>📌 إعلان عند النقر (Click Ad)</h4>
+                        <textarea id="clickAdCode" class="ad-code" rows="3" placeholder="أضف كود الإعلان الذي يظهر عند النقر على تحميل"></textarea>
+                        <div class="ad-actions">
+                            <button onclick="saveAdCode('clickAd')" class="submit-btn" style="width:auto;">💾 حفظ</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
 
         <aside class="ad-sidebar ad-right">
-            <div class="ad-container">
-                <script>
-                    atOptions = {'key': 'd97eda55927b2ccbf2ad42d5cb6201f8', 'format': 'iframe', 'height': 600, 'width': 160};
-                </script>
-                <script src="https://www.highperformanceformat.com/d97eda55927b2ccbf2ad42d5cb6201f8/invoke.js"></script>
-            </div>
-            <div class="ad-container" style="margin-top: 20px;">
-                <script>
-                    atOptions = {'key': 'd97eda55927b2ccbf2ad42d5cb6201f8', 'format': 'iframe', 'height': 600, 'width': 160};
-                </script>
-                <script src="https://www.highperformanceformat.com/d97eda55927b2ccbf2ad42d5cb6201f8/invoke.js"></script>
-            </div>
+            <div id="rightAdContainer" class="ad-container"></div>
         </aside>
     </div>
 
     <footer class="footer">
         <div class="footer-content">
-            <div class="footer-section"><h3>AppNova</h3><p>منصة عربية لتطبيقات الموبيل</p></div>
-            <div class="footer-section"><h3>روابط</h3><ul><li><a href="index.html">الرئيسية</a></li><li><a href="apps.html">التطبيقات</a></li><li><a href="upload.html">رفع تطبيق</a></li></ul></div>
-            <div class="footer-section"><h3>النشرة</h3><div class="newsletter"><input type="email" id="newsletterEmail" placeholder="بريدك"><button onclick="subscribeNewsletter()">اشتراك</button></div></div>
+            <div class="footer-section">
+                <h3>AppNova</h3>
+                <p>منصة عربية لتطبيقات الموبيل</p>
+            </div>
+            <div class="footer-section">
+                <h3>روابط</h3>
+                <ul>
+                    <li><a href="index.html">الرئيسية</a></li>
+                    <li><a href="apps.html">التطبيقات</a></li>
+                    <li><a href="upload.html">رفع تطبيق</a></li>
+                    <li><a href="privacy.html">سياسة الخصوصية</a></li>
+                    <li><a href="about.html">من نحن</a></li>
+                    <li><a href="contact.html">اتصل بنا</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>النشرة البريدية</h3>
+                <div class="newsletter">
+                    <input type="email" id="newsletterEmail" placeholder="بريدك الإلكتروني">
+                    <button onclick="subscribeNewsletter()">اشتراك</button>
+                </div>
+            </div>
         </div>
-        <div class="footer-bottom">© 2024 AppNova</div>
+        <div class="footer-bottom">© 2024 AppNova. جميع الحقوق محفوظة</div>
     </footer>
 
-    <!-- الإعلان السفلي -->
-    <div style="text-align: center; margin: 10px auto; max-width: 1200px;">
-        <script src="https://pl28941417.profitablecpmratenetwork.com/56/78/41/567841b929b9b0b5da580931d4c9140c.js"></script>
-    </div>
+    <div id="bottomAdContainer" style="text-align: center; margin: 10px auto; max-width: 1200px;"></div>
 
     <div id="permissionsModal" class="modal">
         <div class="modal-content permissions-modal-content">

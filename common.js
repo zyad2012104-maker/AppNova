@@ -1,4 +1,4 @@
-// common.js - الملف الرئيسي مع JSONBin.io
+// common.js - الملف الرئيسي الكامل
 
 // ========== المتغيرات العامة ==========
 let apps = [];
@@ -10,14 +10,14 @@ let selectedRating = 0;
 let currentAppId = null;
 let pendingDownloadApp = null;
 
-// متغيرات JSONBin
-let jsonbinReady = false;
-let BIN_ID = '';
-let MASTER_KEY = '';
-let BASE_URL = 'https://api.jsonbin.io/v3/b/';
-
-// متغيرات الإعلان
-let adScriptLoaded = false;
+// إعدادات الإعلانات
+let adSettings = {
+    topBanner: '',
+    bottomBanner: '',
+    leftSidebar: '',
+    rightSidebar: '',
+    clickAd: ''
+};
 
 // التصنيفات الافتراضية
 const defaultCategories = [
@@ -28,8 +28,189 @@ const defaultCategories = [
     { id: 5, name: 'ترفيه', icon: '🎬', key: 'entertainment' }
 ];
 
-// ========== دوال التحقق من الصلاحيات ==========
+// بيانات JSONBin
+const BIN_ID = '69c13f81b7ec241ddc956318';
+const MASTER_KEY = '$2a$10$5X1fbgOhCiGV23rKGUkLLuhD/a1eIHNuKwvtNzKwu3W7KT8CGpaG.';
+const BASE_URL = 'https://api.jsonbin.io/v3/b/';
 
+// التحقق من وضع التشغيل
+const isLocalhost = window.location.protocol === 'file:' || 
+                    window.location.hostname === 'localhost' || 
+                    window.location.hostname === '127.0.0.1';
+
+let jsonbinReady = false;
+
+console.log(`🔧 وضع التشغيل: ${isLocalhost ? 'محلي (Local)' : 'خادم (Server)'}`);
+
+// ========== تحميل البيانات ==========
+async function loadData() {
+    console.log('🔄 جاري تحميل البيانات...');
+    
+    if (!isLocalhost) {
+        try {
+            const response = await fetch(`${BASE_URL}${BIN_ID}/latest`, {
+                method: 'GET',
+                headers: {
+                    'X-Master-Key': MASTER_KEY,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                apps = data.record.apps || [];
+                users = data.record.users || [];
+                comments = data.record.comments || [];
+                categories = data.record.categories || defaultCategories;
+                adSettings = data.record.adSettings || adSettings;
+                
+                console.log('✅ تم تحميل البيانات من JSONBin');
+                console.log(`📱 عدد التطبيقات: ${apps.length}`);
+                
+                saveToLocalStorage();
+                jsonbinReady = true;
+                return;
+            }
+        } catch (error) {
+            console.log('⚠️ فشل تحميل من JSONBin، استخدام البيانات المحلية');
+        }
+    }
+    
+    loadFromLocalStorage();
+    jsonbinReady = true;
+}
+
+function saveToLocalStorage() {
+    localStorage.setItem('apps_data', JSON.stringify(apps));
+    localStorage.setItem('users_data', JSON.stringify(users));
+    localStorage.setItem('comments_data', JSON.stringify(comments));
+    localStorage.setItem('categories_data', JSON.stringify(categories));
+    console.log('💾 تم حفظ البيانات في localStorage');
+}
+
+function loadFromLocalStorage() {
+    console.log('📦 تحميل البيانات من localStorage...');
+    
+    const savedApps = localStorage.getItem('apps_data');
+    const savedUsers = localStorage.getItem('users_data');
+    const savedComments = localStorage.getItem('comments_data');
+    const savedCategories = localStorage.getItem('categories_data');
+    
+    if (savedApps) {
+        apps = JSON.parse(savedApps);
+        console.log(`📱 تم تحميل ${apps.length} تطبيق من localStorage`);
+    }
+    if (savedUsers) {
+        users = JSON.parse(savedUsers);
+    }
+    if (savedComments) {
+        comments = JSON.parse(savedComments);
+    }
+    if (savedCategories) {
+        categories = JSON.parse(savedCategories);
+    }
+    
+    if (!categories || categories.length === 0) {
+        categories = defaultCategories;
+    }
+    
+    if (apps.length === 0) {
+        console.log('⚠️ لا توجد تطبيقات، إنشاء تطبيقات افتراضية');
+        createDemoApps();
+    }
+}
+
+function createDemoApps() {
+    apps = [
+        {
+            id: 1,
+            name: "تطبيق التواصل الاجتماعي - NovaSocial",
+            description: "تطبيق رائع للتواصل مع الأصدقاء ومشاركة الصور والفيديوهات. يمكنك الدردشة مع الأصدقاء ومشاركة اللحظات الجميلة. يتميز التطبيق بواجهة سهلة الاستخدام وميزات متقدمة مثل المكالمات الصوتية والمرئية.",
+            version: "2.0.1",
+            category: "social",
+            deviceType: "both",
+            size: "45 MB",
+            image: "https://placehold.co/400x200/667eea/white?text=NovaSocial",
+            gallery: [
+                "https://placehold.co/300x200/667eea/white?text=الشاشة+الرئيسية",
+                "https://placehold.co/300x200/667eea/white?text=المحادثات",
+                "https://placehold.co/300x200/667eea/white?text=الملف+الشخصي"
+            ],
+            downloadLink: "#",
+            downloads: 1250,
+            rating: 4.5,
+            ratings: [5, 4, 5, 4, 5],
+            userId: 1,
+            userName: "المدير",
+            date: new Date().toISOString()
+        },
+        {
+            id: 2,
+            name: "لعبة الألغاز - Puzzle Master",
+            description: "لعبة ألغاز ممتعة وتحدي للعقل مع مستويات متعددة. اختبر ذكاءك وحل الألغاز الصعبة.",
+            version: "1.5.0",
+            category: "games",
+            deviceType: "android",
+            size: "78 MB",
+            image: "https://placehold.co/400x200/764ba2/white?text=Puzzle+Master",
+            gallery: [],
+            downloadLink: "#",
+            downloads: 890,
+            rating: 4.2,
+            ratings: [4, 5, 4, 4, 4],
+            userId: 1,
+            userName: "المدير",
+            date: new Date().toISOString()
+        },
+        {
+            id: 3,
+            name: "تطبيق التعليم - EduSmart",
+            description: "منصة تعليمية متكاملة للطلاب تحتوي على دروس واختبارات.",
+            version: "3.0.0",
+            category: "education",
+            deviceType: "both",
+            size: "120 MB",
+            image: "https://placehold.co/400x200/48c6ef/white?text=EduSmart",
+            gallery: [],
+            downloadLink: "#",
+            downloads: 2340,
+            rating: 4.8,
+            ratings: [5, 5, 4, 5, 5],
+            userId: 1,
+            userName: "المدير",
+            date: new Date().toISOString()
+        }
+    ];
+    
+    if (users.length === 0) {
+        users = [{
+            id: 1,
+            username: "المدير",
+            email: "admin",
+            password: "admin2012",
+            role: "admin",
+            date: new Date().toISOString()
+        }];
+    }
+    
+    if (comments.length === 0) {
+        comments = [
+            {
+                id: 1001,
+                appId: 1,
+                userId: 1,
+                username: "المدير",
+                comment: "تطبيق رائع جداً! أنصح الجميع بتجربته.",
+                rating: 5,
+                date: new Date().toISOString()
+            }
+        ];
+    }
+    
+    console.log('✅ تم إنشاء تطبيقات تجريبية');
+}
+
+// ========== دوال التحقق ==========
 function isAdmin(user) {
     return user && user.role === 'admin';
 }
@@ -45,237 +226,7 @@ function hasPermission(user, permission) {
     return false;
 }
 
-function canAccessAdminPanel(user) {
-    return isAdmin(user) || isModerator(user);
-}
-
-// ========== تحميل التكوين ==========
-async function loadConfig() {
-    try {
-        console.log('🔄 جاري تحميل التكوين...');
-        
-        let response;
-        try {
-            response = await fetch('get-config.php');
-        } catch(e) {
-            console.log('لا يوجد ملف get-config.php، استخدام config.js');
-        }
-        
-        if (response && response.ok) {
-            const config = await response.json();
-            if (!config.error) {
-                BIN_ID = config.BIN_ID;
-                MASTER_KEY = config.MASTER_KEY;
-                BASE_URL = config.BASE_URL || 'https://api.jsonbin.io/v3/b/';
-                console.log('✅ تم تحميل التكوين من get-config.php');
-                return true;
-            }
-        }
-        
-        if (typeof CONFIG !== 'undefined' && CONFIG.JSONBIN) {
-            BIN_ID = CONFIG.JSONBIN.BIN_ID;
-            MASTER_KEY = CONFIG.JSONBIN.MASTER_KEY;
-            BASE_URL = CONFIG.JSONBIN.BASE_URL;
-            console.log('✅ تم تحميل التكوين من config.js');
-            return true;
-        }
-        
-        throw new Error('لم يتم العثور على إعدادات JSONBin');
-        
-    } catch (error) {
-        console.error('❌ خطأ في تحميل التكوين:', error);
-        showAlert('خطأ في تحميل إعدادات الاتصال: ' + error.message, 'error');
-        return false;
-    }
-}
-
-// ========== دوال JSONBin.io ==========
-
-async function loadDataFromJSONBin() {
-    try {
-        console.log('🔄 جاري تحميل البيانات من JSONBin.io...');
-        console.log('📡 الرابط:', `${BASE_URL}${BIN_ID}`);
-        
-        const response = await fetch(`${BASE_URL}${BIN_ID}`, {
-            method: 'GET',
-            headers: {
-                'X-Master-Key': MASTER_KEY,
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        apps = data.record.apps || [];
-        users = data.record.users || [];
-        comments = data.record.comments || [];
-        categories = data.record.categories || defaultCategories;
-        
-        console.log('✅ تم تحميل البيانات بنجاح');
-        console.log(`📊 التطبيقات: ${apps.length}, المستخدمين: ${users.length}, التعليقات: ${comments.length}, التصنيفات: ${categories.length}`);
-        
-        await ensureDefaultData();
-        jsonbinReady = true;
-        return true;
-        
-    } catch (error) {
-        console.error('❌ خطأ في تحميل البيانات:', error);
-        loadFromLocalBackup();
-        jsonbinReady = true;
-        return false;
-    }
-}
-
-async function saveAllToJSONBin() {
-    if (!jsonbinReady) {
-        console.warn('⚠️ JSONBin غير جاهز بعد');
-        return false;
-    }
-    
-    try {
-        const dataToSave = {
-            apps: apps,
-            users: users,
-            comments: comments,
-            categories: categories,
-            lastUpdated: new Date().toISOString()
-        };
-        
-        const response = await fetch(`${BASE_URL}${BIN_ID}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': MASTER_KEY
-            },
-            body: JSON.stringify(dataToSave)
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        console.log('✅ تم حفظ البيانات في JSONBin.io');
-        saveToLocalBackup();
-        return true;
-        
-    } catch (error) {
-        console.error('❌ خطأ في حفظ البيانات:', error);
-        saveToLocalBackup();
-        return false;
-    }
-}
-
-function saveToLocalBackup() {
-    localStorage.setItem('apps_backup', JSON.stringify(apps));
-    localStorage.setItem('users_backup', JSON.stringify(users));
-    localStorage.setItem('comments_backup', JSON.stringify(comments));
-    localStorage.setItem('categories_backup', JSON.stringify(categories));
-    localStorage.setItem('last_backup', new Date().toISOString());
-    console.log('💾 تم حفظ النسخة الاحتياطية محلياً');
-}
-
-function loadFromLocalBackup() {
-    console.log('📦 محاولة التحميل من النسخة الاحتياطية المحلية...');
-    
-    const backupApps = localStorage.getItem('apps_backup');
-    const backupUsers = localStorage.getItem('users_backup');
-    const backupComments = localStorage.getItem('comments_backup');
-    const backupCategories = localStorage.getItem('categories_backup');
-    
-    if (backupApps) {
-        apps = JSON.parse(backupApps);
-        console.log(`📱 تم تحميل ${apps.length} تطبيق من النسخة الاحتياطية`);
-    }
-    if (backupUsers) {
-        users = JSON.parse(backupUsers);
-        console.log(`👥 تم تحميل ${users.length} مستخدم من النسخة الاحتياطية`);
-    }
-    if (backupComments) {
-        comments = JSON.parse(backupComments);
-        console.log(`💬 تم تحميل ${comments.length} تعليق من النسخة الاحتياطية`);
-    }
-    if (backupCategories) {
-        categories = JSON.parse(backupCategories);
-        console.log(`🏷️ تم تحميل ${categories.length} تصنيف من النسخة الاحتياطية`);
-    }
-    
-    if (!categories || categories.length === 0) {
-        categories = defaultCategories;
-        console.log('🏷️ استخدام التصنيفات الافتراضية');
-    }
-    
-    if (apps.length === 0) {
-        apps = [
-            {id:1, name:"تطبيق التواصل الاجتماعي", description:"تطبيق رائع للتواصل مع الأصدقاء", version:"2.0.1", category:"social", deviceType:"both", size:"45 MB", image:"https://via.placeholder.com/300x180/667eea/ffffff?text=Social+App", downloadLink:"#", downloads:1250, rating:4.5, ratings:[5,4,5,4,5], userId:1, userName:"المدير", date:"2024-01-01"},
-            {id:2, name:"لعبة الألغاز", description:"لعبة ألغاز ممتعة وتحدي للعقل", version:"1.5.0", category:"games", deviceType:"android", size:"78 MB", image:"https://via.placeholder.com/300x180/764ba2/ffffff?text=Puzzle+Game", downloadLink:"#", downloads:890, rating:4.2, ratings:[4,5,4,4,4], userId:1, userName:"المدير", date:"2024-01-02"},
-            {id:3, name:"تطبيق التعليم", description:"منصة تعليمية متكاملة للطلاب", version:"3.0.0", category:"education", deviceType:"both", size:"120 MB", image:"https://via.placeholder.com/300x180/48c6ef/ffffff?text=Education+App", downloadLink:"#", downloads:2340, rating:4.8, ratings:[5,5,4,5,5], userId:1, userName:"المدير", date:"2024-01-03"}
-        ];
-        console.log('📱 تم إنشاء تطبيقات افتراضية');
-    }
-    
-    if (users.length === 0) {
-        users = [{
-            id: 1,
-            username: "المدير",
-            email: "admin",
-            password: "admin2012",
-            role: "admin",
-            date: new Date().toISOString()
-        }];
-        console.log('👑 تم إنشاء مستخدم admin افتراضي');
-    }
-    
-    console.log('✅ تم تحميل البيانات من النسخة الاحتياطية بنجاح');
-}
-
-async function ensureDefaultData() {
-    let needsSave = false;
-    
-    const adminExists = users.find(u => u.email === "admin");
-    if (!adminExists) {
-        users.push({
-            id: 1,
-            username: "المدير",
-            email: "admin",
-            password: "admin2012",
-            role: "admin",
-            date: new Date().toISOString()
-        });
-        needsSave = true;
-        console.log('👑 تم إضافة المستخدم admin');
-    }
-    
-    if (apps.length === 0) {
-        apps.push(
-            {id:1, name:"تطبيق التواصل الاجتماعي", description:"تطبيق رائع للتواصل مع الأصدقاء", version:"2.0.1", category:"social", deviceType:"both", size:"45 MB", image:"https://via.placeholder.com/300x180/667eea/ffffff?text=Social+App", downloadLink:"#", downloads:1250, rating:4.5, ratings:[5,4,5,4,5], userId:1, userName:"المدير", date:"2024-01-01"},
-            {id:2, name:"لعبة الألغاز", description:"لعبة ألغاز ممتعة وتحدي للعقل", version:"1.5.0", category:"games", deviceType:"android", size:"78 MB", image:"https://via.placeholder.com/300x180/764ba2/ffffff?text=Puzzle+Game", downloadLink:"#", downloads:890, rating:4.2, ratings:[4,5,4,4,4], userId:1, userName:"المدير", date:"2024-01-02"},
-            {id:3, name:"تطبيق التعليم", description:"منصة تعليمية متكاملة للطلاب", version:"3.0.0", category:"education", deviceType:"both", size:"120 MB", image:"https://via.placeholder.com/300x180/48c6ef/ffffff?text=Education+App", downloadLink:"#", downloads:2340, rating:4.8, ratings:[5,5,4,5,5], userId:1, userName:"المدير", date:"2024-01-03"}
-        );
-        needsSave = true;
-        console.log('📱 تم إضافة تطبيقات افتراضية');
-    }
-    
-    if (categories.length === 0) {
-        categories = defaultCategories;
-        needsSave = true;
-        console.log('🏷️ تم إضافة تصنيفات افتراضية');
-    }
-    
-    if (needsSave) {
-        await saveAllToJSONBin();
-    }
-}
-
 // ========== دوال التصنيفات ==========
-
-function getCategoriesForSelect() {
-    return categories.map(cat => `<option value="${cat.key}">${cat.icon} ${cat.name}</option>`).join('');
-}
-
 function getCategoryIcon(key) {
     const cat = categories.find(c => c.key === key);
     return cat ? cat.icon : '📱';
@@ -286,19 +237,14 @@ function getCategoryName(key) {
     return cat ? cat.name : key;
 }
 
-function getCategoryById(id) {
-    return categories.find(c => c.id === id);
-}
-
 // ========== دوال حفظ البيانات ==========
-
-function saveApps() { saveAllToJSONBin(); }
-function saveUsers() { saveAllToJSONBin(); }
-function saveComments() { saveAllToJSONBin(); }
-function saveCategories() { saveAllToJSONBin(); }
+function saveApps() { saveToLocalStorage(); }
+function saveUsers() { saveToLocalStorage(); }
+function saveComments() { saveToLocalStorage(); }
+function saveCategories() { saveToLocalStorage(); }
+async function saveAdSettings() { saveToLocalStorage(); }
 
 // ========== دوال مساعدة ==========
-
 function showAlert(message, type) {
     let div = document.createElement('div');
     div.className = `alert alert-${type}`;
@@ -306,7 +252,7 @@ function showAlert(message, type) {
     div.style.cssText = `
         position: fixed;
         top: 20px;
-        left: 20px;
+        right: 20px;
         padding: 15px 25px;
         border-radius: 12px;
         color: white;
@@ -375,117 +321,57 @@ function escapeHtml(text) {
     });
 }
 
+// ========== دوال التطبيقات ==========
+function openAppDetail(appId) {
+    window.location.href = `app-detail.html?id=${appId}`;
+}
+
+async function downloadApp(appId) {
+    const app = apps.find(a => a.id === appId);
+    if (!app) {
+        showAlert('التطبيق غير موجود', 'error');
+        return;
+    }
+    
+    showClickAd(async () => {
+        app.downloads++;
+        await saveApps();
+        
+        if (app.downloadLink && app.downloadLink !== '#') {
+            window.open(app.downloadLink, '_blank');
+            showAlert('جاري تحميل التطبيق...', 'success');
+        } else {
+            showAlert('رابط التحميل غير متوفر حالياً', 'error');
+        }
+    });
+}
+
 function createAppCard(app) {
     let fullStars = Math.floor(app.rating);
     let emptyStars = 5 - fullStars;
     let stars = '★'.repeat(fullStars) + '☆'.repeat(emptyStars);
     
-    return `<div class="app-card" onclick="if(typeof showRatingModal === 'function') showRatingModal(${app.id})">
-        <img src="${app.image}" class="app-card-image" onerror="this.src='https://via.placeholder.com/300x180/cccccc/ffffff?text=No+Image'">
-        <div class="app-card-content">
-            <div class="app-card-title">${escapeHtml(app.name)}</div>
-            <div class="app-card-description">${escapeHtml(app.description.substring(0,80))}${app.description.length>80?'...':''}</div>
-            <div class="app-card-meta">
-                <span>📥 ${app.downloads}</span>
-                <span>💾 ${app.size}</span>
-                <span>📱 ${app.version}</span>
-            </div>
-            <div class="app-card-meta">
-                <span class="app-card-rating">${stars} (${app.rating.toFixed(1)})</span>
-                <span>${getCategoryIcon(app.category)} ${getCategoryName(app.category)}</span>
-            </div>
-            <a href="#" class="app-card-download" onclick="event.stopPropagation(); if(typeof requestDownload === 'function') requestDownload(${app.id})">📥 تحميل</a>
-        </div>
-    </div>`;
-}
-
-// ========== إعلانات ProfitableCPM (عند الضغط على تحميل/رفع/دخول) ==========
-
-function loadAdScript() {
-    if (adScriptLoaded) return Promise.resolve();
+    const appImage = app.image && app.image.startsWith('http') ? app.image : 'https://placehold.co/300x180/667eea/white?text=' + encodeURIComponent(app.name);
     
-    return new Promise((resolve) => {
-        try {
-            if (document.querySelector('script[src*="profitablecpmratenetwork"]')) {
-                adScriptLoaded = true;
-                resolve();
-                return;
-            }
-            
-            let script = document.createElement('script');
-            script.src = 'https://pl28941680.profitablecpmratenetwork.com/8b/d5/21/8bd5212efbe7fc123c0c78afb316cd4f.js';
-            script.async = true;
-            script.onload = () => {
-                adScriptLoaded = true;
-                console.log('✅ تم تحميل سكريبت الإعلان');
-                resolve();
-            };
-            script.onerror = () => {
-                console.error('❌ فشل تحميل سكريبت الإعلان');
-                resolve();
-            };
-            document.head.appendChild(script);
-        } catch(e) {
-            console.error('خطأ في تحميل الإعلان:', e);
-            resolve();
-        }
-    });
-}
-
-function showProfitableAd(callback) {
-    loadAdScript().then(() => {
-        let modal = document.getElementById('adModal');
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = 'adModal';
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <span class="close" onclick="closeAdModal()">&times;</span>
-                    <div id="modalAdContent"></div>
-                    <button onclick="closeAdModal()" class="submit-btn" style="margin-top:15px;">إغلاق</button>
+    return `<div class="app-card">
+        <div onclick="openAppDetail(${app.id})" style="cursor: pointer;">
+            <img src="${appImage}" class="app-card-image" onerror="this.src='https://placehold.co/300x180/cccccc/white?text=No+Image'">
+            <div class="app-card-content">
+                <div class="app-card-title">${escapeHtml(app.name)}</div>
+                <div class="app-card-description">${escapeHtml(app.description.substring(0,80))}${app.description.length>80?'...':''}</div>
+                <div class="app-card-meta">
+                    <span>📥 ${app.downloads}</span>
+                    <span>💾 ${app.size}</span>
+                    <span>📱 ${app.version}</span>
                 </div>
-            `;
-            document.body.appendChild(modal);
-        }
-        
-        let content = document.getElementById('modalAdContent');
-        if (content) {
-            content.innerHTML = `
-                <div style="padding:20px; text-align:center;">
-                    <h3>📢 إعلان</h3>
-                    <div id="profitableAdContainer" style="min-height:250px; margin:15px 0;"></div>
-                    <p style="color:#666; font-size:12px;">سيتم توجيهك بعد 5 ثواني...</p>
-                    <div class="loading-spinner"></div>
+                <div class="app-card-meta">
+                    <span class="app-card-rating">${stars} (${app.rating.toFixed(1)})</span>
+                    <span>${getCategoryIcon(app.category)} ${getCategoryName(app.category)}</span>
                 </div>
-            `;
-        }
-        
-        modal.style.display = 'flex';
-        
-        setTimeout(() => {
-            let adContainer = document.getElementById('profitableAdContainer');
-            if (adContainer) {
-                adContainer.innerHTML = '<div style="background:#f0f0f0; padding:20px; border-radius:10px; text-align:center;">📢 إعلان مدعوم<br><small>شكراً لدعمك</small></div>';
-            }
-        }, 500);
-        
-        setTimeout(() => {
-            modal.style.display = 'none';
-            if (callback) callback();
-        }, 5000);
-    }).catch(() => {
-        if (callback) callback();
-    });
-}
-
-function showAdModal(callback) {
-    showProfitableAd(callback);
-}
-
-function closeAdModal() {
-    let modal = document.getElementById('adModal');
-    if (modal) modal.style.display = 'none';
+            </div>
+        </div>
+        <div class="app-card-download" onclick="event.stopPropagation(); openAppDetail(${app.id})">📱 عرض التفاصيل</div>
+    </div>`;
 }
 
 function subscribeNewsletter() {
@@ -503,39 +389,44 @@ function searchApps() {
     if(term) window.location.href = `apps.html?search=${encodeURIComponent(term)}`;
 }
 
-// ========== أيقونة الموقع ==========
-function loadSiteFavicon() {
-    let savedFavicon = localStorage.getItem('site_favicon');
-    if (savedFavicon) {
-        let existingLink = document.querySelector("link[rel*='icon']");
-        if (existingLink) {
-            existingLink.href = savedFavicon;
-        } else {
-            let link = document.createElement('link');
-            link.rel = 'icon';
-            link.href = savedFavicon;
-            document.head.appendChild(link);
+// ========== إعلانات ==========
+function renderAds() {
+    const topAd = document.getElementById('topAdContainer');
+    const bottomAd = document.getElementById('bottomAdContainer');
+    const leftAd = document.getElementById('leftAdContainer');
+    const rightAd = document.getElementById('rightAdContainer');
+    
+    if (topAd && adSettings.topBanner) topAd.innerHTML = adSettings.topBanner;
+    if (bottomAd && adSettings.bottomBanner) bottomAd.innerHTML = adSettings.bottomBanner;
+    if (leftAd && adSettings.leftSidebar) leftAd.innerHTML = adSettings.leftSidebar;
+    if (rightAd && adSettings.rightSidebar) rightAd.innerHTML = adSettings.rightSidebar;
+}
+
+function showClickAd(callback) {
+    const modal = document.getElementById('adModal');
+    const modalContent = document.getElementById('modalAdContent');
+    
+    if (modal && adSettings.clickAd && adSettings.clickAd.trim()) {
+        modalContent.innerHTML = adSettings.clickAd;
+        modal.style.display = 'flex';
+        window.pendingCallback = callback;
+    } else {
+        if (callback) callback();
+    }
+}
+
+function closeAdModal() {
+    const modal = document.getElementById('adModal');
+    if (modal) {
+        modal.style.display = 'none';
+        if (window.pendingCallback) {
+            window.pendingCallback();
+            window.pendingCallback = null;
         }
     }
 }
 
-function waitForData() {
-    return new Promise((resolve) => {
-        if (jsonbinReady) {
-            resolve();
-        } else {
-            const checkInterval = setInterval(() => {
-                if (jsonbinReady) {
-                    clearInterval(checkInterval);
-                    resolve();
-                }
-            }, 100);
-        }
-    });
-}
-
 // ========== تهيئة الصفحة ==========
-
 let storedUser = localStorage.getItem('currentUser');
 if(storedUser) {
     try {
@@ -547,20 +438,9 @@ if(storedUser) {
 
 (async function init() {
     console.log('🚀 بدء تهيئة AppNova...');
-    
-    const configLoaded = await loadConfig();
-    if (!configLoaded) {
-        console.error('❌ فشل تحميل التكوين، استخدام البيانات المحلية');
-        loadFromLocalBackup();
-        jsonbinReady = true;
-    } else {
-        await loadDataFromJSONBin();
-    }
-    
+    await loadData();
     updateNavBar();
-    loadSiteFavicon();
-    
+    renderAds();
     console.log('✅ AppNova جاهز للعمل');
     console.log(`📊 عدد التطبيقات: ${apps.length}`);
-    console.log(`👥 عدد المستخدمين: ${users.length}`);
 })();

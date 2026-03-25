@@ -4,14 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AppNova - التطبيقات | اكتشف أحدث التطبيقات</title>
+    <meta name="description" content="اكتشف آلاف التطبيقات المميزة في متجر AppNova">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- الإعلان العلوي -->
-    <div style="text-align: center; margin: 10px auto; max-width: 1200px;">
-        <script src="https://pl28941417.profitablecpmratenetwork.com/56/78/41/567841b929b9b0b5da580931d4c9140c.js"></script>
-    </div>
+    <div id="topAdContainer" style="text-align: center; margin: 10px auto; max-width: 1200px;"></div>
 
     <nav class="navbar">
         <div class="nav-container">
@@ -34,88 +32,54 @@
 
     <div class="main-layout">
         <aside class="ad-sidebar ad-left">
-            <div class="ad-container">
-                <script>
-                    atOptions = {'key': 'd97eda55927b2ccbf2ad42d5cb6201f8', 'format': 'iframe', 'height': 600, 'width': 160};
-                </script>
-                <script src="https://www.highperformanceformat.com/d97eda55927b2ccbf2ad42d5cb6201f8/invoke.js"></script>
-            </div>
+            <div id="leftAdContainer" class="ad-container"></div>
         </aside>
 
         <main class="content-wrapper">
-            <div class="hero" style="padding: 30px;">
+            <div class="hero">
                 <h1>جميع التطبيقات</h1>
                 <p>استكشف آلاف التطبيقات المميزة</p>
             </div>
             
-            <div class="categories-bar">
-                <button class="category-btn active" onclick="filterApps('all')">الكل</button>
-                <button class="category-btn" onclick="filterApps('games')">🎮 ألعاب</button>
-                <button class="category-btn" onclick="filterApps('social')">💬 تواصل</button>
-                <button class="category-btn" onclick="filterApps('education')">📚 تعليم</button>
-                <button class="category-btn" onclick="filterApps('productivity')">💼 إنتاجية</button>
-                <button class="category-btn" onclick="filterApps('entertainment')">🎬 ترفيه</button>
-            </div>
+            <div class="categories-bar" id="categoriesBar"></div>
             
             <div class="apps-grid" id="allApps"></div>
         </main>
 
         <aside class="ad-sidebar ad-right">
-            <div class="ad-container">
-                <script>
-                    atOptions = {'key': 'd97eda55927b2ccbf2ad42d5cb6201f8', 'format': 'iframe', 'height': 600, 'width': 160};
-                </script>
-                <script src="https://www.highperformanceformat.com/d97eda55927b2ccbf2ad42d5cb6201f8/invoke.js"></script>
-            </div>
-            <div class="ad-container" style="margin-top: 20px;">
-                <script>
-                    atOptions = {'key': 'd97eda55927b2ccbf2ad42d5cb6201f8', 'format': 'iframe', 'height': 600, 'width': 160};
-                </script>
-                <script src="https://www.highperformanceformat.com/d97eda55927b2ccbf2ad42d5cb6201f8/invoke.js"></script>
-            </div>
+            <div id="rightAdContainer" class="ad-container"></div>
         </aside>
     </div>
 
     <footer class="footer">
         <div class="footer-content">
-            <div class="footer-section"><h3>AppNova</h3><p>منصة عربية لتطبيقات الموبيل</p></div>
-            <div class="footer-section"><h3>روابط</h3><ul><li><a href="index.html">الرئيسية</a></li><li><a href="apps.html">التطبيقات</a></li><li><a href="upload.html">رفع تطبيق</a></li></ul></div>
-            <div class="footer-section"><h3>النشرة</h3><div class="newsletter"><input type="email" id="newsletterEmail" placeholder="بريدك"><button onclick="subscribeNewsletter()">اشتراك</button></div></div>
+            <div class="footer-section">
+                <h3>AppNova</h3>
+                <p>منصة عربية لتطبيقات الموبيل</p>
+            </div>
+            <div class="footer-section">
+                <h3>روابط</h3>
+                <ul>
+                    <li><a href="index.html">الرئيسية</a></li>
+                    <li><a href="apps.html">التطبيقات</a></li>
+                    <li><a href="upload.html">رفع تطبيق</a></li>
+                    <li><a href="privacy.html">سياسة الخصوصية</a></li>
+                    <li><a href="about.html">من نحن</a></li>
+                    <li><a href="contact.html">اتصل بنا</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>النشرة البريدية</h3>
+                <div class="newsletter">
+                    <input type="email" id="newsletterEmail" placeholder="بريدك الإلكتروني">
+                    <button onclick="subscribeNewsletter()">اشتراك</button>
+                </div>
+            </div>
         </div>
-        <div class="footer-bottom">© 2024 AppNova</div>
+        <div class="footer-bottom">© 2024 AppNova. جميع الحقوق محفوظة</div>
     </footer>
 
-    <!-- الإعلان السفلي -->
-    <div style="text-align: center; margin: 10px auto; max-width: 1200px;">
-        <script src="https://pl28941417.profitablecpmratenetwork.com/56/78/41/567841b929b9b0b5da580931d4c9140c.js"></script>
-    </div>
-
-    <div id="ratingModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h3>⭐ تقييم التطبيق</h3>
-            <div id="modalAppInfo"></div>
-            <div class="rating-stars">
-                <span class="star" onclick="setRating(1)">★</span>
-                <span class="star" onclick="setRating(2)">★</span>
-                <span class="star" onclick="setRating(3)">★</span>
-                <span class="star" onclick="setRating(4)">★</span>
-                <span class="star" onclick="setRating(5)">★</span>
-            </div>
-            <textarea id="commentText" placeholder="تعليقك..." rows="3"></textarea>
-            <button onclick="submitRating()" class="submit-btn">إرسال</button>
-        </div>
-    </div>
-
-    <div id="downloadModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeDownloadModal()">&times;</span>
-            <h3>📥 تأكيد التحميل</h3>
-            <div id="downloadAppInfo"></div>
-            <button onclick="confirmDownload()" class="submit-btn" style="background:#10b981;">نعم، تحميل</button>
-            <button onclick="closeDownloadModal()" class="submit-btn" style="background:#94a3b8;">إلغاء</button>
-        </div>
-    </div>
+    <div id="bottomAdContainer" style="text-align: center; margin: 10px auto; max-width: 1200px;"></div>
 
     <div id="adModal" class="modal">
         <div class="modal-content">

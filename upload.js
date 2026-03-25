@@ -1,4 +1,4 @@
-// upload.js - رفع وتعديل التطبيقات مع JSONBin.io
+// upload.js - رفع وتعديل التطبيقات
 
 let editAppId = null;
 let urlParams = new URLSearchParams(window.location.search);
@@ -7,10 +7,40 @@ if(editId) {
     editAppId = parseInt(editId);
 }
 
+// التحقق من تسجيل الدخول قبل عرض الصفحة
+function checkLoginAndRedirect() {
+    if (!currentUser) {
+        showAlert('⚠️ يجب تسجيل الدخول أولاً لرفع التطبيقات', 'error');
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1500);
+        return false;
+    }
+    return true;
+}
+
+// تحميل التصنيفات في القائمة المنسدلة
+function loadCategoriesForSelect() {
+    let categorySelect = document.getElementById('appCategory');
+    if (!categorySelect) return;
+    
+    categorySelect.innerHTML = '<option value="">اختر التصنيف</option>';
+    categories.forEach(cat => {
+        categorySelect.innerHTML += `<option value="${cat.key}">${cat.icon} ${cat.name}</option>`;
+    });
+}
+
 (async function checkEditMode() {
+    // انتظار تحميل البيانات
     while (!jsonbinReady) {
         await new Promise(resolve => setTimeout(resolve, 100));
     }
+    
+    // التحقق من تسجيل الدخول
+    if (!checkLoginAndRedirect()) return;
+    
+    // تحميل التصنيفات
+    loadCategoriesForSelect();
     
     if(editAppId) {
         let appToEdit = apps.find(a => a.id === editAppId);
@@ -29,6 +59,10 @@ if(editId) {
             document.getElementById('appSize').value = appToEdit.size;
             document.getElementById('appImage').value = appToEdit.image;
             document.getElementById('appDownloadLink').value = appToEdit.downloadLink;
+            
+            if (appToEdit.gallery && appToEdit.gallery.length) {
+                document.getElementById('appGallery').value = appToEdit.gallery.join('\n');
+            }
         } else if(appToEdit) {
             showAlert('لا تملك صلاحية تعديل هذا التطبيق', 'error');
             window.location.href = 'admin.html';
@@ -45,17 +79,32 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
         return;
     }
     
-    let appId = document.getElementById('appId').value;
+    let galleryText = document.getElementById('appGallery')?.value.trim();
+    let galleryImages = galleryText ? galleryText.split('\n').filter(url => url.trim() && url.trim().startsWith('http')) : [];
+    
+    if (galleryImages.length > 5) {
+        galleryImages = galleryImages.slice(0, 5);
+        showAlert('تم اقتصار معرض الصور على 5 صور فقط', 'info');
+    }
+    
+    for (let i = 0; i < galleryImages.length; i++) {
+        if (!galleryImages[i].startsWith('http')) {
+            showAlert(`الرابط رقم ${i+1} غير صحيح. يجب أن يبدأ بـ http:// أو https://`, 'error');
+            return;
+        }
+    }
+    
     let appData = {
-        id: appId ? parseInt(appId) : Date.now(),
+        id: document.getElementById('appId').value ? parseInt(document.getElementById('appId').value) : Date.now(),
         name: document.getElementById('appName').value.trim(),
         description: document.getElementById('appDescription').value.trim(),
         version: document.getElementById('appVersion').value.trim(),
         category: document.getElementById('appCategory').value,
         deviceType: document.getElementById('appDeviceType').value,
         size: document.getElementById('appSize').value.trim(),
-        image: document.getElementById('appImage').value || 'https://via.placeholder.com/300x180/cccccc/ffffff?text=No+Image',
-        downloadLink: document.getElementById('appDownloadLink').value,
+        image: document.getElementById('appImage').value.trim(),
+        gallery: galleryImages,
+        downloadLink: document.getElementById('appDownloadLink').value.trim(),
         downloads: 0,
         rating: 0,
         ratings: [],
@@ -64,8 +113,44 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
         date: new Date().toISOString()
     };
     
-    if(appId) {
-        let index = apps.findIndex(a => a.id === parseInt(appId));
+    if (!appData.name) {
+        showAlert('يرجى إدخال اسم التطبيق', 'error');
+        return;
+    }
+    if (!appData.description) {
+        showAlert('يرجى إدخال وصف التطبيق', 'error');
+        return;
+    }
+    if (!appData.version) {
+        showAlert('يرجى إدخال إصدار التطبيق', 'error');
+        return;
+    }
+    if (!appData.category) {
+        showAlert('يرجى اختيار تصنيف التطبيق', 'error');
+        return;
+    }
+    if (!appData.deviceType) {
+        showAlert('يرجى اختيار نوع الجهاز', 'error');
+        return;
+    }
+    if (!appData.size) {
+        showAlert('يرجى إدخال حجم التطبيق', 'error');
+        return;
+    }
+    if (!appData.downloadLink) {
+        showAlert('يرجى إدخال رابط تحميل التطبيق', 'error');
+        return;
+    }
+    
+    if (!appData.image) {
+        appData.image = 'https://placehold.co/400x200/667eea/white?text=' + encodeURIComponent(appData.name);
+    } else if (!appData.image.startsWith('http')) {
+        showAlert('رابط الصورة الرئيسية يجب أن يبدأ بـ http:// أو https://', 'error');
+        return;
+    }
+    
+    if(document.getElementById('appId').value) {
+        let index = apps.findIndex(a => a.id === parseInt(document.getElementById('appId').value));
         if(index !== -1) {
             appData.downloads = apps[index].downloads;
             appData.rating = apps[index].rating;
@@ -76,17 +161,19 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
             window.location.href = 'admin.html';
         }
     } else {
-        showProfitableAd(async () => {
+        showClickAd(async () => {
             apps.push(appData);
             await saveApps();
             showAlert('تم رفع التطبيق بنجاح', 'success');
-            window.location.href = 'apps.html';
+            window.location.href = `app-detail.html?id=${appData.id}`;
         });
     }
 });
 
 function cancelEdit() {
-    window.location.href = 'admin.html';
+    if (confirm('هل تريد إلغاء التعديل؟ سيتم فقدان التغييرات غير المحفوظة.')) {
+        window.location.href = 'admin.html';
+    }
 }
 
 function searchApps() {

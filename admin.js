@@ -14,7 +14,7 @@ function checkAdminAccess() {
     
     if (isAdmin(currentUser)) {
         if (titleEl) titleEl.innerHTML = '👑 لوحة التحكم - الإدارة الكاملة';
-        if (descEl) descEl.innerHTML = 'إدارة المستخدمين والمشرفين والتطبيقات والتعليقات والتصنيفات';
+        if (descEl) descEl.innerHTML = 'إدارة المستخدمين والمشرفين والتطبيقات والتعليقات والتصنيفات والإعلانات';
     } else if (isModerator(currentUser)) {
         if (titleEl) titleEl.innerHTML = '🛡️ لوحة الإشراف';
         if (descEl) descEl.innerHTML = 'إدارة المحتوى حسب الصلاحيات الممنوحة لك';
@@ -93,6 +93,7 @@ function showAdminPanel(panel) {
     else if(panel === 'comments') displayComments();
     else if(panel === 'categories') displayCategories();
     else if(panel === 'favicon') loadCurrentFavicon();
+    else if(panel === 'ads') displayAdSettings();
 }
 
 function displayUsers() {
@@ -106,7 +107,7 @@ function displayUsers() {
         return;
     }
     
-    let html = ' <table class="admin-table"><thead><tr><th>#</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead><tr><th>#</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead><tbody>';
     regularUsers.forEach((user, index) => {
         html += `<tr>
             <td>${index + 1}</td>
@@ -140,7 +141,7 @@ function searchUsers() {
         return;
     }
     
-    let html = ' <table class="admin-table"><thead><tr><th>#</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead><tr><th>#</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead><tbody>';
     filtered.forEach((user, index) => {
         html += `<tr>
             <td>${index + 1}</td>
@@ -187,7 +188,7 @@ function displayModerators() {
         return;
     }
     
-    let html = ' <table class="admin-table"><thead><tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead><tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr></thead><tbody>';
     moderatorsList.forEach((mod, index) => {
         let perms = [];
         if(mod.permissions?.deleteUser) perms.push('حذف مستخدم');
@@ -235,7 +236,7 @@ function searchModerators() {
         return;
     }
     
-    let html = ' <table class="admin-table"><thead><tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead> <tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr> </thead><tbody>';
     filtered.forEach((mod, index) => {
         let perms = [];
         if(mod.permissions?.deleteUser) perms.push('حذف مستخدم');
@@ -256,8 +257,8 @@ function searchModerators() {
                 <button class="btn-permissions" onclick="openPermissionsModal(${mod.id})">🔧 صلاحيات</button>
                 <button class="btn-edit" onclick="editModerator(${mod.id})">✏️ تعديل</button>
                 <button class="btn-delete" onclick="deleteModerator(${mod.id})">🗑️ حذف</button>
-             </td>
-         </tr>`;
+              </td>
+          </tr>`;
     });
     html += '</tbody></table>';
     moderatorsTable.innerHTML = html;
@@ -276,37 +277,30 @@ function openPermissionsModal(modId) {
             <div class="permission-item">
                 <input type="checkbox" id="permDeleteUser" ${perms.deleteUser ? 'checked' : ''}>
                 <label for="permDeleteUser">🗑️ حذف المستخدمين</label>
-                <span class="permission-desc">(يمكنه حذف حسابات المستخدمين)</span>
             </div>
             <div class="permission-item">
                 <input type="checkbox" id="permDeleteApp" ${perms.deleteApp ? 'checked' : ''}>
                 <label for="permDeleteApp">📱 حذف التطبيقات</label>
-                <span class="permission-desc">(يمكنه حذف أي تطبيق)</span>
             </div>
             <div class="permission-item">
                 <input type="checkbox" id="permEditApp" ${perms.editApp ? 'checked' : ''}>
                 <label for="permEditApp">✏️ تعديل التطبيقات</label>
-                <span class="permission-desc">(يمكنه تعديل بيانات التطبيقات)</span>
             </div>
             <div class="permission-item">
                 <input type="checkbox" id="permDeleteComment" ${perms.deleteComment ? 'checked' : ''}>
                 <label for="permDeleteComment">💬 حذف التعليقات</label>
-                <span class="permission-desc">(يمكنه حذف أي تعليق)</span>
             </div>
             <div class="permission-item">
                 <input type="checkbox" id="permEditComment" ${perms.editComment ? 'checked' : ''}>
                 <label for="permEditComment">✏️ تعديل التعليقات</label>
-                <span class="permission-desc">(يمكنه تعديل أي تعليق)</span>
             </div>
             <div class="permission-item">
                 <input type="checkbox" id="permViewStats" ${perms.viewStats ? 'checked' : ''}>
                 <label for="permViewStats">📊 عرض الإحصائيات</label>
-                <span class="permission-desc">(يمكنه رؤية إحصائيات الموقع)</span>
             </div>
             <div class="permission-item">
                 <input type="checkbox" id="permManageCategories" ${perms.manageCategories ? 'checked' : ''}>
                 <label for="permManageCategories">🏷️ إدارة التصنيفات</label>
-                <span class="permission-desc">(يمكنه إضافة/تعديل/حذف التصنيفات)</span>
             </div>
         </div>
     `;
@@ -435,7 +429,7 @@ function displayApps() {
         return;
     }
     
-    let html = ' <table class="admin-table"><thead> <tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th> </tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead> <tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr> </thead><tbody>';
     apps.forEach((app, index) => {
         html += `<tr>
             <td>${index + 1}</td>
@@ -471,7 +465,7 @@ function searchAdminApps() {
         return;
     }
     
-    let html = ' <table class="admin-table"><thead> <tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th> </tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead> <tr><th>#</th><th>التطبيق</th><th>التصنيف</th><th>التحميلات</th><th>التقييم</th><th>الإجراءات</th></tr> </thead><tbody>';
     filtered.forEach((app, index) => {
         html += `<tr>
             <td>${index + 1}</td>
@@ -496,7 +490,7 @@ function editAppFull(appId) {
 }
 
 function viewApp(appId) {
-    window.location.href = `apps.html?view=${appId}`;
+    window.location.href = `app-detail.html?id=${appId}`;
 }
 
 async function deleteAppAdmin(appId) {
@@ -523,7 +517,7 @@ function displayComments() {
         return;
     }
     
-    let html = ' <table class="admin-table"><thead> <tr><th>#</th><th>المستخدم</th><th>التطبيق</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th> </tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead> <tr><th>#</th><th>المستخدم</th><th>التطبيق</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th></tr> </thead><tbody>';
     let sortedComments = [...comments].reverse();
     sortedComments.forEach((comment, index) => {
         let app = apps.find(a => a.id === comment.appId);
@@ -561,7 +555,7 @@ function searchComments() {
         return;
     }
     
-    let html = ' <table class="admin-table"><thead> <tr><th>#</th><th>المستخدم</th><th>التطبيق</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th> </tr></thead><tbody>';
+    let html = '<table class="admin-table"><thead> <tr><th>#</th><th>المستخدم</th><th>التطبيق</th><th>التعليق</th><th>التقييم</th><th>التاريخ</th><th>الإجراءات</th></tr> </thead><tbody>';
     let sortedComments = [...filtered].reverse();
     sortedComments.forEach((comment, index) => {
         let app = apps.find(a => a.id === comment.appId);
@@ -836,20 +830,47 @@ async function removeFavicon() {
     }
 }
 
-function addFaviconTab() {
-    if (!isAdmin(currentUser)) return;
-    
-    let adminTabs = document.getElementById('adminTabs');
-    if (adminTabs && !document.getElementById('faviconTab')) {
-        let faviconTab = document.createElement('button');
-        faviconTab.className = 'admin-tab';
-        faviconTab.id = 'faviconTab';
-        faviconTab.setAttribute('data-panel', 'favicon');
-        faviconTab.innerHTML = '🖼️ أيقونة الموقع';
-        faviconTab.onclick = () => showAdminPanel('favicon');
-        adminTabs.appendChild(faviconTab);
-    }
+// ========== إدارة الإعلانات ==========
+
+function displayAdSettings() {
+    document.getElementById('topBannerCode').value = adSettings.topBanner || '';
+    document.getElementById('bottomBannerCode').value = adSettings.bottomBanner || '';
+    document.getElementById('leftSidebarCode').value = adSettings.leftSidebar || '';
+    document.getElementById('rightSidebarCode').value = adSettings.rightSidebar || '';
+    document.getElementById('clickAdCode').value = adSettings.clickAd || '';
 }
+
+async function saveAdCode(type) {
+    let code = '';
+    switch(type) {
+        case 'topBanner':
+            code = document.getElementById('topBannerCode').value;
+            adSettings.topBanner = code;
+            break;
+        case 'bottomBanner':
+            code = document.getElementById('bottomBannerCode').value;
+            adSettings.bottomBanner = code;
+            break;
+        case 'leftSidebar':
+            code = document.getElementById('leftSidebarCode').value;
+            adSettings.leftSidebar = code;
+            break;
+        case 'rightSidebar':
+            code = document.getElementById('rightSidebarCode').value;
+            adSettings.rightSidebar = code;
+            break;
+        case 'clickAd':
+            code = document.getElementById('clickAdCode').value;
+            adSettings.clickAd = code;
+            break;
+    }
+    
+    await saveAdSettings();
+    renderAds();
+    showAlert('تم حفظ إعدادات الإعلان بنجاح', 'success');
+}
+
+// ========== تهيئة الصفحة ==========
 
 (async function initAdminPage() {
     while (!jsonbinReady) {
@@ -862,5 +883,4 @@ function addFaviconTab() {
     await displayStats();
     displayUsers();
     loadCurrentFavicon();
-    addFaviconTab();
 })();

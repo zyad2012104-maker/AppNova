@@ -3,369 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر التطبيقات | اتصل بنا</title>
-    
-    <!-- الخطوط من Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- مكتبة Font Awesome للأيقونات -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- ملف التنسيقات -->
+    <title>AppNova - اتصل بنا</title>
+    <meta name="description" content="تواصل مع فريق AppNova">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- ==================== إعلان أعلى الموقع ==================== -->
-    <div class="ad-top-wrapper">
-        <div class="ad-container ad-top">
-            <div class="ad-content">
-                <div class="ad-grid">
-                    <div class="ad-item">
-                        <script src="https://pl28941417.profitablecpmratenetwork.com/56/78/41/567841b929b9b0b5da580931d4c9140c.js"></script>
-                    </div>
-                </div>
+    <div id="topAdContainer" style="text-align: center; margin: 10px auto; max-width: 1200px;"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🚀 AppNova</div>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="ابحث عن تطبيق...">
+                <button onclick="searchApps()">🔍</button>
             </div>
-            <button class="close-ad-btn" onclick="closeTopAd()"><i class="fas fa-times"></i></button>
+            <ul class="nav-links">
+                <li><a href="index.html">🏠 الرئيسية</a></li>
+                <li><a href="apps.html">📱 التطبيقات</a></li>
+                <li id="uploadNav"><a href="upload.html">⬆️ رفع تطبيق</a></li>
+                <li id="loginNav"><a href="login.html">🔐 تسجيل الدخول</a></li>
+                <li id="adminNav" style="display:none;"><a href="admin.html">👑 الإدارة</a></li>
+                <li id="moderatorNav" style="display:none;"><a href="admin.html">🛡️ الإشراف</a></li>
+                <li id="userInfo" style="display:none;"></li>
+            </ul>
         </div>
-    </div>
+    </nav>
 
-    <!-- ==================== الحاوية الرئيسية ==================== -->
-    <div class="main-wrapper">
-        <!-- إعلان جانبي أيمن -->
-        <div class="ad-sidebar ad-sidebar-right">
-            <div class="ad-sidebar-content">
-                <div class="ad-sidebar-title">
-                    <i class="fas fa-ad"></i>
-                    <span>إعلانات</span>
-                </div>
-                <div class="ad-sidebar-items">
-                    <div class="ad-sidebar-item">
-                        <script src="https://pl28941680.profitablecpmratenetwork.com/8b/d5/21/8bd5212efbe7fc123c0c78afb316cd4f.js"></script>
-                    </div>
-                    <div class="ad-sidebar-item">
-                        <script src="https://pl28941417.profitablecpmratenetwork.com/56/78/41/567841b929b9b0b5da580931d4c9140c.js"></script>
-                    </div>
-                    <div class="ad-sidebar-item">
-                        <script>
-                          atOptions = {
-                            'key' : 'd97eda55927b2ccbf2ad42d5cb6201f8',
-                            'format' : 'iframe',
-                            'height' : 600,
-                            'width' : 160,
-                            'params' : {}
-                          };
-                        </script>
-                        <script src="https://www.highperformanceformat.com/d97eda55927b2ccbf2ad42d5cb6201f8/invoke.js"></script>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="main-layout">
+        <aside class="ad-sidebar ad-left">
+            <div id="leftAdContainer" class="ad-container"></div>
+        </aside>
 
-        <!-- المحتوى الرئيسي للموقع -->
-        <div class="site-content">
-            <!-- رأس الموقع -->
-            <header>
-                <div class="container header-container">
-                    <div class="logo">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <h1>متجر <span>التطبيقات</span></h1>
-                    </div>
-                    
-                    <nav>
-                        <ul>
-                            <li><a href="index.html"><i class="fas fa-home"></i> الرئيسية</a></li>
-                            <li><a href="apps.html"><i class="fas fa-mobile-alt"></i> التطبيقات</a></li>
-                            <li><a href="upload.html"><i class="fas fa-upload"></i> رفع تطبيق</a></li>
-                            <li><a href="contact.html" class="active"><i class="fas fa-envelope"></i> اتصل بنا</a></li>
-                        </ul>
-                    </nav>
-                    
-                    <div class="auth-buttons" id="authButtons">
-                        <button class="btn-login" onclick="openLoginModal()"><i class="fas fa-sign-in-alt"></i> دخول</button>
-                        <button class="btn-signup" onclick="openRegisterModal()"><i class="fas fa-user-plus"></i> حساب جديد</button>
-                    </div>
-                    
-                    <div class="user-info" id="userInfo" style="display: none;">
-                        <div class="user-avatar">
-                            <i class="fas fa-user-circle"></i>
-                        </div>
-                        <span id="userName"></span>
-                        <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button>
-                    </div>
-                    
-                    <div class="admin-panel-btn" id="adminPanelBtn" style="display: none;">
-                        <button class="btn-admin" onclick="showAdminPanel()">
-                            <i class="fas fa-crown"></i> لوحة التحكم
-                        </button>
-                    </div>
-                    
-                    <div class="mobile-menu-btn">
-                        <i class="fas fa-bars"></i>
-                    </div>
-                </div>
-            </header>
-
-            <!-- قسم التواصل -->
-            <section class="contact-section">
-                <div class="container">
-                    <div class="section-header">
-                        <div class="section-icon">
-                            <i class="fas fa-headset"></i>
-                        </div>
-                        <h2>تواصل معنا</h2>
-                        <p>هل لديك استفسار؟ لا تتردد في التواصل معنا</p>
-                    </div>
-                    
-                    <div class="contact-container">
-                        <div class="contact-info">
-                            <div class="contact-item">
-                                <div class="contact-icon">
-                                    <i class="fas fa-envelope"></i>
-                                </div>
-                                <div>
-                                    <h3>البريد الإلكتروني</h3>
-                                    <p>support@appstore.com</p>
-                                </div>
-                            </div>
-                            
-                            <div class="contact-item">
-                                <div class="contact-icon">
-                                    <i class="fas fa-phone-alt"></i>
-                                </div>
-                                <div>
-                                    <h3>رقم الهاتف</h3>
-                                    <p>+966 123 456 789</p>
-                                </div>
-                            </div>
-                            
-                            <div class="contact-item">
-                                <div class="contact-icon">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                </div>
-                                <div>
-                                    <h3>العنوان</h3>
-                                    <p>الرياض، المملكة العربية السعودية</p>
-                                </div>
-                            </div>
-                            
-                            <div class="social-links">
-                                <a href="#"><i class="fab fa-facebook-f"></i></a>
-                                <a href="#"><i class="fab fa-twitter"></i></a>
-                                <a href="#"><i class="fab fa-instagram"></i></a>
-                                <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                                <a href="#"><i class="fab fa-github"></i></a>
-                            </div>
-                        </div>
-                        
-                        <div class="contact-form">
-                            <form id="contactForm">
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <input type="text" id="contactName" placeholder="الاسم الكامل" required>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <input type="email" id="contactEmail" placeholder="البريد الإلكتروني" required>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <input type="text" id="contactSubject" placeholder="الموضوع" required>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <textarea id="contactMessage" rows="5" placeholder="رسالتك..." required></textarea>
-                                </div>
-                                
-                                <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> إرسال الرسالة</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <!-- إعلان جانبي أيسر -->
-        <div class="ad-sidebar ad-sidebar-left">
-            <div class="ad-sidebar-content">
-                <div class="ad-sidebar-title">
-                    <i class="fas fa-ad"></i>
-                    <span>إعلانات</span>
-                </div>
-                <div class="ad-sidebar-items">
-                    <div class="ad-sidebar-item">
-                        <script>
-                          atOptions = {
-                            'key' : 'd97eda55927b2ccbf2ad42d5cb6201f8',
-                            'format' : 'iframe',
-                            'height' : 600,
-                            'width' : 160,
-                            'params' : {}
-                          };
-                        </script>
-                        <script src="https://www.highperformanceformat.com/d97eda55927b2ccbf2ad42d5cb6201f8/invoke.js"></script>
-                    </div>
-                    <div class="ad-sidebar-item">
-                        <script src="https://pl28941680.profitablecpmratenetwork.com/8b/d5/21/8bd5212efbe7fc123c0c78afb316cd4f.js"></script>
-                    </div>
-                    <div class="ad-sidebar-item">
-                        <script src="https://pl28941417.profitablecpmratenetwork.com/56/78/41/567841b929b9b0b5da580931d4c9140c.js"></script>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== إعلان أسفل الموقع ==================== -->
-    <div class="ad-bottom-wrapper">
-        <div class="ad-container ad-bottom">
-            <div class="ad-content">
-                <div class="ad-grid">
-                    <div class="ad-item">
-                        <script src="https://pl28941417.profitablecpmratenetwork.com/56/78/41/567841b929b9b0b5da580931d4c9140c.js"></script>
-                    </div>
-                </div>
-            </div>
-            <button class="close-ad-btn" onclick="closeBottomAd()"><i class="fas fa-times"></i></button>
-        </div>
-    </div>
-
-    <!-- تذييل الموقع -->
-    <footer>
-        <div class="container footer-container">
-            <div class="footer-about">
-                <div class="logo">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <h3>متجر التطبيقات</h3>
-                </div>
-                <p>منصة عربية لرفع ومشاركة تطبيقات الموبيل، نسعى لتوفير بيئة آمنة وسهلة للمطورين والمستخدمين.</p>
+        <main class="content-wrapper">
+            <div class="hero">
+                <h1>📞 اتصل بنا</h1>
+                <p>نحن هنا لمساعدتك والإجابة على استفساراتك</p>
             </div>
             
-            <div class="footer-links">
-                <h4>روابط سريعة</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <div class="upload-form-container" style="max-width: 100%;">
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label>👤 الاسم الكامل *</label>
+                            <input type="text" id="contactName" required placeholder="أدخل اسمك">
+                        </div>
+                        <div class="form-group">
+                            <label>📧 البريد الإلكتروني *</label>
+                            <input type="email" id="contactEmail" required placeholder="بريدك الإلكتروني">
+                        </div>
+                        <div class="form-group">
+                            <label>📌 الموضوع *</label>
+                            <select id="contactSubject" required>
+                                <option value="">اختر الموضوع</option>
+                                <option value="استفسار">❓ استفسار عام</option>
+                                <option value="مشكلة فنية">🔧 مشكلة فنية</option>
+                                <option value="اقتراح">💡 اقتراح تطوير</option>
+                                <option value="إعلان">📢 طلب إعلان</option>
+                                <option value="شكوى">⚠️ شكوى</option>
+                                <option value="أخرى">📝 أخرى</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>💬 الرسالة *</label>
+                            <textarea id="contactMessage" rows="5" required placeholder="اكتب رسالتك هنا..."></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn">📧 إرسال الرسالة</button>
+                    </form>
+                </div>
+                
+                <div>
+                    <div style="background: #f8fafc; border-radius: 20px; padding: 25px; margin-bottom: 20px;">
+                        <h3>📞 معلومات التواصل</h3>
+                        <p><strong>📧 البريد الإلكتروني:</strong> <a href="mailto:info@appnova.com">zyad2012104@gmail.com</a></p>
+                        <p><strong>📞 واتساب:</strong> +201015229611</p>
+                        <p><strong>📍 العنوان:</strong> الاسماعيليه، مصر</p>
+                    </div>
+                    
+                    <div style="background: #f8fafc; border-radius: 20px; padding: 25px;">
+                        <h3>🕐 ساعات العمل</h3>
+                        <p><strong>الأحد - الخميس:</strong> 9:00 صباحاً - 5:00 مساءً</p>
+                        <p><strong>الجمعة - السبت:</strong> مغلق</p>
+                        <hr style="margin: 15px 0; border-color: #e2e8f0;">
+                        <p><strong>⏱️ وقت الرد المتوقع:</strong> خلال 24-48 ساعة</p>
+                    </div>
+                    
+                    <div style="background: #f8fafc; border-radius: 20px; padding: 25px; margin-top: 20px;">
+                        <h3>📱 تابعنا</h3>
+                        <p>🔹 <a href="#">Twitter</a> | 🔹 <a href="#">Facebook</a> | 🔹 <a href="#">Instagram</a></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <aside class="ad-sidebar ad-right">
+            <div id="rightAdContainer" class="ad-container"></div>
+        </aside>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>AppNova</h3>
+                <p>منصة عربية لتطبيقات الموبيل</p>
+            </div>
+            <div class="footer-section">
+                <h3>روابط</h3>
                 <ul>
-                    <li><a href="index.html">الرئيسية</a></li>
-                    <li><a href="apps.html">التطبيقات</a></li>
-                    <li><a href="upload.html">رفع تطبيق</a></li>
-                    <li><a href="contact.html">اتصل بنا</a></li>
+                    <li><a href="index.html">🏠 الرئيسية</a></li>
+                    <li><a href="apps.html">📱 التطبيقات</a></li>
+                    <li><a href="upload.html">⬆️ رفع تطبيق</a></li>
+                    <li><a href="privacy.html">🔒 سياسة الخصوصية</a></li>
+                    <li><a href="about.html">👥 من نحن</a></li>
+                    <li><a href="contact.html">📞 اتصل بنا</a></li>
                 </ul>
             </div>
-            
-            <div class="footer-links">
-                <h4>الدعم</h4>
-                <ul>
-                    <li><a href="#">شروط الاستخدام</a></li>
-                    <li><a href="#">سياسة الخصوصية</a></li>
-                    <li><a href="#">الأسئلة الشائعة</a></li>
-                    <li><a href="#">مساعدة</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-newsletter">
-                <h4>النشرة البريدية</h4>
-                <p>اشترك لتصلك أحدث التطبيقات</p>
-                <form class="newsletter-form">
-                    <input type="email" placeholder="بريدك الإلكتروني">
-                    <button type="submit"><i class="fas fa-paper-plane"></i></button>
-                </form>
+            <div class="footer-section">
+                <h3>📧 النشرة البريدية</h3>
+                <div class="newsletter">
+                    <input type="email" id="newsletterEmail" placeholder="بريدك الإلكتروني">
+                    <button onclick="subscribeNewsletter()">اشتراك</button>
+                </div>
             </div>
         </div>
-        
-        <div class="copyright">
-            <p>جميع الحقوق محفوظة &copy; 2024 متجر التطبيقات</p>
-        </div>
+        <div class="footer-bottom">© 2024 AppNova. جميع الحقوق محفوظة</div>
     </footer>
 
-    <!-- نماذج تسجيل الدخول والتسجيل -->
-    <div id="loginModal" class="modal">
+    <div id="bottomAdContainer" style="text-align: center; margin: 10px auto; max-width: 1200px;"></div>
+
+    <div id="adModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</h3>
-                <span class="close" onclick="closeLoginModal()">&times;</span>
-            </div>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label><i class="fas fa-envelope"></i> البريد الإلكتروني</label>
-                    <input type="email" id="loginEmail" placeholder="example@email.com" required>
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-lock"></i> كلمة المرور</label>
-                    <input type="password" id="loginPassword" placeholder="********" required>
-                </div>
-                <button type="submit" class="btn-submit">تسجيل الدخول</button>
-            </form>
-            <div class="modal-footer">
-                <p>ليس لديك حساب؟ <a href="javascript:void(0)" onclick="switchToRegister()">إنشاء حساب جديد</a></p>
-            </div>
+            <span class="close" onclick="closeAdModal()">&times;</span>
+            <div id="modalAdContent"></div>
+            <button onclick="closeAdModal()" class="submit-btn">إغلاق</button>
         </div>
     </div>
 
-    <div id="registerModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-user-plus"></i> إنشاء حساب جديد</h3>
-                <span class="close" onclick="closeRegisterModal()">&times;</span>
-            </div>
-            <form id="registerForm">
-                <div class="form-group">
-                    <label><i class="fas fa-user"></i> الاسم الكامل</label>
-                    <input type="text" id="regName" placeholder="أحمد محمد" required>
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-envelope"></i> البريد الإلكتروني</label>
-                    <input type="email" id="regEmail" placeholder="example@email.com" required>
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-lock"></i> كلمة المرور</label>
-                    <input type="password" id="regPassword" placeholder="********" required>
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-lock"></i> تأكيد كلمة المرور</label>
-                    <input type="password" id="regConfirmPassword" placeholder="********" required>
-                </div>
-                <button type="submit" class="btn-submit">إنشاء حساب</button>
-            </form>
-            <div class="modal-footer">
-                <p>لديك حساب بالفعل؟ <a href="javascript:void(0)" onclick="switchToLogin()">تسجيل الدخول</a></p>
-            </div>
-        </div>
-    </div>
-
-    <!-- نافذة تفاصيل التطبيق -->
-    <div id="appDetailsModal" class="modal modal-large">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalAppTitle">تفاصيل التطبيق</h3>
-                <span class="close" onclick="closeAppDetailsModal()">&times;</span>
-            </div>
-            <div id="appDetailsContent"></div>
-        </div>
-    </div>
-
-    <!-- لوحة تحكم المدير -->
-    <div id="adminPanelModal" class="modal modal-large">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-crown"></i> لوحة تحكم المدير</h3>
-                <span class="close" onclick="closeAdminPanel()">&times;</span>
-            </div>
-            <div id="adminPanelContent"></div>
-        </div>
-    </div>
-
-    <!-- نافذة التحميل مع التقييم -->
-    <div id="downloadModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-download"></i> تحميل التطبيق</h3>
-                <span class="close" onclick="closeDownloadModal()">&times;</span>
-            </div>
-            <div id="downloadModalContent"></div>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
+    <script src="config.js"></script>
+    <script src="common.js"></script>
+    <script>
+        document.getElementById('contactForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('contactName').value;
+            const email = document.getElementById('contactEmail').value;
+            const subject = document.getElementById('contactSubject').value;
+            const message = document.getElementById('contactMessage').value;
+            
+            if (name && email && subject && message) {
+                showAlert('✅ تم إرسال رسالتك بنجاح. سنتواصل معك قريباً', 'success');
+                this.reset();
+            } else {
+                showAlert('❌ يرجى ملء جميع الحقول', 'error');
+            }
+        });
+        
+        function searchApps() {
+            let term = document.getElementById('searchInput')?.value.toLowerCase().trim();
+            if(term) window.location.href = `apps.html?search=${encodeURIComponent(term)}`;
+        }
+    </script>
 </body>
 </html>
