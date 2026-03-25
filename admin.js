@@ -236,7 +236,7 @@ function searchModerators() {
         return;
     }
     
-    let html = '<table class="admin-table"><thead> <tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr> </thead><tbody>';
+    let html = '<table class="admin-table"><thead><tr><th>#</th><th>اسم المشرف</th><th>البريد الإلكتروني</th><th>الصلاحيات</th><th>تاريخ التعيين</th><th>الإجراءات</th></tr></thead><tbody>';
     filtered.forEach((mod, index) => {
         let perms = [];
         if(mod.permissions?.deleteUser) perms.push('حذف مستخدم');
@@ -257,8 +257,8 @@ function searchModerators() {
                 <button class="btn-permissions" onclick="openPermissionsModal(${mod.id})">🔧 صلاحيات</button>
                 <button class="btn-edit" onclick="editModerator(${mod.id})">✏️ تعديل</button>
                 <button class="btn-delete" onclick="deleteModerator(${mod.id})">🗑️ حذف</button>
-              </td>
-          </tr>`;
+               </td>
+           </tr>`;
     });
     html += '</tbody></table>';
     moderatorsTable.innerHTML = html;
@@ -868,6 +868,102 @@ async function saveAdCode(type) {
     await saveAdSettings();
     renderAds();
     showAlert('تم حفظ إعدادات الإعلان بنجاح', 'success');
+}
+
+function testAdCode(type) {
+    let code = '';
+    switch(type) {
+        case 'topBanner':
+            code = document.getElementById('topBannerCode').value;
+            break;
+        case 'bottomBanner':
+            code = document.getElementById('bottomBannerCode').value;
+            break;
+        case 'leftSidebar':
+            code = document.getElementById('leftSidebarCode').value;
+            break;
+        case 'rightSidebar':
+            code = document.getElementById('rightSidebarCode').value;
+            break;
+        case 'clickAd':
+            code = document.getElementById('clickAdCode').value;
+            break;
+    }
+    
+    if (!code || !code.trim()) {
+        showAlert('لا يوجد كود إعلان للمعاينة', 'error');
+        return;
+    }
+    
+    const previewWindow = window.open('', '_blank', 'width=600,height=400,scrollbars=yes');
+    previewWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>معاينة الإعلان</title>
+            <meta charset="UTF-8">
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+                .preview-container { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+                h3 { margin-top: 0; color: #333; }
+            </style>
+        </head>
+        <body>
+            <div class="preview-container">
+                <h3>📢 معاينة الإعلان</h3>
+                <div style="border: 2px dashed #ccc; padding: 15px; border-radius: 8px;">
+                    ${code}
+                </div>
+                <p style="color: #666; font-size: 12px; margin-top: 15px;">هذه معاينة للإعلان. قد لا تعمل بعض الإعلانات في وضع المعاينة.</p>
+            </div>
+            <script>
+                (function() {
+                    const scripts = document.querySelectorAll('script');
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        for(let i = 0; i < oldScript.attributes.length; i++) {
+                            const attr = oldScript.attributes[i];
+                            newScript.setAttribute(attr.name, attr.value);
+                        }
+                        newScript.text = oldScript.text;
+                        oldScript.parentNode.replaceChild(newScript, oldScript);
+                    });
+                })();
+            <\/script>
+        </body>
+        </html>
+    `);
+    previewWindow.document.close();
+}
+
+function clearAdCode(type) {
+    if (confirm('⚠️ هل أنت متأكد من حذف هذا الإعلان؟')) {
+        switch(type) {
+            case 'topBanner':
+                document.getElementById('topBannerCode').value = '';
+                adSettings.topBanner = '';
+                break;
+            case 'bottomBanner':
+                document.getElementById('bottomBannerCode').value = '';
+                adSettings.bottomBanner = '';
+                break;
+            case 'leftSidebar':
+                document.getElementById('leftSidebarCode').value = '';
+                adSettings.leftSidebar = '';
+                break;
+            case 'rightSidebar':
+                document.getElementById('rightSidebarCode').value = '';
+                adSettings.rightSidebar = '';
+                break;
+            case 'clickAd':
+                document.getElementById('clickAdCode').value = '';
+                adSettings.clickAd = '';
+                break;
+        }
+        saveAdSettings();
+        renderAds();
+        showAlert('تم حذف الإعلان بنجاح', 'success');
+    }
 }
 
 // ========== تهيئة الصفحة ==========

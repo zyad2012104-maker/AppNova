@@ -1,4 +1,4 @@
-// upload.js - رفع وتعديل التطبيقات
+// upload.js - رفع وتعديل التطبيقات مع إعلان عند الرفع
 
 let editAppId = null;
 let urlParams = new URLSearchParams(window.location.search);
@@ -30,6 +30,44 @@ function loadCategoriesForSelect() {
     });
 }
 
+// دالة لجلب معرض الصور من الحقول المنفصلة
+function getGalleryImages() {
+    let images = [];
+    const imageInputs = ['galleryImage1', 'galleryImage2', 'galleryImage3'];
+    
+    for (let i = 0; i < imageInputs.length; i++) {
+        const url = document.getElementById(imageInputs[i])?.value.trim();
+        if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+            images.push(url);
+        }
+    }
+    
+    return images;
+}
+
+// دالة لتعيين معرض الصور في الحقول المنفصلة
+function setGalleryImages(gallery) {
+    if (!gallery || gallery.length === 0) return;
+    
+    for (let i = 0; i < gallery.length && i < 3; i++) {
+        const input = document.getElementById(`galleryImage${i + 1}`);
+        if (input) {
+            input.value = gallery[i];
+            // تحديث المعاينة
+            const previewId = `preview${i + 1}`;
+            const preview = document.getElementById(previewId);
+            if (preview) {
+                preview.innerHTML = `
+                    <div class="preview-item">
+                        <img src="${gallery[i]}" onerror="this.src='https://placehold.co/100x100/ef4444/white?text=خطأ'">
+                        <button class="remove-image" onclick="clearImage('galleryImage${i + 1}', 'preview${i + 1}')">×</button>
+                    </div>
+                `;
+            }
+        }
+    }
+}
+
 (async function checkEditMode() {
     // انتظار تحميل البيانات
     while (!jsonbinReady) {
@@ -59,9 +97,13 @@ function loadCategoriesForSelect() {
             document.getElementById('appSize').value = appToEdit.size;
             document.getElementById('appImage').value = appToEdit.image;
             document.getElementById('appDownloadLink').value = appToEdit.downloadLink;
+            if (appToEdit.developer) {
+                document.getElementById('appDeveloper').value = appToEdit.developer;
+            }
             
+            // عرض معرض الصور في الحقول المنفصلة
             if (appToEdit.gallery && appToEdit.gallery.length) {
-                document.getElementById('appGallery').value = appToEdit.gallery.join('\n');
+                setGalleryImages(appToEdit.gallery);
             }
         } else if(appToEdit) {
             showAlert('لا تملك صلاحية تعديل هذا التطبيق', 'error');
@@ -79,17 +121,13 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
         return;
     }
     
-    let galleryText = document.getElementById('appGallery')?.value.trim();
-    let galleryImages = galleryText ? galleryText.split('\n').filter(url => url.trim() && url.trim().startsWith('http')) : [];
+    // جلب معرض الصور من الحقول المنفصلة
+    let galleryImages = getGalleryImages();
     
-    if (galleryImages.length > 5) {
-        galleryImages = galleryImages.slice(0, 5);
-        showAlert('تم اقتصار معرض الصور على 5 صور فقط', 'info');
-    }
-    
+    // التحقق من صحة الروابط
     for (let i = 0; i < galleryImages.length; i++) {
         if (!galleryImages[i].startsWith('http')) {
-            showAlert(`الرابط رقم ${i+1} غير صحيح. يجب أن يبدأ بـ http:// أو https://`, 'error');
+            showAlert(`الصورة رقم ${i+1} يجب أن تبدأ بـ http:// أو https://`, 'error');
             return;
         }
     }
@@ -110,9 +148,11 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
         ratings: [],
         userId: currentUser.id,
         userName: currentUser.username,
+        developer: document.getElementById('appDeveloper').value.trim() || currentUser.username,
         date: new Date().toISOString()
     };
     
+    // التحقق من الحقول المطلوبة
     if (!appData.name) {
         showAlert('يرجى إدخال اسم التطبيق', 'error');
         return;
@@ -142,6 +182,7 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
         return;
     }
     
+    // التحقق من صورة التطبيق الرئيسية
     if (!appData.image) {
         appData.image = 'https://placehold.co/400x200/667eea/white?text=' + encodeURIComponent(appData.name);
     } else if (!appData.image.startsWith('http')) {
@@ -150,6 +191,7 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
     }
     
     if(document.getElementById('appId').value) {
+        // وضع التعديل - لا يحتاج إعلان
         let index = apps.findIndex(a => a.id === parseInt(document.getElementById('appId').value));
         if(index !== -1) {
             appData.downloads = apps[index].downloads;
@@ -161,7 +203,8 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
             window.location.href = 'admin.html';
         }
     } else {
-        showClickAd(async () => {
+        // وضع الإضافة الجديدة - عرض إعلان أولاً
+        showClickAdForUpload(async () => {
             apps.push(appData);
             await saveApps();
             showAlert('تم رفع التطبيق بنجاح', 'success');
@@ -180,3 +223,9 @@ function searchApps() {
     let term = document.getElementById('searchInput')?.value.toLowerCase().trim();
     if(term) window.location.href = `apps.html?search=${encodeURIComponent(term)}`;
 }
+
+// دالة مساعدة لمسح الصورة
+window.clearImage = function(inputId, previewId) {
+    document.getElementById(inputId).value = '';
+    document.getElementById(previewId).innerHTML = '';
+};

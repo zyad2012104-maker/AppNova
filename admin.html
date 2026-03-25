@@ -144,44 +144,84 @@
                     <h3>📢 إدارة إعلانات Google AdSense</h3>
                     <p>يمكنك إضافة أكواد إعلانات Google AdSense في الأماكن المحددة</p>
                     
-                    <div class="ad-item">
-                        <h4>📌 إعلان أعلى الصفحة (Top Banner)</h4>
-                        <textarea id="topBannerCode" class="ad-code" rows="3" placeholder="أضف كود إعلان Google AdSense هنا"></textarea>
-                        <div class="ad-actions">
-                            <button onclick="saveAdCode('topBanner')" class="submit-btn" style="width:auto;">💾 حفظ</button>
+                    <div class="info-box" style="background: #e6f7ff; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+                        <h4>💡 تعليمات إضافة إعلان AdSense:</h4>
+                        <ol style="margin-right: 20px; margin-top: 10px;">
+                            <li>انسخ كود الإعلان من حساب AdSense الخاص بك</li>
+                            <li>الصق الكود في الحقل المناسب أدناه</li>
+                            <li>اضغط على حفظ - سيتم تطبيق الإعلان فوراً</li>
+                            <li>لإزالة الإعلان، فقط احذف الكود واضغط حفظ</li>
+                        </ol>
+                    </div>
+                    
+                    <!-- إعلان أعلى الصفحة -->
+                    <div class="ad-item" style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 10px;">📌 إعلان أعلى الصفحة (Top Banner)</h4>
+                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">يظهر في أعلى جميع الصفحات تحت القائمة مباشرة</p>
+                        <textarea id="topBannerCode" class="ad-code" rows="6" placeholder="أضف كود إعلان Google AdSense هنا&#10;مثال:&#10;<ins class='adsbygoogle' style='display:block' data-ad-client='ca-pub-xxxx' data-ad-slot='xxxx' data-ad-format='auto'></ins>&#10;<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-family: monospace; direction: ltr;"></textarea>
+                        <div class="ad-actions" style="margin-top: 15px;">
+                            <button onclick="saveAdCode('topBanner')" class="submit-btn" style="width: auto; padding: 10px 25px; background: #10b981;">💾 حفظ</button>
+                            <button onclick="testAdCode('topBanner')" class="submit-btn" style="width: auto; padding: 10px 25px; background: #3b82f6;">👁️ معاينة</button>
+                            <button onclick="clearAdCode('topBanner')" class="submit-btn" style="width: auto; padding: 10px 25px; background: #ef4444;">🗑️ حذف</button>
                         </div>
                     </div>
                     
-                    <div class="ad-item">
-                        <h4>📌 إعلان أسفل الصفحة (Bottom Banner)</h4>
-                        <textarea id="bottomBannerCode" class="ad-code" rows="3" placeholder="أضف كود إعلان Google AdSense هنا"></textarea>
-                        <div class="ad-actions">
-                            <button onclick="saveAdCode('bottomBanner')" class="submit-btn" style="width:auto;">💾 حفظ</button>
+                    <!-- إعلان أسفل الصفحة -->
+                    <div class="ad-item" style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 10px;">📌 إعلان أسفل الصفحة (Bottom Banner)</h4>
+                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">يظهر في أسفل جميع الصفحات قبل الفوتر</p>
+                        <textarea id="bottomBannerCode" class="ad-code" rows="6" placeholder="أضف كود إعلان Google AdSense هنا" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-family: monospace; direction: ltr;"></textarea>
+                        <div class="ad-actions" style="margin-top: 15px;">
+                            <button onclick="saveAdCode('bottomBanner')" class="submit-btn" style="width: auto; padding: 10px 25px; background: #10b981;">💾 حفظ</button>
+                            <button onclick="testAdCode('bottomBanner')" class="submit-btn" style="width: auto; padding: 10px 25px; background: #3b82f6;">👁️ معاينة</button>
+                            <button onclick="clearAdCode('bottomBanner')" class="submit-btn" style="width: auto; padding: 10px 25px; background: #ef4444;">🗑️ حذف</button>
                         </div>
                     </div>
                     
-                    <div class="ad-item">
-                        <h4>📌 إعلان جانبي أيسر (Left Sidebar)</h4>
-                        <textarea id="leftSidebarCode" class="ad-code" rows="3" placeholder="أضف كود إعلان Google AdSense هنا"></textarea>
-                        <div class="ad-actions">
-                            <button onclick="saveAdCode('leftSidebar')" class="submit-btn" style="width:auto;">💾 حفظ</button>
+                    <!-- إعلان جانبي أيسر -->
+                    <div class="ad-item" style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 10px;">📌 إعلان جانبي أيسر (Left Sidebar)</h4>
+                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">يظهر في العمود الأيسر من الصفحة (عرض 180px)</p>
+                        <textarea id="leftSidebarCode" class="ad-code" rows="6" placeholder="أضف كود إعلان Google AdSense هنا" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-family: monospace; direction: ltr;"></textarea>
+                        <div class="ad-actions" style="margin-top: 15px;">
+                            <button onclick="saveAdCode('leftSidebar')" class="submit-btn" style="width: auto; padding: 10px 25px; background: #10b981;">💾 حفظ</button>
+                            <button onclick="testAdCode('leftSidebar')" class="submit-btn" style="width: auto; padding: 10px 25px; background: #3b82f6;">👁️ معاينة</button>
+                            <button onclick="clearAdCode('leftSidebar')" class="submit-btn" style="width: auto; padding: 10px 25px; background: #ef4444;">🗑️ حذف</button>
                         </div>
                     </div>
                     
-                    <div class="ad-item">
-                        <h4>📌 إعلان جانبي أيمن (Right Sidebar)</h4>
-                        <textarea id="rightSidebarCode" class="ad-code" rows="3" placeholder="أضف كود إعلان Google AdSense هنا"></textarea>
-                        <div class="ad-actions">
-                            <button onclick="saveAdCode('rightSidebar')" class="submit-btn" style="width:auto;">💾 حفظ</button>
+                    <!-- إعلان جانبي أيمن -->
+                    <div class="ad-item" style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 10px;">📌 إعلان جانبي أيمن (Right Sidebar)</h4>
+                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">يظهر في العمود الأيمن من الصفحة (عرض 180px)</p>
+                        <textarea id="rightSidebarCode" class="ad-code" rows="6" placeholder="أضف كود إعلان Google AdSense هنا" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-family: monospace; direction: ltr;"></textarea>
+                        <div class="ad-actions" style="margin-top: 15px;">
+                            <button onclick="saveAdCode('rightSidebar')" class="submit-btn" style="width: auto; padding: 10px 25px; background: #10b981;">💾 حفظ</button>
+                            <button onclick="testAdCode('rightSidebar')" class="submit-btn" style="width: auto; padding: 10px 25px; background: #3b82f6;">👁️ معاينة</button>
+                            <button onclick="clearAdCode('rightSidebar')" class="submit-btn" style="width: auto; padding: 10px 25px; background: #ef4444;">🗑️ حذف</button>
                         </div>
                     </div>
                     
-                    <div class="ad-item">
-                        <h4>📌 إعلان عند النقر (Click Ad)</h4>
-                        <textarea id="clickAdCode" class="ad-code" rows="3" placeholder="أضف كود الإعلان الذي يظهر عند النقر على تحميل"></textarea>
-                        <div class="ad-actions">
-                            <button onclick="saveAdCode('clickAd')" class="submit-btn" style="width:auto;">💾 حفظ</button>
+                    <!-- إعلان عند النقر (Click Ad) -->
+                    <div class="ad-item" style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 10px;">📌 إعلان عند النقر (Click Ad)</h4>
+                        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">يظهر عند الضغط على زر تحميل التطبيق (نافذة منبثقة)</p>
+                        <textarea id="clickAdCode" class="ad-code" rows="8" placeholder="أضف كود إعلان Google AdSense للنافذة المنبثقة&#10;مثال:&#10;<div style='text-align:center; padding:20px;'>&#10;  <ins class='adsbygoogle' style='display:block' data-ad-client='ca-pub-xxxx' data-ad-slot='xxxx'></ins>&#10;  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>&#10;</div>" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-family: monospace; direction: ltr;"></textarea>
+                        <div class="ad-actions" style="margin-top: 15px;">
+                            <button onclick="saveAdCode('clickAd')" class="submit-btn" style="width: auto; padding: 10px 25px; background: #10b981;">💾 حفظ</button>
+                            <button onclick="testAdCode('clickAd')" class="submit-btn" style="width: auto; padding: 10px 25px; background: #3b82f6;">👁️ معاينة</button>
+                            <button onclick="clearAdCode('clickAd')" class="submit-btn" style="width: auto; padding: 10px 25px; background: #ef4444;">🗑️ حذف</button>
                         </div>
+                    </div>
+                    
+                    <div class="info-box" style="background: #fef3c7; padding: 15px; border-radius: 12px; margin-top: 20px;">
+                        <h4>⚠️ ملاحظات مهمة:</h4>
+                        <ul style="margin-right: 20px; margin-top: 10px;">
+                            <li>لعمل إعلانات AdSense، يجب أن يكون موقعك مفعل في Google AdSense</li>
+                            <li>قد يستغرق ظهور الإعلانات بضع دقائق بعد الحفظ</li>
+                            <li>يمكنك معاينة الإعلان قبل الحفظ للتأكد من عمله</li>
+                            <li>لإزالة الإعلان، احذف الكود بالكامل واضغط حفظ</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -245,5 +285,11 @@
     <script src="config.js"></script>
     <script src="common.js"></script>
     <script src="admin.js"></script>
+    <script>
+        function searchApps() {
+            let term = document.getElementById('searchInput')?.value.toLowerCase().trim();
+            if(term) window.location.href = `apps.html?search=${encodeURIComponent(term)}`;
+        }
+    </script>
 </body>
 </html>
