@@ -9,6 +9,7 @@ let currentUser = null;
 let selectedRating = 0;
 let currentAppId = null;
 let pendingDownloadApp = null;
+let jsonbinReady = false;  // متغير جاهزية البيانات
 
 // إعدادات الإعلانات
 let adSettings = {
@@ -37,8 +38,6 @@ const BASE_URL = 'https://api.jsonbin.io/v3/b/';
 const isLocalhost = window.location.protocol === 'file:' || 
                     window.location.hostname === 'localhost' || 
                     window.location.hostname === '127.0.0.1';
-
-let jsonbinReady = false;
 
 console.log(`🔧 وضع التشغيل: ${isLocalhost ? 'محلي (Local)' : 'خادم (Server)'}`);
 
@@ -87,7 +86,7 @@ async function loadData() {
         categories = defaultCategories;
     }
     
-    jsonbinReady = true;
+    jsonbinReady = true;  // تعيين جاهزية البيانات
     console.log(`✅ تم تحميل ${apps.length} تطبيق و ${categories.length} تصنيف`);
 }
 
@@ -140,8 +139,7 @@ function createDemoApps() {
             gallery: [
                 "https://placehold.co/300x200/667eea/white?text=الشاشة+الرئيسية",
                 "https://placehold.co/300x200/667eea/white?text=المحادثات",
-                "https://placehold.co/300x200/667eea/white?text=الملف+الشخصي",
-                "https://placehold.co/300x200/667eea/white?text=الإشعارات"
+                "https://placehold.co/300x200/667eea/white?text=الملف+الشخصي"
             ],
             downloadLink: "#",
             downloads: 1250,
@@ -390,11 +388,14 @@ function escapeHtml(text) {
     });
 }
 
-// ========== دوال التطبيقات ==========
-function openAppDetails(appId) {
-    window.location.href = `app-details.html?id=${appId}`;
+// ========== دوال التطبيقات الأساسية ==========
+
+// دالة فتح صفحة تفاصيل التطبيق
+function openAppDetail(appId) {
+    window.location.href = `app-detail.html?id=${appId}`;
 }
 
+// دالة تحميل التطبيق
 async function downloadApp(appId) {
     const app = apps.find(a => a.id === appId);
     if (!app) {
@@ -415,6 +416,7 @@ async function downloadApp(appId) {
     });
 }
 
+// دالة إنشاء بطاقة التطبيق
 function createAppCard(app) {
     let fullStars = Math.floor(app.rating);
     let emptyStars = 5 - fullStars;
@@ -423,7 +425,7 @@ function createAppCard(app) {
     const appImage = app.image && app.image.startsWith('http') ? app.image : 'https://placehold.co/300x180/667eea/white?text=' + encodeURIComponent(app.name);
     
     return `<div class="app-card">
-        <div onclick="openAppDetails(${app.id})" style="cursor: pointer;">
+        <div onclick="openAppDetail(${app.id})" style="cursor: pointer;">
             <img src="${appImage}" class="app-card-image" onerror="this.src='https://placehold.co/300x180/cccccc/white?text=No+Image'">
             <div class="app-card-content">
                 <div class="app-card-title">${escapeHtml(app.name)}</div>
@@ -439,7 +441,7 @@ function createAppCard(app) {
                 </div>
             </div>
         </div>
-        <div class="app-card-download" onclick="event.stopPropagation(); openAppDetails(${app.id})">📱 تفاصيل التطبيق</div>
+        <div class="app-card-download" onclick="event.stopPropagation(); openAppDetail(${app.id})">📱 تفاصيل التطبيق</div>
     </div>`;
 }
 
