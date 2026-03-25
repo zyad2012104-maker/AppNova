@@ -51,10 +51,12 @@ async function saveApps() {
 
 // ================== التصنيفات ==================
 let categories = [
+    let categories = [
     { key: 'games', name: 'ألعاب', icon: '🎮' },
-    { key: 'apps', name: 'تطبيقات', icon: '📱' },
-    { key: 'tools', name: 'أدوات', icon: '🛠️' },
-    { key: 'education', name: 'تعليمي', icon: '📚' }
+    { key: 'social', name: 'تواصل اجتماعي', icon: '💬' },
+    { key: 'education', name: 'تعليم', icon: '📚' },
+    { key: 'productivity', name: 'إنتاجية', icon: '💼' },
+    { key: 'entertainment', name: 'ترفيه', icon: '🎬' }
 ];
 
 function loadCategoriesForSelect() {

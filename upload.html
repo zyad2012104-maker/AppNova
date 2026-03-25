@@ -7,76 +7,34 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
-        .image-preview {
-            margin-top: 10px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .preview-item {
-            position: relative;
-            width: 100px;
-            height: 100px;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 2px solid #e2e8f0;
-        }
-        .preview-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .remove-image {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: rgba(239, 68, 68, 0.8);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .gallery-field {
-            background: #f8fafc;
-            border-radius: 16px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border: 1px solid #e2e8f0;
-        }
-        .gallery-field label {
-            font-weight: 600;
-            margin-bottom: 8px;
-            display: block;
-        }
-        .gallery-number {
-            display: inline-block;
-            background: #667eea;
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            text-align: center;
-            line-height: 24px;
-            font-size: 12px;
-            margin-left: 8px;
-        }
-        .image-url-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-family: inherit;
-            direction: ltr;
-        }
+        .image-preview { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 10px; }
+        .preview-item { position: relative; width: 100px; height: 100px; border-radius: 12px; overflow: hidden; border: 2px solid #e2e8f0; }
+        .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+        .remove-image { position: absolute; top: 5px; right: 5px; background: rgba(239,68,68,0.8); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+        .gallery-field { background: #f8fafc; border-radius: 16px; padding: 15px; margin-bottom: 15px; border: 1px solid #e2e8f0; }
+        .gallery-field label { font-weight: 600; margin-bottom: 8px; display: block; }
+        .gallery-number { display: inline-block; background: #667eea; color: white; border-radius: 50%; width: 24px; height: 24px; text-align: center; line-height: 24px; font-size: 12px; margin-left: 8px; }
+        .image-url-input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-family: inherit; direction: ltr; }
     </style>
 </head>
 <body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🚀 AppNova</div>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="ابحث عن تطبيق...">
+                <button onclick="searchApps()">🔍</button>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">🏠 الرئيسية</a></li>
+                <li><a href="apps.html">📱 التطبيقات</a></li>
+                <li id="uploadNav"><a href="upload.html">⬆️ رفع تطبيق</a></li>
+                <li id="loginNav"><a href="login.html">🔐 تسجيل الدخول</a></li>
+                <li id="adminNav" style="display:none;"><a href="admin.html">👑 الإدارة</a></li>
+            </ul>
+        </div>
+    </nav>
+
     <div class="main-layout">
         <main class="content-wrapper">
             <div class="hero">
@@ -169,184 +127,149 @@
         </main>
     </div>
 
-    <script src="config.js"></script>
-
     <script>
-    // ================== المتغيرات ==================
-    let apps = [];
-    let jsonbinReady = false;
-    let editAppId = null;
+        // ================== التصنيفات ==================
+        let categories = [
+            { key: 'games', name: 'ألعاب', icon: '🎮' },
+            { key: 'social', name: 'تواصل اجتماعي', icon: '💬' },
+            { key: 'education', name: 'تعليم', icon: '📚' },
+            { key: 'productivity', name: 'إنتاجية', icon: '💼' },
+            { key: 'entertainment', name: 'ترفيه', icon: '🎬' }
+        ];
 
-    // التصنيفات
-    let categories = [
-        { key: 'games', name: 'ألعاب', icon: '🎮' },
-        { key: 'apps', name: 'تطبيقات', icon: '📱' },
-        { key: 'tools', name: 'أدوات', icon: '🛠️' },
-        { key: 'education', name: 'تعليمي', icon: '📚' }
-    ];
-
-    // ================== تحميل التطبيقات ==================
-    async function loadApps() {
-        try {
-            const response = await fetch(CONFIG.JSONBIN.BASE_URL + CONFIG.JSONBIN.BIN_ID, {
-                headers: { 'X-Master-Key': CONFIG.JSONBIN.MASTER_KEY }
+        function loadCategoriesForSelect() {
+            let select = document.getElementById('appCategory');
+            select.innerHTML = '<option value="">اختر التصنيف</option>';
+            categories.forEach(cat => {
+                let option = document.createElement('option');
+                option.value = cat.key;
+                option.textContent = `${cat.icon} ${cat.name}`;
+                select.appendChild(option);
             });
-            const data = await response.json();
-            apps = data.record.apps || [];
-            jsonbinReady = true;
-        } catch(e) { console.error(e); }
-    }
-
-    // ================== حفظ التطبيقات ==================
-    async function saveApps() {
-        try {
-            const response = await fetch(CONFIG.JSONBIN.BASE_URL + CONFIG.JSONBIN.BIN_ID, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': CONFIG.JSONBIN.MASTER_KEY,
-                    'X-Bin-Versioning': 'false'
-                },
-                body: JSON.stringify({ apps: apps })
-            });
-            await response.json();
-        } catch(e) { console.error(e); alert('فشل رفع البيانات'); }
-    }
-
-    // ================== التصنيفات ==================
-    function loadCategoriesForSelect() {
-        let select = document.getElementById('appCategory');
-        if (!select) return;
-        select.innerHTML = '<option value="">اختر التصنيف</option>';
-        categories.forEach(cat => {
-            let option = document.createElement('option');
-            option.value = cat.key;
-            option.textContent = `${cat.icon} ${cat.name}`;
-            select.appendChild(option);
-        });
-    }
-
-    // ================== المعرض ==================
-    function getGalleryImages() {
-        let images = [];
-        for(let i=1;i<=3;i++){
-            let el = document.getElementById('galleryImage'+i);
-            if(el && el.value.trim()!=='') images.push(el.value.trim());
         }
-        return images;
-    }
 
-    function setGalleryImages(gallery){
-        if(!Array.isArray(gallery)) return;
-        gallery.forEach((img,i)=>{
-            let input = document.getElementById(`galleryImage${i+1}`);
-            if(input) input.value = img;
-        });
-    }
+        // ================== المعرض ==================
+        function previewImage(inputId, previewId){
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+            input.addEventListener('input',function(){
+                const url = this.value.trim();
+                if(url && (url.startsWith('http://')||url.startsWith('https://'))){
+                    preview.innerHTML=`<div class="preview-item"><img src="${url}" onerror="this.src='https://placehold.co/100x100/ef4444/white?text=خطأ'"><button class="remove-image" onclick="clearImage('${inputId}','${previewId}')">×</button></div>`;
+                }else{preview.innerHTML='';}
+            });
+        }
+        function clearImage(inputId, previewId){document.getElementById(inputId).value=''; document.getElementById(previewId).innerHTML='';}
 
-    // ================== فتح الصفحة ==================
-    async function initPage(){
-        await loadApps();
-        loadCategoriesForSelect();
+        // ================== الوظائف ==================
+        function searchApps(){ let term=document.getElementById('searchInput')?.value.toLowerCase().trim(); if(term) window.location.href=`apps.html?search=${encodeURIComponent(term)}`; }
+        function getGalleryImages(){ let imgs=[]; for(let i=1;i<=3;i++){ let el=document.getElementById('galleryImage'+i); if(el && el.value.trim()!=='') imgs.push(el.value.trim()); } return imgs; }
+        function cancelEdit(){ if(confirm('هل تريد إلغاء التعديل؟')) window.location.href='admin.html'; }
 
-        let urlParams = new URLSearchParams(window.location.search);
-        let editId = urlParams.get('edit');
-        if(editId){
-            editAppId = parseInt(editId);
-            let app = apps.find(a=>a.id===editAppId);
-            if(app){
-                document.getElementById('appId').value = app.id;
-                document.getElementById('appName').value = app.name;
-                document.getElementById('appDescription').value = app.description;
-                document.getElementById('appVersion').value = app.version;
-                document.getElementById('appDeviceType').value = app.deviceType;
-                document.getElementById('appSize').value = app.size;
-                document.getElementById('appImage').value = app.image;
-                document.getElementById('appDownloadLink').value = app.downloadLink;
-                document.getElementById('appDeveloper').value = app.developer || '';
-                setGalleryImages(app.gallery);
-                setTimeout(()=>{document.getElementById('appCategory').value=app.category},100);
-                document.getElementById('submitBtn').innerText='💾 حفظ التغييرات';
-                document.getElementById('cancelBtn').style.display='inline-block';
+        // ================== حفظ التطبيق ==================
+        let apps = [];
+        let editAppId = null;
+        async function loadApps(){
+            try{
+                const res=await fetch(CONFIG.JSONBIN.BASE_URL + CONFIG.JSONBIN.BIN_ID, { headers: { 'X-Master-Key': CONFIG.JSONBIN.MASTER_KEY }});
+                const data = await res.json();
+                apps = data.record.apps || [];
+            }catch(e){ console.error(e); }
+        }
+        async function saveApps(){
+            try{
+                await fetch(CONFIG.JSONBIN.BASE_URL + CONFIG.JSONBIN.BIN_ID, { method:'PUT', headers:{ 'Content-Type':'application/json','X-Master-Key':CONFIG.JSONBIN.MASTER_KEY,'X-Bin-Versioning':'false'}, body: JSON.stringify({apps:apps}) });
+            }catch(e){ console.error(e); alert('فشل رفع البيانات'); }
+        }
+
+        async function saveApp(){
+            let appId = document.getElementById('appId').value;
+            let isEdit = appId && appId!=='';
+            let appData={
+                id:isEdit?parseInt(appId):Date.now(),
+                name:document.getElementById('appName').value.trim(),
+                description:document.getElementById('appDescription').value.trim(),
+                version:document.getElementById('appVersion').value.trim(),
+                category:document.getElementById('appCategory').value,
+                deviceType:document.getElementById('appDeviceType').value,
+                size:document.getElementById('appSize').value.trim(),
+                image:document.getElementById('appImage').value.trim(),
+                gallery:getGalleryImages(),
+                downloadLink:document.getElementById('appDownloadLink').value.trim(),
+                developer:document.getElementById('appDeveloper').value.trim(),
+                date:new Date().toISOString(),
+                downloads:0,
+                rating:0,
+                ratings:[],
+                comments:[]
+            };
+
+            if(!appData.name || !appData.description || !appData.version || !appData.category || !appData.deviceType || !appData.size || !appData.image || !appData.downloadLink){
+                return alert('يرجى ملء جميع الحقول المطلوبة!');
+            }
+
+            if(isEdit){
+                let oldApp = apps.find(a=>a.id===appData.id);
+                if(oldApp){
+                    appData.downloads = oldApp.downloads;
+                    appData.rating = oldApp.rating;
+                    appData.ratings = oldApp.ratings;
+                    appData.comments = oldApp.comments;
+                }
+                apps = apps.filter(a=>a.id!==appData.id);
+                apps.push(appData);
+                await saveApps();
+                alert('تم تعديل التطبيق بنجاح');
+                window.location.href='admin.html';
+            }else{
+                apps.push(appData);
+                await saveApps();
+                alert('تم رفع التطبيق بنجاح');
+                window.location.href='admin.html';
             }
         }
-    }
 
-    // ================== حفظ التطبيق ==================
-    async function saveApp(){
-        let appId = document.getElementById('appId').value;
-        let isEdit = appId && appId!=='';
-        let appData = {
-            id: isEdit?parseInt(appId):Date.now(),
-            name: document.getElementById('appName').value.trim(),
-            description: document.getElementById('appDescription').value.trim(),
-            version: document.getElementById('appVersion').value.trim(),
-            category: document.getElementById('appCategory').value,
-            deviceType: document.getElementById('appDeviceType').value,
-            size: document.getElementById('appSize').value.trim(),
-            image: document.getElementById('appImage').value.trim(),
-            gallery: getGalleryImages(),
-            downloadLink: document.getElementById('appDownloadLink').value.trim(),
-            developer: document.getElementById('appDeveloper').value.trim(),
-            date: new Date().toISOString(),
-            downloads: 0,
-            rating: 0,
-            ratings: [],
-            comments: []
-        };
+        document.getElementById('submitBtn')?.addEventListener('click', e=>{ e.preventDefault(); saveApp(); });
+        document.getElementById('uploadForm')?.addEventListener('submit', e=>{ e.preventDefault(); saveApp(); });
 
-        if(!appData.name || !appData.description || !appData.version || !appData.category || !appData.deviceType || !appData.size || !appData.image || !appData.downloadLink){
-            return alert('يرجى ملء جميع الحقول المطلوبة!');
-        }
+        previewImage('appImage','mainImagePreview');
+        previewImage('galleryImage1','preview1');
+        previewImage('galleryImage2','preview2');
+        previewImage('galleryImage3','preview3');
 
-        if(isEdit){
-            let oldApp = apps.find(a=>a.id===appData.id);
-            if(oldApp){
-                appData.downloads = oldApp.downloads;
-                appData.rating = oldApp.rating;
-                appData.ratings = oldApp.ratings;
-                appData.comments = oldApp.comments;
+        // ================== تشغيل الصفحة ==================
+        async function initPage(){
+            await loadApps();
+            loadCategoriesForSelect();
+
+            let urlParams = new URLSearchParams(window.location.search);
+            let editId = urlParams.get('edit');
+            if(editId){
+                editAppId = parseInt(editId);
+                let app = apps.find(a=>a.id===editAppId);
+                if(app){
+                    document.getElementById('appId').value = app.id;
+                    document.getElementById('appName').value = app.name;
+                    document.getElementById('appDescription').value = app.description;
+                    document.getElementById('appVersion').value = app.version;
+                    document.getElementById('appDeviceType').value = app.deviceType;
+                    document.getElementById('appSize').value = app.size;
+                    document.getElementById('appImage').value = app.image;
+                    document.getElementById('appDownloadLink').value = app.downloadLink;
+                    document.getElementById('appDeveloper').value = app.developer || '';
+                    setTimeout(()=>{document.getElementById('appCategory').value=app.category},100);
+                    let gallery = app.gallery || [];
+                    gallery.forEach((img,i)=>{
+                        let input = document.getElementById('galleryImage'+(i+1));
+                        if(input) input.value = img;
+                    });
+                    document.getElementById('submitBtn').innerText='💾 حفظ التغييرات';
+                    document.getElementById('cancelBtn').style.display='inline-block';
+                }
             }
-            apps = apps.filter(a=>a.id!==appData.id);
-            apps.push(appData);
-            await saveApps();
-            alert('تم تعديل التطبيق بنجاح');
-            window.location.href='admin.html';
-        }else{
-            apps.push(appData);
-            await saveApps();
-            alert('تم رفع التطبيق بنجاح');
-            window.location.href='admin.html';
         }
-    }
 
-    document.getElementById('submitBtn')?.addEventListener('click',e=>{e.preventDefault(); saveApp();});
-    document.getElementById('uploadForm')?.addEventListener('submit',e=>{e.preventDefault(); saveApp();});
-    function cancelEdit(){if(confirm('هل تريد إلغاء التعديل؟')) window.location.href='admin.html';}
-
-    // ================== معاينة الصور ==================
-    function previewImage(inputId, previewId){
-        const input = document.getElementById(inputId);
-        const preview = document.getElementById(previewId);
-        if(!input || !preview) return;
-        input.addEventListener('input',function(){
-            const url = this.value.trim();
-            if(url && (url.startsWith('http://')||url.startsWith('https://'))){
-                preview.innerHTML=`<div class="preview-item"><img src="${url}" onerror="this.src='https://placehold.co/100x100/ef4444/white?text=خطأ'"><button class="remove-image" onclick="clearImage('${inputId}','${previewId}')">×</button></div>`;
-            }else if(url){
-                preview.innerHTML=`<div class="preview-item" style="background:#fee2e2; display:flex; align-items:center; justify-content:center; color:#ef4444;">رابط غير صالح</div>`;
-            }else{preview.innerHTML='';}
-        });
-    }
-
-    function clearImage(inputId, previewId){document.getElementById(inputId).value=''; document.getElementById(previewId).innerHTML='';}
-
-    previewImage('appImage','mainImagePreview');
-    previewImage('galleryImage1','preview1');
-    previewImage('galleryImage2','preview2');
-    previewImage('galleryImage3','preview3');
-
-    initPage();
+        initPage();
     </script>
 </body>
 </html>
