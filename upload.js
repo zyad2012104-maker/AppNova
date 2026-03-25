@@ -1,11 +1,11 @@
-// upload.js - رفع وتعديل التطبيقات (نسخة مصححة بالكامل)
+// upload.js - نسخة مبسطة جداً
 
 let editAppId = null;
 let urlParams = new URLSearchParams(window.location.search);
 let editId = urlParams.get('edit');
 if(editId) {
     editAppId = parseInt(editId);
-    console.log('✏️ وضع التعديل - معرف التطبيق:', editAppId);
+    console.log('✏️ وضع التعديل - ID:', editAppId);
 }
 
 function checkLoginAndRedirect() {
@@ -28,7 +28,6 @@ function loadCategoriesForSelect() {
     });
 }
 
-// دالة لجلب الصور من الحقول
 function getGalleryImages() {
     let images = [];
     
@@ -38,25 +37,19 @@ function getGalleryImages() {
     
     if (img1 && img1.value && img1.value.trim() !== '') {
         images.push(img1.value.trim());
-        console.log('✅ صورة 1:', img1.value);
     }
     if (img2 && img2.value && img2.value.trim() !== '') {
         images.push(img2.value.trim());
-        console.log('✅ صورة 2:', img2.value);
     }
     if (img3 && img3.value && img3.value.trim() !== '') {
         images.push(img3.value.trim());
-        console.log('✅ صورة 3:', img3.value);
     }
     
-    console.log('📸 إجمالي الصور:', images.length);
     return images;
 }
 
-// دالة لعرض الصور في حقول التعديل
 function setGalleryImages(gallery) {
     if (!gallery) return;
-    console.log('📸 تحميل الصور للتعديل:', gallery);
     
     if (gallery[0]) {
         let input1 = document.getElementById('galleryImage1');
@@ -84,24 +77,18 @@ function setGalleryImages(gallery) {
     }
 }
 
-// انتظار تحميل البيانات
-(async function checkEditMode() {
-    console.log('⏳ انتظار تحميل البيانات...');
+// تحميل بيانات التعديل
+(async function loadEditData() {
     while (!jsonbinReady) {
         await new Promise(resolve => setTimeout(resolve, 100));
     }
-    console.log('✅ البيانات جاهزة');
     
     if (!checkLoginAndRedirect()) return;
     loadCategoriesForSelect();
     
     if(editAppId) {
         let appToEdit = apps.find(a => a.id === editAppId);
-        console.log('🔍 البحث عن التطبيق للمعرف:', editAppId);
-        console.log('📱 التطبيق الموجود:', appToEdit);
-        
         if(appToEdit) {
-            console.log('✏️ جاري تحميل بيانات التطبيق للتعديل:', appToEdit.name);
             document.getElementById('pageTitle').innerHTML = '✏️ تعديل التطبيق';
             document.getElementById('pageDesc').innerHTML = 'قم بتعديل بيانات التطبيق';
             document.getElementById('submitBtn').innerHTML = '💾 حفظ التغييرات';
@@ -120,64 +107,31 @@ function setGalleryImages(gallery) {
                 document.getElementById('appDeveloper').value = appToEdit.developer;
             }
             
-            // عرض الصور عند التعديل
             if (appToEdit.gallery && appToEdit.gallery.length > 0) {
                 setGalleryImages(appToEdit.gallery);
             }
             
-            // معاينة الصورة الرئيسية
             if (appToEdit.image) {
                 let mainPreview = document.getElementById('mainImagePreview');
                 if (mainPreview) {
                     mainPreview.innerHTML = `<div class="preview-item"><img src="${appToEdit.image}"><button class="remove-image" onclick="clearImage('appImage', 'mainImagePreview')">×</button></div>`;
                 }
             }
-        } else {
-            console.log('❌ لم يتم العثور على التطبيق للمعرف:', editAppId);
         }
     }
 })();
 
-// دالة حفظ التطبيق (جديدة ومصححة)
-async function saveAppData(isEdit, appData) {
-    if (isEdit) {
-        // وضع التعديل
-        let index = apps.findIndex(a => a.id === appData.id);
-        if (index !== -1) {
-            // الحفاظ على الإحصائيات القديمة
-            appData.downloads = apps[index].downloads;
-            appData.rating = apps[index].rating;
-            appData.ratings = apps[index].ratings;
-            // استبدال التطبيق بالكامل
-            apps[index] = appData;
-            await saveApps();
-            console.log('✅ تم تعديل التطبيق بنجاح:', appData.name);
-            console.log('✅ الصور المحفوظة:', appData.gallery);
-            return true;
-        }
-        return false;
-    } else {
-        // وضع الإضافة الجديدة
-        apps.push(appData);
-        await saveApps();
-        console.log('✅ تم رفع التطبيق الجديد بنجاح:', appData.name);
-        console.log('✅ الصور المحفوظة:', appData.gallery);
-        return true;
-    }
-}
-
-// معالجة إرسال النموذج
-document.getElementById('uploadForm')?.addEventListener('submit', async function(e) {
-    e.preventDefault();
+// دالة حفظ التطبيق
+async function saveApp() {
     console.log('===== بدء حفظ التطبيق =====');
     
     if(!currentUser) {
         showAlert('يرجى تسجيل الدخول أولاً', 'error');
         window.location.href = 'login.html';
-        return;
+        return false;
     }
     
-    // جلب جميع البيانات من النموذج
+    // جلب البيانات
     let appId = document.getElementById('appId').value;
     let isEdit = (appId && appId !== '');
     
@@ -191,41 +145,25 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
     let appDownloadLink = document.getElementById('appDownloadLink').value.trim();
     let appDeveloper = document.getElementById('appDeveloper').value.trim();
     
-    console.log('📝 البيانات الأساسية:', {
-        name: appName,
-        isEdit: isEdit,
-        appId: appId
-    });
-    
     // جلب الصور
     let galleryImages = getGalleryImages();
     
-    // التحقق من الحقول المطلوبة
-    if (!appName) { showAlert('يرجى إدخال اسم التطبيق', 'error'); return; }
-    if (!appDescription) { showAlert('يرجى إدخال وصف التطبيق', 'error'); return; }
-    if (!appVersion) { showAlert('يرجى إدخال إصدار التطبيق', 'error'); return; }
-    if (!appCategory) { showAlert('يرجى اختيار تصنيف التطبيق', 'error'); return; }
-    if (!appDeviceType) { showAlert('يرجى اختيار نوع الجهاز', 'error'); return; }
-    if (!appSize) { showAlert('يرجى إدخال حجم التطبيق', 'error'); return; }
-    if (!appDownloadLink) { showAlert('يرجى إدخال رابط تحميل التطبيق', 'error'); return; }
+    console.log('📝 الاسم:', appName);
+    console.log('📸 عدد الصور:', galleryImages.length);
     
-    // معالجة الصورة الرئيسية
+    // التحقق
+    if (!appName) { showAlert('يرجى إدخال اسم التطبيق', 'error'); return false; }
+    if (!appDescription) { showAlert('يرجى إدخال وصف التطبيق', 'error'); return false; }
+    if (!appVersion) { showAlert('يرجى إدخال إصدار التطبيق', 'error'); return false; }
+    if (!appCategory) { showAlert('يرجى اختيار تصنيف التطبيق', 'error'); return false; }
+    if (!appDeviceType) { showAlert('يرجى اختيار نوع الجهاز', 'error'); return false; }
+    if (!appSize) { showAlert('يرجى إدخال حجم التطبيق', 'error'); return false; }
+    if (!appDownloadLink) { showAlert('يرجى إدخال رابط تحميل التطبيق', 'error'); return false; }
+    
     if (!appImage) {
         appImage = 'https://placehold.co/400x200/667eea/white?text=' + encodeURIComponent(appName);
-    } else if (!appImage.startsWith('http')) {
-        showAlert('رابط الصورة الرئيسية يجب أن يبدأ بـ http:// أو https://', 'error');
-        return;
     }
     
-    // التحقق من صحة روابط الصور
-    for (let i = 0; i < galleryImages.length; i++) {
-        if (!galleryImages[i].startsWith('http')) {
-            showAlert(`الصورة رقم ${i+1} يجب أن تبدأ بـ http:// أو https://`, 'error');
-            return;
-        }
-    }
-    
-    // إنشاء بيانات التطبيق
     let appData = {
         id: isEdit ? parseInt(appId) : Date.now(),
         name: appName,
@@ -246,28 +184,49 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
         date: new Date().toISOString()
     };
     
-    console.log('📦 بيانات التطبيق النهائية:', appData);
-    console.log('📸 عدد الصور:', galleryImages.length);
-    
-    // حفظ البيانات
-    let success = await saveAppData(isEdit, appData);
-    
-    if (success) {
-        let message = isEdit ? 'تم تعديل التطبيق بنجاح مع ' + galleryImages.length + ' صور' : 'تم رفع التطبيق بنجاح مع ' + galleryImages.length + ' صور';
-        showAlert(message, 'success');
-        
-        if (isEdit) {
+    if (isEdit) {
+        // تعديل
+        let index = apps.findIndex(a => a.id === appData.id);
+        if (index !== -1) {
+            appData.downloads = apps[index].downloads;
+            appData.rating = apps[index].rating;
+            appData.ratings = apps[index].ratings;
+            apps[index] = appData;
+            await saveApps();
+            console.log('✅ تم التعديل بنجاح');
+            showAlert('تم تعديل التطبيق بنجاح', 'success');
             window.location.href = 'admin.html';
-        } else {
-            window.location.href = `app-detail.html?id=${appData.id}`;
+            return true;
         }
     } else {
-        showAlert('حدث خطأ أثناء حفظ التطبيق', 'error');
+        // إضافة جديدة
+        apps.push(appData);
+        await saveApps();
+        console.log('✅ تم الرفع بنجاح');
+        showAlert('تم رفع التطبيق بنجاح', 'success');
+        window.location.href = `app-detail.html?id=${appData.id}`;
+        return true;
     }
+    
+    return false;
+}
+
+// ربط حدث الضغط على زر الرفع
+document.getElementById('submitBtn')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    console.log('🖱️ تم الضغط على زر رفع التطبيق');
+    saveApp();
+});
+
+// ربط حدث إرسال النموذج (كإجراء احتياطي)
+document.getElementById('uploadForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    console.log('📝 تم إرسال النموذج');
+    saveApp();
 });
 
 function cancelEdit() {
-    if (confirm('هل تريد إلغاء التعديل؟ سيتم فقدان التغييرات غير المحفوظة.')) {
+    if (confirm('هل تريد إلغاء التعديل؟')) {
         window.location.href = 'admin.html';
     }
 }
