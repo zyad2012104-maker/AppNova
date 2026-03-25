@@ -185,19 +185,23 @@ async function saveApp() {
     };
     
     if (isEdit) {
-        // تعديل
-        let index = apps.findIndex(a => a.id === appData.id);
-        if (index !== -1) {
-            appData.downloads = apps[index].downloads;
-            appData.rating = apps[index].rating;
-            appData.ratings = apps[index].ratings;
-            apps[index] = appData;
-            await saveApps();
-            console.log('✅ تم التعديل بنجاح');
-            showAlert('تم تعديل التطبيق بنجاح', 'success');
-            window.location.href = 'admin.html';
-            return true;
-        }
+    console.log('✏️ جاري تعديل التطبيق...');
+
+    // حذف التطبيق القديم
+    apps = apps.filter(a => a.id !== appData.id);
+
+    // إضافة البيانات الجديدة
+    apps.push(appData);
+
+    // حفظ
+    await saveApps();
+
+    console.log('✅ تم حذف القديم وإضافة الجديد بنجاح');
+    showAlert('تم تحديث التطبيق بنجاح', 'success');
+
+    window.location.href = 'admin.html';
+    return true;
+}
     } else {
         // إضافة جديدة
         apps.push(appData);
