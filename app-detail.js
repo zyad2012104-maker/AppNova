@@ -1,4 +1,4 @@
-// app-detail.js - صفحة تفاصيل التطبيق مع عرض الصور
+// app-detail.js - صفحة تفاصيل التطبيق
 
 console.log('🚀 بدء تحميل app-detail.js');
 
@@ -100,51 +100,33 @@ function renderGallery(images) {
     
     if (!images || images.length === 0) {
         console.log('⚠️ لا توجد صور لعرضها');
-        return '<div style="margin: 20px 0; padding: 20px; background: #f8fafc; border-radius: 16px; text-align: center; color: #64748b;">📸 لا توجد صور مضافة للتطبيق</div>';
+        return '';
     }
     
     // تصفية الصور الفارغة
     const validImages = images.filter(img => img && img.trim() !== '');
     
     if (validImages.length === 0) {
-        return '<div style="margin: 20px 0; padding: 20px; background: #f8fafc; border-radius: 16px; text-align: center; color: #64748b;">📸 لا توجد صور مضافة للتطبيق</div>';
+        console.log('⚠️ لا توجد صور صالحة بعد التصفية');
+        return '';
     }
     
     galleryImages = validImages;
     console.log('✅ تم تحميل الصور بنجاح، عددها:', validImages.length);
     
-    // إذا كانت صورة واحدة فقط
-    if (validImages.length === 1) {
-        return `
-            <div style="margin: 20px 0 30px 0;">
-                <h3 style="margin-bottom: 15px; color: #2d3748; font-size: 1.1rem;">📸 صور من التطبيق</h3>
-                <div style="background: #f8fafc; border-radius: 16px; padding: 15px;">
-                    <div style="cursor: pointer;" onclick="openImageModal(0)">
-                        <img src="${validImages[0]}" style="width: 100%; height: 300px; object-fit: cover; border-radius: 12px;" onerror="this.src='https://placehold.co/600x300/cccccc/white?text=Image+Error'">
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-    
-    // عرض الصور على شكل شبكة
+    // عرض الصور
     let html = `
         <div style="margin: 20px 0 30px 0;">
             <h3 style="margin-bottom: 15px; color: #2d3748; font-size: 1.1rem;">📸 صور من التطبيق (${validImages.length} صور)</h3>
             <div style="background: #f8fafc; border-radius: 16px; padding: 15px;">
-                <!-- الصورة الرئيسية الكبيرة -->
-                <div style="margin-bottom: 15px; cursor: pointer;" onclick="openImageModal(0)">
-                    <img src="${validImages[0]}" style="width: 100%; height: 350px; object-fit: cover; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" onerror="this.src='https://placehold.co/800x350/cccccc/white?text=Image+Error'">
-                </div>
-                
-                <!-- الصور المصغرة -->
-                <div style="display: flex; gap: 12px; overflow-x: auto; padding: 5px 0;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
     `;
     
     validImages.forEach((img, idx) => {
         html += `
-            <div style="flex-shrink: 0; cursor: pointer;" onclick="openImageModal(${idx})">
-                <img src="${img}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 12px; border: ${idx === 0 ? '3px solid #667eea' : '2px solid #e2e8f0'}; transition: all 0.2s;" onerror="this.src='https://placehold.co/100x100/cccccc/white?text=Error'">
+            <div style="cursor: pointer; position: relative;" onclick="openImageModal(${idx})">
+                <img src="${img}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onerror="this.src='https://placehold.co/200x150/ef4444/white?text=خطأ+في+الصورة'">
+                <div style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 20px; font-size: 11px;">${idx + 1}/${validImages.length}</div>
             </div>
         `;
     });
@@ -230,7 +212,6 @@ function displayAppDetails() {
     // عرض الصفحة الكاملة
     container.innerHTML = `
         <div style="max-width: 1200px; margin: 0 auto; background: white; border-radius: 25px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
-            <!-- Header -->
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; color: white;">
                 <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: center;">
                     <img src="${appIcon}" style="width: 120px; height: 120px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); object-fit: cover;" onerror="this.src='https://placehold.co/120x120/cccccc/white?text=No+Image'">
@@ -251,23 +232,19 @@ function displayAppDetails() {
             </div>
             
             <div style="padding: 30px;">
-                <!-- زر التحميل -->
                 <div style="margin-bottom: 30px;">
                     <button onclick="downloadApp(${app.id})" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 15px 50px; border-radius: 50px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 15px rgba(16,185,129,0.3); width: 100%;">
                         📥 تحميل التطبيق
                     </button>
                 </div>
                 
-                <!-- معرض الصور -->
                 ${galleryHtml}
                 
-                <!-- وصف التطبيق -->
                 <div style="background: #f8fafc; border-radius: 16px; padding: 25px; margin: 25px 0;">
                     <h2 style="margin-bottom: 15px; color: #2d3748;">📄 وصف التطبيق</h2>
                     <p style="line-height: 1.8; color: #4a5568;">${escapeHtml(app.description)}</p>
                 </div>
                 
-                <!-- إحصائيات التقييمات -->
                 <div style="background: #f8fafc; border-radius: 16px; padding: 25px; margin: 25px 0;">
                     <h3 style="margin-bottom: 20px; color: #2d3748;">📊 إحصائيات التقييمات</h3>
                     <div style="display: flex; flex-wrap: wrap; gap: 40px; align-items: center;">
@@ -282,11 +259,9 @@ function displayAppDetails() {
                     </div>
                 </div>
                 
-                <!-- التعليقات -->
                 <div style="margin-top: 30px;">
                     <h2 style="margin-bottom: 20px; color: #2d3748;">💬 آراء المستخدمين</h2>
                     
-                    <!-- نموذج إضافة تعليق -->
                     <div style="background: #f8fafc; border-radius: 16px; padding: 25px; margin-bottom: 25px;">
                         <h3 style="margin-bottom: 15px;">✍️ أضف تعليقك</h3>
                         <input type="text" id="commentName" placeholder="اسمك" style="width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #e2e8f0; border-radius: 12px; font-family: inherit;" ${currentUser ? `value="${escapeHtml(currentUser.username)}"` : ''}>
@@ -335,7 +310,7 @@ async function addNewComment(appId) {
     displayAppDetails();
 }
 
-// إضافة دالة لفتح الصور إلى النافذة العامة
+// إضافة دوال الصور إلى النافذة العامة
 window.openImageModal = openImageModal;
 window.closeImageModal = closeImageModal;
 window.prevImage = prevImage;

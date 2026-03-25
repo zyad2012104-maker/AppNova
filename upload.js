@@ -39,11 +39,15 @@ function getGalleryImages() {
         const input = document.getElementById(imageInputs[i]);
         if (input) {
             const url = input.value.trim();
-            if (url && url !== '' && (url.startsWith('http://') || url.startsWith('https://'))) {
-                images.push(url);
-                console.log(`✅ تم إضافة الصورة ${i+1}:`, url);
-            } else if (url && url !== '') {
-                console.log(`⚠️ الصورة ${i+1} رابط غير صالح:`, url);
+            if (url && url !== '') {
+                // التحقق من صحة الرابط
+                if (url.startsWith('http://') || url.startsWith('https://')) {
+                    images.push(url);
+                    console.log(`✅ تم إضافة الصورة ${i+1}:`, url);
+                } else {
+                    console.log(`⚠️ الصورة ${i+1} رابط غير صالح (يجب أن يبدأ بـ http:// أو https://):`, url);
+                    showAlert(`⚠️ رابط الصورة ${i+1} غير صحيح. يجب أن يبدأ بـ http:// أو https://`, 'error');
+                }
             }
         }
     }
@@ -147,10 +151,20 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
         return;
     }
     
+    // جلب الصورة الرئيسية
+    let mainImage = document.getElementById('appImage').value.trim();
+    
     // جلب معرض الصور من الحقول المنفصلة
     let galleryImages = getGalleryImages();
     
-    console.log('📸 الصور قبل الحفظ:', galleryImages);
+    // إذا لم توجد صور في المعرض ولكن هناك صورة رئيسية، أضفها كأول صورة في المعرض
+    if (galleryImages.length === 0 && mainImage && mainImage !== '') {
+        galleryImages = [mainImage];
+        console.log('📸 تم إضافة الصورة الرئيسية كأول صورة في المعرض');
+    }
+    
+    console.log('📸 الصورة الرئيسية:', mainImage);
+    console.log('📸 معرض الصور:', galleryImages);
     
     let appData = {
         id: document.getElementById('appId').value ? parseInt(document.getElementById('appId').value) : Date.now(),
@@ -160,7 +174,7 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
         category: document.getElementById('appCategory').value,
         deviceType: document.getElementById('appDeviceType').value,
         size: document.getElementById('appSize').value.trim(),
-        image: document.getElementById('appImage').value.trim(),
+        image: mainImage,
         gallery: galleryImages,
         downloadLink: document.getElementById('appDownloadLink').value.trim(),
         downloads: 0,
@@ -212,6 +226,7 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
     
     console.log('📦 بيانات التطبيق النهائية:', appData);
     console.log('📸 معرض الصور في البيانات:', appData.gallery);
+    console.log('📸 عدد الصور:', appData.gallery.length);
     
     if(document.getElementById('appId').value) {
         // وضع التعديل
@@ -222,26 +237,18 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
             appData.ratings = apps[index].ratings;
             apps[index] = appData;
             await saveApps();
+            console.log('✅ تم تعديل التطبيق بنجاح مع الصور:', appData.gallery);
             showAlert('تم تعديل التطبيق بنجاح', 'success');
             window.location.href = 'admin.html';
         }
     } else {
         // وضع الإضافة الجديدة
-        if (typeof showClickAdForUpload === 'function') {
-            showClickAdForUpload(async () => {
-                apps.push(appData);
-                await saveApps();
-                console.log('✅ تم حفظ التطبيق مع الصور:', appData.gallery);
-                showAlert('تم رفع التطبيق بنجاح', 'success');
-                window.location.href = `app-detail.html?id=${appData.id}`;
-            });
-        } else {
-            apps.push(appData);
-            await saveApps();
-            console.log('✅ تم حفظ التطبيق مع الصور:', appData.gallery);
-            showAlert('تم رفع التطبيق بنجاح', 'success');
-            window.location.href = `app-detail.html?id=${appData.id}`;
-        }
+        apps.push(appData);
+        await saveApps();
+        console.log('✅ تم حفظ التطبيق الجديد بنجاح مع الصور:', appData.gallery);
+        console.log('✅ عدد الصور المحفوظة:', appData.gallery.length);
+        showAlert('تم رفع التطبيق بنجاح مع ' + appData.gallery.length + ' صور', 'success');
+        window.location.href = `app-detail.html?id=${appData.id}`;
     }
 });
 
