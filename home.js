@@ -1,4 +1,4 @@
-// home.js - الصفحة الرئيسية المصححة
+// home.js - الصفحة الرئيسية
 
 function displayAppsGrid(list, containerId) {
     let container = document.getElementById(containerId);
@@ -38,14 +38,18 @@ function displayHomeContent() {
     console.log('✅ تم عرض المحتوى الرئيسي بنجاح');
 }
 
-// انتظار تحميل البيانات
-let homeInitInterval = setInterval(async () => {
-    if (jsonbinReady) {
-        clearInterval(homeInitInterval);
-        console.log('✅ البيانات جاهزة، بدء عرض المحتوى');
+// التحقق من وجود البيانات كل 500ms
+let homeCheckInterval = setInterval(function() {
+    if (typeof apps !== 'undefined' && apps.length > 0) {
+        clearInterval(homeCheckInterval);
+        console.log('✅ تم تحميل التطبيقات، بدء عرض الصفحة الرئيسية');
+        displayHomeContent();
+    } else if (typeof apps !== 'undefined' && apps.length === 0) {
+        clearInterval(homeCheckInterval);
+        console.log('⚠️ لا توجد تطبيقات، عرض رسالة فارغة');
         displayHomeContent();
     } else {
-        console.log('⏳ انتظار تحميل البيانات...');
+        console.log('⏳ انتظار تحميل التطبيقات...');
         // عرض رسالة انتظار
         if(document.getElementById('latestApps') && document.getElementById('latestApps').innerHTML === '') {
             document.getElementById('latestApps').innerHTML = '<div class="loading-skeleton">🔄 جاري تحميل التطبيقات...</div>';

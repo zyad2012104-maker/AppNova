@@ -1,4 +1,4 @@
-// app-detail.js - صفحة تفاصيل التطبيق المصححة
+// app-detail.js - صفحة تفاصيل التطبيق
 
 let currentApp = null;
 let selectedRating = 0;
@@ -81,12 +81,8 @@ function renderAppDetail() {
         : 'https://placehold.co/300x300/667eea/white?text=' + encodeURIComponent(currentApp.name);
     
     const fullStars = Math.floor(currentApp.rating);
-    const halfStar = (currentApp.rating % 1) >= 0.5;
-    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-    let starsHtml = '';
-    for (let i = 0; i < fullStars; i++) starsHtml += '★';
-    if (halfStar) starsHtml += '½';
-    for (let i = 0; i < emptyStars; i++) starsHtml += '☆';
+    const emptyStars = 5 - fullStars;
+    let starsHtml = '★'.repeat(fullStars) + '☆'.repeat(emptyStars);
     
     const appComments = comments.filter(c => c.appId === currentApp.id).reverse();
     let commentsHtml = '';
@@ -324,21 +320,27 @@ function loadApp() {
     currentApp = apps.find(a => a.id === appId);
     
     if (!currentApp) {
-        showError(`لم نتمكن من العثور على التطبيق المطلوب (ID: ${appId})`);
+        showError(`لم نتمكن من العثور على التطبيق المطلوب`);
         return;
     }
     
     renderAppDetail();
 }
 
-// انتظار تحميل البيانات
+// عرض رسالة تحميل أولاً
 showLoading();
-let detailInterval = setInterval(() => {
-    if (jsonbinReady) {
-        clearInterval(detailInterval);
+
+// التحقق من وجود التطبيقات
+let detailCheckInterval = setInterval(function() {
+    if (typeof apps !== 'undefined' && apps.length > 0) {
+        clearInterval(detailCheckInterval);
         console.log('✅ البيانات جاهزة، بدء تحميل تفاصيل التطبيق');
         loadApp();
+    } else if (typeof apps !== 'undefined' && apps.length === 0) {
+        clearInterval(detailCheckInterval);
+        console.log('⚠️ لا توجد تطبيقات، عرض رسالة خطأ');
+        showError('لا توجد تطبيقات متاحة حالياً');
     } else {
-        console.log('⏳ انتظار تحميل البيانات لصفحة التفاصيل...');
+        console.log('⏳ انتظار تحميل التطبيقات لصفحة التفاصيل...');
     }
 }, 500);

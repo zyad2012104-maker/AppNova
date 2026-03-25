@@ -1,4 +1,4 @@
-// apps-page.js - صفحة التطبيقات المصححة
+// apps-page.js - صفحة التطبيقات
 
 let currentCategoryFilter = 'all';
 
@@ -11,13 +11,13 @@ function displayCategoriesBar() {
     
     if (!categories || categories.length === 0) {
         console.log('⚠️ لا توجد تصنيفات');
-        container.innerHTML = '<button class="category-btn active" onclick="filterApps(\'all\')">الكل</button>';
+        container.innerHTML = '<button class="category-btn active" onclick="filterApps(\'all\')">📱 الكل</button>';
         return;
     }
     
     let html = '<button class="category-btn active" onclick="filterApps(\'all\')">📱 الكل</button>';
     categories.forEach(cat => {
-        html += `<button class="category-btn" onclick="filterApps('${cat.key}')">${cat.icon} ${cat.name}</button>`;
+        html += `<button class="category-btn" onclick="filterApps(\'${cat.key}\')">${cat.icon} ${cat.name}</button>`;
     });
     container.innerHTML = html;
     console.log(`✅ تم عرض ${categories.length + 1} تصنيف`);
@@ -58,8 +58,8 @@ function filterApps(category) {
     // تحديث حالة الأزرار
     document.querySelectorAll('.category-btn').forEach(btn => {
         btn.classList.remove('active');
-        const btnCategory = btn.getAttribute('onclick');
-        if (btnCategory && btnCategory.includes(`'${category}'`)) {
+        const onclickAttr = btn.getAttribute('onclick');
+        if (onclickAttr && onclickAttr.includes(`'${category}'`)) {
             btn.classList.add('active');
         }
     });
@@ -89,10 +89,10 @@ function searchAppsFromPage() {
     container.innerHTML = filtered.map(app => createAppCard(app)).join('');
 }
 
-// تحميل التصنيفات والتطبيقات عند تحميل الصفحة
-let appsPageInitInterval = setInterval(async () => {
-    if (jsonbinReady) {
-        clearInterval(appsPageInitInterval);
+// التحقق من وجود البيانات
+let appsCheckInterval = setInterval(function() {
+    if (typeof apps !== 'undefined' && apps.length > 0 && typeof categories !== 'undefined' && categories.length > 0) {
+        clearInterval(appsCheckInterval);
         console.log('✅ البيانات جاهزة، بدء عرض صفحة التطبيقات');
         displayCategoriesBar();
         displayAllApps();
@@ -104,6 +104,11 @@ let appsPageInitInterval = setInterval(async () => {
             document.getElementById('searchInput').value = searchTerm;
             searchAppsFromPage();
         }
+    } else if (typeof apps !== 'undefined' && apps.length === 0) {
+        clearInterval(appsCheckInterval);
+        console.log('⚠️ لا توجد تطبيقات، عرض رسالة فارغة');
+        displayCategoriesBar();
+        displayAllApps();
     } else {
         console.log('⏳ انتظار تحميل البيانات لصفحة التطبيقات...');
         // عرض رسالة انتظار
