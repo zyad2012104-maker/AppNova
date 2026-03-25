@@ -1,27 +1,76 @@
-// upload.js - نسخة معدلة بالكامل
+// ================== الإعدادات ==================
+const CONFIG = {
+    JSONBIN: {
+        BIN_ID: '69c13f81b7ec241ddc956318',
+        MASTER_KEY: '$2a$10$5X1fbgOhCiGV23rKGUkLLuhD/a1eIHNuKwvtNzKwu3W7KT8CGpaG.',
+        BASE_URL: 'https://api.jsonbin.io/v3/b/'
+    }
+};
 
+let apps = [];
+let jsonbinReady = false;
 let editAppId = null;
-let urlParams = new URLSearchParams(window.location.search);
-let editId = urlParams.get('edit');
 
-if (editId) {
-    editAppId = parseInt(editId);
-    console.log('✏️ وضع التعديل - ID:', editAppId);
+// ================== تحميل البيانات ==================
+async function loadApps() {
+    try {
+        console.log('📥 تحميل البيانات...');
+
+        const response = await fetch(
+            CONFIG.JSONBIN.BASE_URL + CONFIG.JSONBIN.BIN_ID,
+            {
+                headers: {
+                    'X-Master-Key': CONFIG.JSONBIN.MASTER_KEY
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        apps = data.record.apps || [];
+        jsonbinReady = true;
+
+        console.log('✅ تم تحميل التطبيقات:', apps);
+
+    } catch (error) {
+        console.error('❌ خطأ تحميل:', error);
+    }
 }
 
-// تحقق تسجيل الدخول
-function checkLoginAndRedirect() {
-    if (!currentUser) {
-        showAlert('⚠️ يجب تسجيل الدخول أولاً', 'error');
-        setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 1500);
+// ================== حفظ البيانات ==================
+async function saveApps() {
+    try {
+        console.log('📡 جاري الحفظ...');
+
+        const response = await fetch(
+            CONFIG.JSONBIN.BASE_URL + CONFIG.JSONBIN.BIN_ID,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': CONFIG.JSONBIN.MASTER_KEY,
+                    'X-Bin-Versioning': 'false'
+                },
+                body: JSON.stringify({ apps: apps })
+            }
+        );
+
+        const data = await response.json();
+
+        console.log('📥 رد السيرفر:', data);
+
+        if (!response.ok) throw new Error('فشل الحفظ');
+
+        return true;
+
+    } catch (error) {
+        console.error('❌ خطأ حفظ:', error);
+        alert('فشل حفظ البيانات');
         return false;
     }
-    return true;
 }
 
-// تحميل التصنيفات
+// ================== تحميل التصنيفات ==================
 function loadCategoriesForSelect() {
     let select = document.getElementById('appCategory');
     if (!select) return;
@@ -33,11 +82,11 @@ function loadCategoriesForSelect() {
     });
 }
 
-// جلب صور المعرض
+// ================== صور المعرض ==================
 function getGalleryImages() {
     let images = [];
 
-    ['galleryImage1', 'galleryImage2', 'galleryImage3'].forEach(id => {
+    ['galleryImage1','galleryImage2','galleryImage3'].forEach(id => {
         let el = document.getElementById(id);
         if (el && el.value.trim()) {
             images.push(el.value.trim());
@@ -47,43 +96,31 @@ function getGalleryImages() {
     return images;
 }
 
-// تعيين صور المعرض
 function setGalleryImages(gallery) {
     if (!gallery) return;
 
     gallery.forEach((img, i) => {
-        let input = document.getElementById(`galleryImage${i + 1}`);
-        let preview = document.getElementById(`preview${i + 1}`);
-
+        let input = document.getElementById(`galleryImage${i+1}`);
         if (input) input.value = img;
-        if (preview) {
-            preview.innerHTML = `
-                <div class="preview-item">
-                    <img src="${img}">
-                    <button onclick="clearImage('galleryImage${i + 1}','preview${i + 1}')">×</button>
-                </div>`;
-        }
     });
 }
 
-// تحميل بيانات التعديل
-(async function loadEditData() {
-    while (!jsonbinReady) {
-        await new Promise(r => setTimeout(r, 100));
-    }
-
-    if (!checkLoginAndRedirect()) return;
+// ================== فتح التعديل ==================
+async function initPage() {
+    await loadApps();
 
     loadCategoriesForSelect();
 
-    if (editAppId) {
+    let urlParams = new URLSearchParams(window.location.search);
+    let editId = urlParams.get('edit');
+
+    if (editId) {
+        editAppId = parseInt(editId);
+
         let app = apps.find(a => a.id === editAppId);
 
         if (app) {
-            console.log('📦 تحميل بيانات التطبيق');
-
-            document.getElementById('pageTitle').innerText = '✏️ تعديل التطبيق';
-            document.getElementById('submitBtn').innerText = '💾 حفظ التغييرات';
+            console.log('✏️ تحميل بيانات التعديل');
 
             document.getElementById('appId').value = app.id;
             document.getElementById('appName').value = app.name;
@@ -98,29 +135,17 @@ function setGalleryImages(gallery) {
 
             setGalleryImages(app.gallery);
 
-            if (app.image) {
-                document.getElementById('mainImagePreview').innerHTML = `
-                    <div class="preview-item">
-                        <img src="${app.image}">
-                    </div>`;
-            }
+            document.getElementById('submitBtn').innerText = '💾 حفظ التغييرات';
         }
     }
-})();
+}
 
-// حفظ التطبيق
+// ================== حفظ / رفع ==================
 async function saveApp() {
-    console.log('🚀 بدء الحفظ');
-
-    if (!currentUser) {
-        showAlert('يجب تسجيل الدخول', 'error');
-        return;
-    }
 
     let appId = document.getElementById('appId').value;
     let isEdit = appId && appId !== '';
 
-    // البيانات
     let appData = {
         id: isEdit ? parseInt(appId) : Date.now(),
         name: document.getElementById('appName').value.trim(),
@@ -132,35 +157,27 @@ async function saveApp() {
         image: document.getElementById('appImage').value.trim(),
         gallery: getGalleryImages(),
         downloadLink: document.getElementById('appDownloadLink').value.trim(),
-        developer: document.getElementById('appDeveloper').value.trim() || currentUser.username,
-        userId: currentUser.id,
-        userName: currentUser.username,
+        developer: document.getElementById('appDeveloper').value.trim(),
         date: new Date().toISOString(),
 
-        // القيم الافتراضية
         downloads: 0,
         rating: 0,
         ratings: [],
         comments: []
     };
 
-    // تحقق
-    if (!appData.name || !appData.description || !appData.downloadLink) {
-        showAlert('❌ أكمل البيانات', 'error');
-        return;
-    }
+    if (!appData.name) return alert('اكتب اسم التطبيق');
 
     if (isEdit) {
-        console.log('✏️ تعديل...');
+        console.log('✏️ تعديل التطبيق');
 
         let oldApp = apps.find(a => a.id === appData.id);
 
         if (oldApp) {
-            // الاحتفاظ بالبيانات المهمة
-            appData.downloads = oldApp.downloads || 0;
-            appData.rating = oldApp.rating || 0;
-            appData.ratings = oldApp.ratings || [];
-            appData.comments = oldApp.comments || [];
+            appData.downloads = oldApp.downloads;
+            appData.rating = oldApp.rating;
+            appData.ratings = oldApp.ratings;
+            appData.comments = oldApp.comments;
         }
 
         // حذف القديم
@@ -171,34 +188,31 @@ async function saveApp() {
 
         await saveApps();
 
-        showAlert('✅ تم تحديث التطبيق', 'success');
+        alert('تم التحديث');
         window.location.href = 'admin.html';
 
     } else {
-        console.log('📤 إضافة جديدة');
+        console.log('📤 رفع جديد');
 
         apps.push(appData);
+
         await saveApps();
 
-        showAlert('✅ تم رفع التطبيق', 'success');
-        window.location.href = `app-detail.html?id=${appData.id}`;
+        alert('تم الرفع');
+        window.location.href = 'admin.html';
     }
 }
 
-// زر الإرسال
-document.getElementById('submitBtn')?.addEventListener('click', function (e) {
+// ================== أحداث ==================
+document.getElementById('submitBtn')?.addEventListener('click', function(e){
     e.preventDefault();
     saveApp();
 });
 
-// النموذج
-document.getElementById('uploadForm')?.addEventListener('submit', function (e) {
+document.getElementById('uploadForm')?.addEventListener('submit', function(e){
     e.preventDefault();
     saveApp();
 });
 
-// مسح صورة
-window.clearImage = function (inputId, previewId) {
-    document.getElementById(inputId).value = '';
-    document.getElementById(previewId).innerHTML = '';
-};
+// ================== تشغيل ==================
+initPage();
