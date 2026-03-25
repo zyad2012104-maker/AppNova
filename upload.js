@@ -1,4 +1,4 @@
-// upload.js - رفع وتعديل التطبيقات مع حفظ الصور
+// upload.js - رفع وتعديل التطبيقات
 
 let editAppId = null;
 let urlParams = new URLSearchParams(window.location.search);
@@ -55,7 +55,6 @@ function setGalleryImages(gallery) {
     
     if (gallery[0]) {
         document.getElementById('galleryImage1').value = gallery[0];
-        // تحديث المعاينة
         let preview1 = document.getElementById('preview1');
         if (preview1) {
             preview1.innerHTML = `<div class="preview-item"><img src="${gallery[0]}"><button class="remove-image" onclick="clearImage('galleryImage1', 'preview1')">×</button></div>`;
@@ -75,6 +74,16 @@ function setGalleryImages(gallery) {
             preview3.innerHTML = `<div class="preview-item"><img src="${gallery[2]}"><button class="remove-image" onclick="clearImage('galleryImage3', 'preview3')">×</button></div>`;
         }
     }
+}
+
+// دالة لمسح حقول الصور عند التعديل
+function clearGalleryFields() {
+    document.getElementById('galleryImage1').value = '';
+    document.getElementById('galleryImage2').value = '';
+    document.getElementById('galleryImage3').value = '';
+    document.getElementById('preview1').innerHTML = '';
+    document.getElementById('preview2').innerHTML = '';
+    document.getElementById('preview3').innerHTML = '';
 }
 
 // انتظار تحميل البيانات
@@ -144,7 +153,7 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
     let appDownloadLink = document.getElementById('appDownloadLink').value.trim();
     let appDeveloper = document.getElementById('appDeveloper').value.trim();
     
-    // جلب الصور
+    // جلب الصور الجديدة (من الحقول الحالية)
     let galleryImages = getGalleryImages();
     
     // التحقق من الحقول المطلوبة
@@ -158,6 +167,14 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
     
     if (!appImage) {
         appImage = 'https://placehold.co/400x200/667eea/white?text=' + encodeURIComponent(appName);
+    }
+    
+    // التحقق من صحة روابط الصور
+    for (let i = 0; i < galleryImages.length; i++) {
+        if (!galleryImages[i].startsWith('http')) {
+            showAlert(`الصورة رقم ${i+1} يجب أن تبدأ بـ http:// أو https://`, 'error');
+            return;
+        }
     }
     
     let appData = {
@@ -181,14 +198,18 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
     };
     
     if(document.getElementById('appId').value) {
-        // تعديل
+        // تعديل - استبدال كامل للبيانات
         let index = apps.findIndex(a => a.id === parseInt(document.getElementById('appId').value));
         if(index !== -1) {
+            // الحفاظ على الإحصائيات القديمة
             appData.downloads = apps[index].downloads;
             appData.rating = apps[index].rating;
             appData.ratings = apps[index].ratings;
+            // استبدال التطبيق بالكامل
             apps[index] = appData;
             await saveApps();
+            console.log('✅ تم تعديل التطبيق:', appData.name);
+            console.log('✅ الصور الجديدة:', appData.gallery);
             showAlert('تم تعديل التطبيق بنجاح مع ' + galleryImages.length + ' صور', 'success');
             window.location.href = 'admin.html';
         }
@@ -196,6 +217,8 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
         // إضافة جديدة
         apps.push(appData);
         await saveApps();
+        console.log('✅ تم رفع التطبيق:', appData.name);
+        console.log('✅ الصور:', appData.gallery);
         showAlert('تم رفع التطبيق بنجاح مع ' + galleryImages.length + ' صور', 'success');
         window.location.href = `app-detail.html?id=${appData.id}`;
     }

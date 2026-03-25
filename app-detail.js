@@ -1,4 +1,4 @@
-// app-detail.js - صفحة تفاصيل التطبيق مع تحسين حجم الصور
+// app-detail.js - صفحة تفاصيل التطبيق
 
 console.log('🚀 بدء تحميل app-detail.js');
 
@@ -64,7 +64,7 @@ function closeImageModal() {
     }
 }
 
-// دالة عرض معرض الصور - مع تحسين حجم الصور
+// دالة عرض معرض الصور - ارتفاع 200px
 function renderGallery(images) {
     console.log('🎨 عرض الصور:', images);
     
@@ -78,13 +78,13 @@ function renderGallery(images) {
         <div style="margin: 20px 0 30px 0;">
             <h3 style="margin-bottom: 15px; color: #2d3748;">📸 صور من التطبيق (${images.length} صور)</h3>
             <div style="background: #f8fafc; border-radius: 16px; padding: 15px;">
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;">
     `;
     
     images.forEach((img, idx) => {
         html += `
             <div style="cursor: pointer; position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onclick="openImageModal(${idx})">
-                <img src="${img}" style="width: 100%; height: 200px; object-fit: cover; display: block;" onerror="this.src='https://placehold.co/280x200/ef4444/white?text=خطأ+في+الصورة'">
+                <img src="${img}" style="width: 100%; height: 200px; object-fit: cover; display: block;" onerror="this.src='https://placehold.co/280x200/ef4444/white?text=خطأ'">
                 <div style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px;">
                     ${idx + 1}/${images.length}
                 </div>
@@ -150,7 +150,6 @@ function displayAppDetails() {
     
     container.innerHTML = `
         <div style="max-width:1200px;margin:0 auto;background:white;border-radius:25px;overflow:hidden;">
-            <!-- Header -->
             <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:40px;color:white;">
                 <div style="display:flex;flex-wrap:wrap;gap:30px;align-items:center;">
                     <img src="${appIcon}" style="width:120px;height:120px;border-radius:25px;object-fit:cover;box-shadow:0 10px 30px rgba(0,0,0,0.3);" onerror="this.src='https://placehold.co/120x120/cccccc/white?text=No+Image'">
@@ -171,19 +170,15 @@ function displayAppDetails() {
             </div>
             
             <div style="padding:30px;">
-                <!-- زر التحميل -->
                 <button onclick="downloadApp(${app.id})" style="background:linear-gradient(135deg,#10b981 0%,#059669 100%);color:white;border:none;padding:15px;border-radius:50px;font-size:1.2rem;font-weight:bold;cursor:pointer;width:100%;margin-bottom:30px;">📥 تحميل التطبيق</button>
                 
-                <!-- معرض الصور -->
                 ${galleryHtml}
                 
-                <!-- وصف التطبيق -->
                 <div style="background:#f8fafc;border-radius:16px;padding:25px;margin:20px 0;">
                     <h2>📄 وصف التطبيق</h2>
                     <p style="line-height:1.8;">${escapeHtml(app.description)}</p>
                 </div>
                 
-                <!-- إحصائيات التقييمات -->
                 <div style="background:#f8fafc;border-radius:16px;padding:25px;margin:20px 0;">
                     <h3>📊 إحصائيات التقييمات</h3>
                     <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:center;">
@@ -196,7 +191,6 @@ function displayAppDetails() {
                     </div>
                 </div>
                 
-                <!-- التعليقات -->
                 <div>
                     <h2>💬 التعليقات</h2>
                     <div style="background:#f8fafc;border-radius:16px;padding:25px;margin:20px 0;">
