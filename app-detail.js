@@ -1,4 +1,4 @@
-// app-detail.js - النسخة المصححة بالكامل
+// app-detail.js - النسخة النهائية المصححة
 
 let currentApp = null;
 let selectedRating = 0;
@@ -80,7 +80,10 @@ function renderAppDetail(app) {
     console.log('🎨 جاري عرض تفاصيل التطبيق:', app.name);
     
     const container = document.getElementById('appContent');
-    if (!container) return;
+    if (!container) {
+        console.error('❌ عنصر appContent غير موجود');
+        return;
+    }
     
     const totalRatings = app.ratings.length;
     const ratingsValues = app.ratings.map(r => typeof r === 'object' ? r.rating : r);
@@ -111,7 +114,7 @@ function renderAppDetail(app) {
     let ratingFormHtml = '';
     if (currentUser && !hasUserRated) {
         ratingFormHtml = `
-            <div style="background: #f8fafc; border-radius: 16px; padding: 20px; margin: 20px 0;">
+            <div class="rating-section" style="background: #f8fafc; border-radius: 16px; padding: 20px; margin: 20px 0;">
                 <h3>⭐ قيم هذا التطبيق</h3>
                 <div style="display: flex; gap: 10px; margin: 15px 0;">
                     ${[1,2,3,4,5].map(star => `
@@ -296,7 +299,7 @@ async function submitAppRating(appId) {
     await saveApps();
     showAlert('تم إضافة تقييمك بنجاح!', 'success');
     tempRating = 0;
-    loadApp(); // إعادة تحميل الصفحة
+    location.reload(); // إعادة تحميل الصفحة
 }
 
 // دالة إرسال تعليق
@@ -333,7 +336,7 @@ async function submitComment(appId) {
     // تفريغ الحقول
     if (document.getElementById('commentText')) document.getElementById('commentText').value = '';
     
-    loadApp(); // إعادة تحميل الصفحة
+    location.reload(); // إعادة تحميل الصفحة
 }
 
 // دالة فتح الصورة
@@ -352,11 +355,15 @@ function loadApp() {
     appId = parseInt(urlParams.get('id'));
     
     console.log('🔍 معرف التطبيق:', appId);
-    console.log('📱 عدد التطبيقات:', apps.length);
-    console.log('📱 التطبيقات:', apps);
+    console.log('📱 عدد التطبيقات:', apps ? apps.length : 0);
     
     if (!appId || isNaN(appId)) {
         showError('معرّف التطبيق غير صحيح');
+        return;
+    }
+    
+    if (!apps || apps.length === 0) {
+        showError('لم يتم تحميل البيانات بعد. يرجى تحديث الصفحة');
         return;
     }
     
@@ -371,31 +378,23 @@ function loadApp() {
     renderAppDetail(app);
 }
 
-// بدء تحميل الصفحة مع انتظار البيانات
+// بدء تحميل الصفحة
 showLoading();
 
-// استخدام setInterval للانتظار حتى تحميل البيانات
+// التحقق من وجود البيانات
+let checkCount = 0;
 let loadInterval = setInterval(function() {
-    console.log('⏳ انتظار تحميل البيانات... apps:', apps?.length);
+    checkCount++;
+    console.log(`⏳ انتظار تحميل البيانات... (${checkCount}) apps: ${apps ? apps.length : 'undefined'}`);
     
     if (typeof apps !== 'undefined' && apps.length > 0) {
         clearInterval(loadInterval);
         console.log('✅ البيانات جاهزة، بدء تحميل التطبيق');
         loadApp();
-    } else if (typeof apps !== 'undefined' && apps.length === 0) {
+    } else if (checkCount > 30) {
+        // بعد 15 ثانية (30 * 500ms)
         clearInterval(loadInterval);
-        console.log('⚠️ لا توجد تطبيقات');
-        showError('لا توجد تطبيقات متاحة حالياً');
+        console.log('❌ انتهى وقت الانتظار');
+        showError('حدث خطأ في تحميل البيانات. يرجى تحديث الصفحة أو التحقق من اتصال الإنترنت');
     }
 }, 500);
-
-// timeout بعد 10 ثواني
-setTimeout(function() {
-    if (loadInterval) {
-        clearInterval(loadInterval);
-        if ((!apps || apps.length === 0)) {
-            console.log('❌ timeout: لم يتم تحميل البيانات');
-            showError('حدث خطأ في تحميل البيانات. يرجى تحديث الصفحة');
-        }
-    }
-}, 10000);
