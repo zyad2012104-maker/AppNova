@@ -1,4 +1,4 @@
-// upload.js - رفع وتعديل التطبيقات
+// upload.js - نسخة تصحيح الأخطاء
 
 let editAppId = null;
 let urlParams = new URLSearchParams(window.location.search);
@@ -30,68 +30,55 @@ function loadCategoriesForSelect() {
     });
 }
 
-// دالة لجلب معرض الصور من الحقول
+// دالة لجلب معرض الصور
 function getGalleryImages() {
+    console.log('🔍 جلب الصور من الحقول...');
+    
     let images = [];
     
-    // جلب الصورة الأولى
-    let img1 = document.getElementById('galleryImage1')?.value.trim();
-    if (img1 && img1 !== '') {
-        images.push(img1);
-        console.log('✅ صورة 1:', img1);
+    // الحصول على الصورة 1
+    let img1 = document.getElementById('galleryImage1');
+    if (img1) {
+        let val1 = img1.value.trim();
+        console.log('📸 حقل الصورة 1:', val1);
+        if (val1 && val1 !== '') {
+            images.push(val1);
+        }
     }
     
-    // جلب الصورة الثانية
-    let img2 = document.getElementById('galleryImage2')?.value.trim();
-    if (img2 && img2 !== '') {
-        images.push(img2);
-        console.log('✅ صورة 2:', img2);
+    // الحصول على الصورة 2
+    let img2 = document.getElementById('galleryImage2');
+    if (img2) {
+        let val2 = img2.value.trim();
+        console.log('📸 حقل الصورة 2:', val2);
+        if (val2 && val2 !== '') {
+            images.push(val2);
+        }
     }
     
-    // جلب الصورة الثالثة
-    let img3 = document.getElementById('galleryImage3')?.value.trim();
-    if (img3 && img3 !== '') {
-        images.push(img3);
-        console.log('✅ صورة 3:', img3);
+    // الحصول على الصورة 3
+    let img3 = document.getElementById('galleryImage3');
+    if (img3) {
+        let val3 = img3.value.trim();
+        console.log('📸 حقل الصورة 3:', val3);
+        if (val3 && val3 !== '') {
+            images.push(val3);
+        }
     }
     
-    console.log('📸 جميع الصور:', images);
+    console.log('📸 الصور المجمعة:', images);
+    console.log('📸 عدد الصور:', images.length);
+    
     return images;
-}
-
-// دالة لتعيين الصور عند التعديل
-function setGalleryImages(gallery) {
-    if (!gallery) return;
-    
-    if (gallery[0]) {
-        document.getElementById('galleryImage1').value = gallery[0];
-        // تحديث المعاينة
-        let preview1 = document.getElementById('preview1');
-        if (preview1) {
-            preview1.innerHTML = `<div class="preview-item"><img src="${gallery[0]}"><button class="remove-image" onclick="clearImage('galleryImage1', 'preview1')">×</button></div>`;
-        }
-    }
-    if (gallery[1]) {
-        document.getElementById('galleryImage2').value = gallery[1];
-        let preview2 = document.getElementById('preview2');
-        if (preview2) {
-            preview2.innerHTML = `<div class="preview-item"><img src="${gallery[1]}"><button class="remove-image" onclick="clearImage('galleryImage2', 'preview2')">×</button></div>`;
-        }
-    }
-    if (gallery[2]) {
-        document.getElementById('galleryImage3').value = gallery[2];
-        let preview3 = document.getElementById('preview3');
-        if (preview3) {
-            preview3.innerHTML = `<div class="preview-item"><img src="${gallery[2]}"><button class="remove-image" onclick="clearImage('galleryImage3', 'preview3')">×</button></div>`;
-        }
-    }
 }
 
 // انتظار تحميل البيانات
 (async function checkEditMode() {
+    console.log('⏳ انتظار تحميل البيانات...');
     while (!jsonbinReady) {
         await new Promise(resolve => setTimeout(resolve, 100));
     }
+    console.log('✅ البيانات جاهزة');
     
     if (!checkLoginAndRedirect()) return;
     loadCategoriesForSelect();
@@ -99,6 +86,7 @@ function setGalleryImages(gallery) {
     if(editAppId) {
         let appToEdit = apps.find(a => a.id === editAppId);
         if(appToEdit) {
+            console.log('✏️ تعديل التطبيق:', appToEdit.name);
             document.getElementById('pageTitle').innerHTML = '✏️ تعديل التطبيق';
             document.getElementById('pageDesc').innerHTML = 'قم بتعديل بيانات التطبيق';
             document.getElementById('submitBtn').innerHTML = '💾 حفظ التغييرات';
@@ -119,7 +107,10 @@ function setGalleryImages(gallery) {
             
             // عرض الصور إذا وجدت
             if (appToEdit.gallery && appToEdit.gallery.length) {
-                setGalleryImages(appToEdit.gallery);
+                console.log('📸 تحميل الصور للتعديل:', appToEdit.gallery);
+                if (appToEdit.gallery[0]) document.getElementById('galleryImage1').value = appToEdit.gallery[0];
+                if (appToEdit.gallery[1]) document.getElementById('galleryImage2').value = appToEdit.gallery[1];
+                if (appToEdit.gallery[2]) document.getElementById('galleryImage3').value = appToEdit.gallery[2];
             }
         }
     }
@@ -128,6 +119,8 @@ function setGalleryImages(gallery) {
 // معالجة إرسال النموذج
 document.getElementById('uploadForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
+    
+    console.log('📝 بدء عملية حفظ التطبيق...');
     
     if(!currentUser) {
         showAlert('يرجى تسجيل الدخول أولاً', 'error');
@@ -145,6 +138,14 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
     let appImage = document.getElementById('appImage').value.trim();
     let appDownloadLink = document.getElementById('appDownloadLink').value.trim();
     let appDeveloper = document.getElementById('appDeveloper').value.trim();
+    
+    console.log('📝 البيانات الأساسية:', {
+        name: appName,
+        category: appCategory,
+        version: appVersion,
+        size: appSize,
+        image: appImage
+    });
     
     // جلب الصور
     let galleryImages = getGalleryImages();
@@ -184,9 +185,9 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
         date: new Date().toISOString()
     };
     
-    console.log('📦 حفظ التطبيق:', appData);
-    console.log('📸 الصور المحفوظة:', galleryImages);
-    console.log('📸 عدد الصور:', galleryImages.length);
+    console.log('📦 بيانات التطبيق الكاملة:', appData);
+    console.log('📸 الصور في gallery:', appData.gallery);
+    console.log('📸 عدد الصور:', appData.gallery.length);
     
     if(document.getElementById('appId').value) {
         // تعديل
@@ -197,6 +198,7 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
             appData.ratings = apps[index].ratings;
             apps[index] = appData;
             await saveApps();
+            console.log('✅ تم تعديل التطبيق بنجاح');
             showAlert('تم تعديل التطبيق بنجاح مع ' + galleryImages.length + ' صور', 'success');
             window.location.href = 'admin.html';
         }
@@ -204,6 +206,8 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
         // إضافة جديدة
         apps.push(appData);
         await saveApps();
+        console.log('✅ تم رفع التطبيق الجديد بنجاح');
+        console.log('📸 الصور المحفوظة في قاعدة البيانات:', apps[apps.length-1].gallery);
         showAlert('تم رفع التطبيق بنجاح مع ' + galleryImages.length + ' صور', 'success');
         window.location.href = `app-detail.html?id=${appData.id}`;
     }
@@ -219,8 +223,3 @@ function searchApps() {
     let term = document.getElementById('searchInput')?.value.toLowerCase().trim();
     if(term) window.location.href = `apps.html?search=${encodeURIComponent(term)}`;
 }
-
-window.clearImage = function(inputId, previewId) {
-    document.getElementById(inputId).value = '';
-    document.getElementById(previewId).innerHTML = '';
-};
