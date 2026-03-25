@@ -1,83 +1,21 @@
 // app-detail.js - النسخة النهائية المصححة
 
+console.log('🚀 بدء تحميل app-detail.js');
+
 let currentApp = null;
-let selectedRating = 0;
-let appId = null;
 
 // دالة للحصول على معرف التطبيق من الرابط
 function getAppIdFromURL() {
     const params = new URLSearchParams(window.location.search);
-    return params.get("id");
-}
-
-// دالة عرض رسالة تحميل
-function showLoading() {
-    const container = document.getElementById('appContent');
-    if (container) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 60px; background: white; border-radius: 25px;">
-                <div style="width: 60px; height: 60px; border: 4px solid #e2e8f0; border-top: 4px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
-                <h3>🔄 جاري تحميل بيانات التطبيق...</h3>
-                <p style="color: #64748b; margin-top: 10px;">يرجى الانتظار قليلاً</p>
-            </div>
-        `;
-    }
-}
-
-// دالة عرض خطأ
-function showError(message) {
-    const container = document.getElementById('appContent');
-    if (container) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 60px; background: white; border-radius: 25px;">
-                <h1 style="font-size: 3rem;">😕</h1>
-                <p style="color: #64748b; margin: 15px 0;">${message}</p>
-                <a href="apps.html" class="submit-btn" style="display: inline-block; width: auto; padding: 12px 25px;">📱 استعراض التطبيقات</a>
-            </div>
-        `;
-    }
-}
-
-// دالة عرض النجوم
-function renderStars(rating = 0) {
-    let stars = "";
-    for (let i = 1; i <= 5; i++) {
-        stars += i <= Math.round(rating) ? "★" : "☆";
-    }
-    return stars;
-}
-
-// دالة عرض أشرطة التقييمات
-function renderRatingBars(ratings) {
-    const total = ratings.length;
-    if (total === 0) return '<p style="text-align:center;">لا توجد تقييمات بعد</p>';
-    
-    const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-    ratings.forEach(r => {
-        let val = typeof r === 'object' ? r.rating : r;
-        if (val >= 1 && val <= 5) distribution[Math.floor(val)]++;
-    });
-    
-    let html = '';
-    for (let star = 5; star >= 1; star--) {
-        const count = distribution[star];
-        const percentage = (count / total) * 100;
-        html += `
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                <div style="width: 60px; color: #fbbf24;">${'★'.repeat(star)}</div>
-                <div style="flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
-                    <div style="width: ${percentage}%; height: 100%; background: #fbbf24; border-radius: 4px;"></div>
-                </div>
-                <div style="width: 40px; color: #64748b;">${count}</div>
-            </div>
-        `;
-    }
-    return html;
+    const id = params.get("id");
+    console.log('🔍 معرف التطبيق من الرابط:', id);
+    return id;
 }
 
 // دالة عرض تفاصيل التطبيق
-function renderAppDetail(app) {
-    console.log('🎨 جاري عرض تفاصيل التطبيق:', app.name);
+function displayAppDetails() {
+    console.log('🎨 بدء عرض تفاصيل التطبيق');
+    console.log('📦 عدد التطبيقات:', apps ? apps.length : 0);
     
     const container = document.getElementById('appContent');
     if (!container) {
@@ -85,9 +23,82 @@ function renderAppDetail(app) {
         return;
     }
     
+    const appId = getAppIdFromURL();
+    
+    if (!appId) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 60px; background: white; border-radius: 25px;">
+                <h1 style="font-size: 3rem;">😕</h1>
+                <p style="color: #64748b;">معرّف التطبيق غير موجود في الرابط</p>
+                <a href="apps.html" class="submit-btn" style="display: inline-block; width: auto; padding: 12px 25px; margin-top: 20px;">📱 استعراض التطبيقات</a>
+            </div>
+        `;
+        return;
+    }
+    
+    // البحث عن التطبيق
+    const app = apps.find(a => a.id == appId);
+    
+    if (!app) {
+        console.error('❌ التطبيق غير موجود للمعرف:', appId);
+        container.innerHTML = `
+            <div style="text-align: center; padding: 60px; background: white; border-radius: 25px;">
+                <h1 style="font-size: 3rem;">😕</h1>
+                <p style="color: #64748b;">التطبيق غير موجود (ID: ${appId})</p>
+                <a href="apps.html" class="submit-btn" style="display: inline-block; width: auto; padding: 12px 25px; margin-top: 20px;">📱 استعراض التطبيقات</a>
+            </div>
+        `;
+        return;
+    }
+    
+    console.log('✅ تم العثور على التطبيق:', app.name);
+    currentApp = app;
+    
+    // حساب متوسط التقييم
     const totalRatings = app.ratings.length;
-    const ratingsValues = app.ratings.map(r => typeof r === 'object' ? r.rating : r);
-    const avgRating = totalRatings > 0 ? (ratingsValues.reduce((a,b) => a + b, 0) / totalRatings).toFixed(1) : app.rating.toFixed(1);
+    let avgRating = app.rating;
+    if (totalRatings > 0) {
+        const ratingsSum = app.ratings.reduce((sum, r) => sum + (typeof r === 'object' ? r.rating : r), 0);
+        avgRating = (ratingsSum / totalRatings).toFixed(1);
+    }
+    
+    // عرض النجوم
+    function renderStars(rating) {
+        let stars = '';
+        for (let i = 1; i <= 5; i++) {
+            stars += i <= Math.round(rating) ? '★' : '☆';
+        }
+        return stars;
+    }
+    
+    // عرض أشرطة التقييمات
+    function renderRatingBars() {
+        const ratings = app.ratings;
+        const total = ratings.length;
+        if (total === 0) return '<p style="text-align:center;">لا توجد تقييمات بعد</p>';
+        
+        const distribution = {5:0,4:0,3:0,2:0,1:0};
+        ratings.forEach(r => {
+            const val = typeof r === 'object' ? r.rating : r;
+            if (val >= 1 && val <= 5) distribution[Math.floor(val)]++;
+        });
+        
+        let html = '';
+        for (let star = 5; star >= 1; star--) {
+            const count = distribution[star];
+            const percent = (count / total) * 100;
+            html += `
+                <div class="rating-bar">
+                    <div style="width: 60px; color: #fbbf24;">${'★'.repeat(star)}</div>
+                    <div style="flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                        <div style="width: ${percent}%; height: 100%; background: #fbbf24; border-radius: 4px;"></div>
+                    </div>
+                    <div style="width: 40px; color: #64748b;">${count}</div>
+                </div>
+            `;
+        }
+        return html;
+    }
     
     // معرض الصور
     let galleryHtml = '';
@@ -95,45 +106,11 @@ function renderAppDetail(app) {
         galleryHtml = `
             <div style="margin: 30px 0;">
                 <h3>📸 صور من التطبيق</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 15px;">
-                    ${app.gallery.map(img => `<img src="${img}" onclick="openImageModal('${img}')" onerror="this.style.display='none'" style="width: 100%; height: 150px; object-fit: cover; border-radius: 12px; cursor: pointer;">`).join('')}
-                </div>
-            </div>
-        `;
-    }
-    
-    const appIcon = app.icon || app.image || 'https://placehold.co/120x120/667eea/white?text=' + encodeURIComponent(app.name);
-    
-    // التحقق من أن المستخدم قد قيم
-    const hasUserRated = currentUser ? app.ratings.some(r => {
-        if (typeof r === 'object') return r.userId === currentUser.id;
-        return false;
-    }) : false;
-    
-    // نموذج التقييم
-    let ratingFormHtml = '';
-    if (currentUser && !hasUserRated) {
-        ratingFormHtml = `
-            <div class="rating-section" style="background: #f8fafc; border-radius: 16px; padding: 20px; margin: 20px 0;">
-                <h3>⭐ قيم هذا التطبيق</h3>
-                <div style="display: flex; gap: 10px; margin: 15px 0;">
-                    ${[1,2,3,4,5].map(star => `
-                        <span onclick="setRatingValue(${star})" style="font-size: 2rem; cursor: pointer; color: #cbd5e1;">★</span>
+                <div class="gallery-grid">
+                    ${app.gallery.map(img => `
+                        <img src="${img}" onclick="openImageModal('${img}')" onerror="this.style.display='none'">
                     `).join('')}
                 </div>
-                <button onclick="submitAppRating(${app.id})" class="submit-btn" style="width: auto; padding: 10px 25px;">إرسال التقييم</button>
-            </div>
-        `;
-    } else if (currentUser && hasUserRated) {
-        ratingFormHtml = `
-            <div style="background: #e6f7e6; border-radius: 16px; padding: 20px; margin: 20px 0;">
-                <p style="color: #10b981; text-align: center;">✅ لقد قمت بتقييم هذا التطبيق بالفعل. شكراً لك!</p>
-            </div>
-        `;
-    } else if (!currentUser) {
-        ratingFormHtml = `
-            <div style="background: #f8fafc; border-radius: 16px; padding: 20px; margin: 20px 0;">
-                <p style="text-align: center;">🔐 <a href="login.html" style="color: #667eea;">سجل الدخول</a> لتقييم هذا التطبيق</p>
             </div>
         `;
     }
@@ -142,10 +119,10 @@ function renderAppDetail(app) {
     const appComments = comments.filter(c => c.appId === app.id);
     let commentsHtml = '';
     if (appComments.length === 0) {
-        commentsHtml = '<p style="text-align:center; padding:30px; background:#f8fafc; border-radius:16px;">💬 لا توجد تعليقات بعد. كن أول من يعلق!</p>';
+        commentsHtml = '<p style="text-align:center; padding:30px; background:#f8fafc; border-radius:16px;">💬 لا توجد تعليقات بعد</p>';
     } else {
         commentsHtml = appComments.map(comment => `
-            <div style="background: #f8fafc; border-radius: 16px; padding: 20px; margin-bottom: 15px;">
+            <div class="comment-card">
                 <div style="display: flex; justify-content: space-between; flex-wrap: wrap; margin-bottom: 10px; color: #64748b;">
                     <span><strong>${escapeHtml(comment.username)}</strong></span>
                     <span style="color: #fbbf24;">${renderStars(comment.rating)}</span>
@@ -176,23 +153,25 @@ function renderAppDetail(app) {
         `;
     }
     
-    // عرض الصفحة الكاملة
-    const html = `
-        <div style="max-width: 1200px; margin: 0 auto; background: white; border-radius: 25px; overflow: hidden;">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; color: white;">
+    const appIcon = app.icon || app.image || 'https://placehold.co/120x120/667eea/white?text=' + encodeURIComponent(app.name);
+    
+    // عرض الصفحة
+    container.innerHTML = `
+        <div class="app-detail-container">
+            <div class="app-header">
                 <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: center;">
-                    <img src="${appIcon}" style="width: 120px; height: 120px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); object-fit: cover;" onerror="this.src='https://placehold.co/120x120/cccccc/white?text=No+Image'">
+                    <img src="${appIcon}" class="app-icon-large" onerror="this.src='https://placehold.co/120x120/cccccc/white?text=No+Image'">
                     <div>
                         <h1 style="font-size: 2rem; margin-bottom: 10px;">${escapeHtml(app.name)}</h1>
                         <p>${escapeHtml(app.developer || app.userName || "مطور غير معروف")}</p>
-                        <div style="color: #fbbf24; font-size: 1.2rem;">${renderStars(avgRating)}</div>
-                        <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px;">
-                            <span style="background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 50px;">⭐ ${avgRating}</span>
-                            <span style="background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 50px;">📊 ${totalRatings} تقييم</span>
-                            <span style="background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 50px;">📥 ${app.downloads} تحميل</span>
-                            <span style="background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 50px;">📱 ${escapeHtml(app.version)}</span>
-                            <span style="background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 50px;">💾 ${escapeHtml(app.size)}</span>
-                            <span style="background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 50px;">${getCategoryIcon(app.category)} ${getCategoryName(app.category)}</span>
+                        <div class="stars">${renderStars(avgRating)}</div>
+                        <div class="app-meta">
+                            <span>⭐ ${avgRating}</span>
+                            <span>📊 ${totalRatings} تقييم</span>
+                            <span>📥 ${app.downloads} تحميل</span>
+                            <span>📱 ${escapeHtml(app.version)}</span>
+                            <span>💾 ${escapeHtml(app.size)}</span>
+                            <span>${getCategoryIcon(app.category)} ${getCategoryName(app.category)}</span>
                         </div>
                     </div>
                 </div>
@@ -200,7 +179,7 @@ function renderAppDetail(app) {
             
             <div style="padding: 30px;">
                 <div style="margin-bottom: 30px;">
-                    <button onclick="downloadApp(${app.id})" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 15px 40px; border-radius: 50px; font-size: 1.2rem; font-weight: bold; cursor: pointer;">📥 تحميل التطبيق</button>
+                    <button onclick="downloadApp(${app.id})" class="download-btn">📥 تحميل التطبيق</button>
                 </div>
                 
                 ${galleryHtml}
@@ -215,16 +194,14 @@ function renderAppDetail(app) {
                     <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: center;">
                         <div style="text-align: center;">
                             <div style="font-size: 3rem; font-weight: 800; color: #fbbf24;">${avgRating}</div>
-                            <div style="color: #fbbf24;">${renderStars(avgRating)}</div>
+                            <div class="stars">${renderStars(avgRating)}</div>
                             <div style="color: #64748b;">${totalRatings} تقييم</div>
                         </div>
                         <div style="flex: 1;">
-                            ${renderRatingBars(app.ratings)}
+                            ${renderRatingBars()}
                         </div>
                     </div>
                 </div>
-                
-                ${ratingFormHtml}
                 
                 <div style="margin-top: 30px;">
                     <h2>💬 التعليقات</h2>
@@ -238,7 +215,7 @@ function renderAppDetail(app) {
                             <option value="1">⭐ ضعيف</option>
                         </select>
                         <textarea id="commentText" rows="3" placeholder="اكتب تعليقك..." style="width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #e2e8f0; border-radius: 12px; font-family: inherit;"></textarea>
-                        <button onclick="submitComment(${app.id})" class="submit-btn" style="width: auto; padding: 10px 25px;">📝 إرسال التعليق</button>
+                        <button onclick="addNewComment(${app.id})" class="submit-btn" style="width: auto; padding: 10px 25px;">📝 إرسال التعليق</button>
                     </div>
                     <div id="commentsList" style="margin-top: 20px;">${commentsHtml}</div>
                 </div>
@@ -247,63 +224,10 @@ function renderAppDetail(app) {
             </div>
         </div>
     `;
-    
-    container.innerHTML = html;
 }
 
-// دالة إرسال التقييم
-let tempRating = 0;
-function setRatingValue(rating) {
-    tempRating = rating;
-    const stars = document.querySelectorAll('.rating-section span');
-    stars.forEach((star, index) => {
-        star.style.color = index < rating ? '#fbbf24' : '#cbd5e1';
-    });
-}
-
-async function submitAppRating(appId) {
-    if (!currentUser) {
-        showAlert('يرجى تسجيل الدخول أولاً', 'error');
-        window.location.href = 'login.html';
-        return;
-    }
-    
-    if (!tempRating) {
-        showAlert('يرجى اختيار التقييم بالنجوم', 'error');
-        return;
-    }
-    
-    const app = apps.find(a => a.id === appId);
-    if (!app) return;
-    
-    // التحقق من عدم وجود تقييم سابق
-    if (app.ratings.some(r => {
-        if (typeof r === 'object') return r.userId === currentUser.id;
-        return false;
-    })) {
-        showAlert('لقد قمت بتقييم هذا التطبيق بالفعل', 'error');
-        return;
-    }
-    
-    // إضافة التقييم
-    app.ratings.push({
-        userId: currentUser.id,
-        rating: tempRating,
-        date: new Date().toISOString()
-    });
-    
-    // تحديث متوسط التقييم
-    const ratingsValues = app.ratings.map(r => typeof r === 'object' ? r.rating : r);
-    app.rating = ratingsValues.reduce((sum, r) => sum + r, 0) / ratingsValues.length;
-    
-    await saveApps();
-    showAlert('تم إضافة تقييمك بنجاح!', 'success');
-    tempRating = 0;
-    location.reload(); // إعادة تحميل الصفحة
-}
-
-// دالة إرسال تعليق
-async function submitComment(appId) {
+// دالة إضافة تعليق جديد
+async function addNewComment(appId) {
     const name = document.getElementById('commentName')?.value.trim();
     const rating = document.getElementById('commentRating')?.value;
     const text = document.getElementById('commentText')?.value.trim();
@@ -320,7 +244,7 @@ async function submitComment(appId) {
     
     const newComment = {
         id: Date.now(),
-        appId: appId,
+        appId: parseInt(appId),
         userId: currentUser?.id || null,
         username: name,
         comment: text,
@@ -332,11 +256,8 @@ async function submitComment(appId) {
     await saveComments();
     
     showAlert('تم إضافة تعليقك بنجاح!', 'success');
-    
-    // تفريغ الحقول
-    if (document.getElementById('commentText')) document.getElementById('commentText').value = '';
-    
-    location.reload(); // إعادة تحميل الصفحة
+    document.getElementById('commentText').value = '';
+    displayAppDetails(); // إعادة تحميل الصفحة
 }
 
 // دالة فتح الصورة
@@ -349,52 +270,46 @@ function openImageModal(imgSrc) {
     }
 }
 
-// الدالة الرئيسية لتحميل التطبيق
-function loadApp() {
-    const urlParams = new URLSearchParams(window.location.search);
-    appId = parseInt(urlParams.get('id'));
-    
-    console.log('🔍 معرف التطبيق:', appId);
-    console.log('📱 عدد التطبيقات:', apps ? apps.length : 0);
-    
-    if (!appId || isNaN(appId)) {
-        showError('معرّف التطبيق غير صحيح');
-        return;
-    }
-    
-    if (!apps || apps.length === 0) {
-        showError('لم يتم تحميل البيانات بعد. يرجى تحديث الصفحة');
-        return;
-    }
-    
-    const app = apps.find(a => a.id === appId);
-    
-    if (!app) {
-        showError(`لم نتمكن من العثور على التطبيق المطلوب (ID: ${appId})`);
-        return;
-    }
-    
-    currentApp = app;
-    renderAppDetail(app);
-}
-
-// بدء تحميل الصفحة
-showLoading();
-
-// التحقق من وجود البيانات
-let checkCount = 0;
-let loadInterval = setInterval(function() {
-    checkCount++;
-    console.log(`⏳ انتظار تحميل البيانات... (${checkCount}) apps: ${apps ? apps.length : 'undefined'}`);
+// انتظار تحميل البيانات
+let checkInterval = setInterval(function() {
+    console.log('⏳ انتظار تحميل البيانات... apps:', apps ? apps.length : 'undefined');
     
     if (typeof apps !== 'undefined' && apps.length > 0) {
-        clearInterval(loadInterval);
-        console.log('✅ البيانات جاهزة، بدء تحميل التطبيق');
-        loadApp();
-    } else if (checkCount > 30) {
-        // بعد 15 ثانية (30 * 500ms)
-        clearInterval(loadInterval);
-        console.log('❌ انتهى وقت الانتظار');
-        showError('حدث خطأ في تحميل البيانات. يرجى تحديث الصفحة أو التحقق من اتصال الإنترنت');
+        clearInterval(checkInterval);
+        console.log('✅ البيانات جاهزة، عدد التطبيقات:', apps.length);
+        displayAppDetails();
+    } else if (typeof apps !== 'undefined' && apps.length === 0) {
+        clearInterval(checkInterval);
+        console.log('⚠️ لا توجد تطبيقات');
+        const container = document.getElementById('appContent');
+        if (container) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 60px; background: white; border-radius: 25px;">
+                    <h1 style="font-size: 3rem;">📱</h1>
+                    <p style="color: #64748b;">لا توجد تطبيقات متاحة حالياً</p>
+                    <a href="apps.html" class="submit-btn" style="display: inline-block; width: auto; padding: 12px 25px; margin-top: 20px;">📱 استعراض التطبيقات</a>
+                </div>
+            `;
+        }
     }
 }, 500);
+
+// timeout بعد 10 ثواني
+setTimeout(function() {
+    if (checkInterval) {
+        clearInterval(checkInterval);
+        if ((!apps || apps.length === 0)) {
+            console.log('❌ timeout: لم يتم تحميل البيانات');
+            const container = document.getElementById('appContent');
+            if (container && container.innerHTML.includes('loading')) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 60px; background: white; border-radius: 25px;">
+                        <h1 style="font-size: 3rem;">⏰</h1>
+                        <p style="color: #64748b;">انتهى وقت الانتظار. يرجى تحديث الصفحة</p>
+                        <button onclick="location.reload()" class="submit-btn" style="display: inline-block; width: auto; padding: 12px 25px; margin-top: 20px;">🔄 تحديث الصفحة</button>
+                    </div>
+                `;
+            }
+        }
+    }
+}, 10000);

@@ -11,6 +11,95 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .app-detail-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 25px;
+            overflow: hidden;
+        }
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            color: white;
+        }
+        .app-icon-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 25px;
+            object-fit: cover;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .app-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .app-meta span {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 50px;
+        }
+        .stars {
+            color: #fbbf24;
+            font-size: 1.2rem;
+        }
+        .download-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .gallery-grid img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+        .comment-card {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .rating-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .rating-bar-fill {
+            height: 100%;
+            background: #fbbf24;
+            border-radius: 4px;
+        }
+        .loading-spinner {
+            text-align: center;
+            padding: 60px;
+            background: white;
+            border-radius: 25px;
+        }
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
     </style>
 </head>
 <body>
@@ -41,7 +130,13 @@
         </aside>
 
         <main class="content-wrapper">
-            <div id="appContent"></div>
+            <div id="appContent">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <h3>🔄 جاري تحميل بيانات التطبيق...</h3>
+                    <p style="color: #64748b;">يرجى الانتظار قليلاً</p>
+                </div>
+            </div>
         </main>
 
         <aside class="ad-sidebar ad-right">
@@ -95,6 +190,10 @@
             let term = document.getElementById('searchInput')?.value.toLowerCase().trim();
             if(term) window.location.href = `apps.html?search=${encodeURIComponent(term)}`;
         }
+        
+        // عرض معلومات التصحيح في Console
+        console.log('✅ تم تحميل app-detail.html');
+        console.log('📦 apps متغير:', typeof apps);
     </script>
 </body>
 </html>
