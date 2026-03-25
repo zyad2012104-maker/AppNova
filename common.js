@@ -1,4 +1,4 @@
-// common.js - الملف الرئيسي المصحح بالكامل
+// common.js - الملف الرئيسي الكامل والمحدث
 
 // ========== المتغيرات العامة ==========
 let apps = [];
@@ -136,10 +136,12 @@ function createDemoApps() {
             deviceType: "both",
             size: "45 MB",
             image: "https://placehold.co/400x200/667eea/white?text=NovaSocial",
+            icon: "https://placehold.co/120x120/667eea/white?text=NS",
             gallery: [
                 "https://placehold.co/300x200/667eea/white?text=الشاشة+الرئيسية",
                 "https://placehold.co/300x200/667eea/white?text=المحادثات",
-                "https://placehold.co/300x200/667eea/white?text=الملف+الشخصي"
+                "https://placehold.co/300x200/667eea/white?text=الملف+الشخصي",
+                "https://placehold.co/300x200/667eea/white?text=الإشعارات"
             ],
             downloadLink: "#",
             downloads: 1250,
@@ -147,7 +149,8 @@ function createDemoApps() {
             ratings: [5, 4, 5, 4, 5],
             userId: 1,
             userName: "المدير",
-            date: new Date().toISOString()
+            date: new Date().toISOString(),
+            developer: "NovaTech"
         },
         {
             id: 2,
@@ -158,14 +161,20 @@ function createDemoApps() {
             deviceType: "android",
             size: "78 MB",
             image: "https://placehold.co/400x200/764ba2/white?text=Puzzle+Master",
-            gallery: [],
+            icon: "https://placehold.co/120x120/764ba2/white?text=PM",
+            gallery: [
+                "https://placehold.co/300x200/764ba2/white?text=مستوى+1",
+                "https://placehold.co/300x200/764ba2/white?text=مستوى+2",
+                "https://placehold.co/300x200/764ba2/white?text=مستوى+3"
+            ],
             downloadLink: "#",
             downloads: 890,
             rating: 4.2,
             ratings: [4, 5, 4, 4, 4],
             userId: 1,
             userName: "المدير",
-            date: new Date().toISOString()
+            date: new Date().toISOString(),
+            developer: "Puzzle Games"
         },
         {
             id: 3,
@@ -176,14 +185,20 @@ function createDemoApps() {
             deviceType: "both",
             size: "120 MB",
             image: "https://placehold.co/400x200/48c6ef/white?text=EduSmart",
-            gallery: [],
+            icon: "https://placehold.co/120x120/48c6ef/white?text=ES",
+            gallery: [
+                "https://placehold.co/300x200/48c6ef/white?text=الرئيسية",
+                "https://placehold.co/300x200/48c6ef/white?text=الدروس",
+                "https://placehold.co/300x200/48c6ef/white?text=الاختبارات"
+            ],
             downloadLink: "#",
             downloads: 2340,
             rating: 4.8,
             ratings: [5, 5, 4, 5, 5],
             userId: 1,
             userName: "المدير",
-            date: new Date().toISOString()
+            date: new Date().toISOString(),
+            developer: "EduTech"
         },
         {
             id: 4,
@@ -194,14 +209,20 @@ function createDemoApps() {
             deviceType: "both",
             size: "32 MB",
             image: "https://placehold.co/400x200/10b981/white?text=TaskFlow",
-            gallery: [],
+            icon: "https://placehold.co/120x120/10b981/white?text=TF",
+            gallery: [
+                "https://placehold.co/300x200/10b981/white?text=المهام",
+                "https://placehold.co/300x200/10b981/white?text=التقويم",
+                "https://placehold.co/300x200/10b981/white?text=التقارير"
+            ],
             downloadLink: "#",
             downloads: 567,
             rating: 4.3,
             ratings: [4, 5, 4, 4, 4],
             userId: 1,
             userName: "المدير",
-            date: new Date().toISOString()
+            date: new Date().toISOString(),
+            developer: "Productivity Lab"
         },
         {
             id: 5,
@@ -212,14 +233,20 @@ function createDemoApps() {
             deviceType: "both",
             size: "95 MB",
             image: "https://placehold.co/400x200/f59e0b/white?text=FunTime",
-            gallery: [],
+            icon: "https://placehold.co/120x120/f59e0b/white?text=FT",
+            gallery: [
+                "https://placehold.co/300x200/f59e0b/white?text=الألعاب",
+                "https://placehold.co/300x200/f59e0b/white?text=الفيديوهات",
+                "https://placehold.co/300x200/f59e0b/white?text=الموسيقى"
+            ],
             downloadLink: "#",
             downloads: 345,
             rating: 4.0,
             ratings: [4, 4, 4, 4, 4],
             userId: 1,
             userName: "المدير",
-            date: new Date().toISOString()
+            date: new Date().toISOString(),
+            developer: "Fun Studios"
         }
     ];
     
@@ -364,8 +391,8 @@ function escapeHtml(text) {
 }
 
 // ========== دوال التطبيقات ==========
-function openAppDetail(appId) {
-    window.location.href = `app-detail.html?id=${appId}`;
+function openAppDetails(appId) {
+    window.location.href = `app-details.html?id=${appId}`;
 }
 
 async function downloadApp(appId) {
@@ -396,7 +423,7 @@ function createAppCard(app) {
     const appImage = app.image && app.image.startsWith('http') ? app.image : 'https://placehold.co/300x180/667eea/white?text=' + encodeURIComponent(app.name);
     
     return `<div class="app-card">
-        <div onclick="openAppDetail(${app.id})" style="cursor: pointer;">
+        <div onclick="openAppDetails(${app.id})" style="cursor: pointer;">
             <img src="${appImage}" class="app-card-image" onerror="this.src='https://placehold.co/300x180/cccccc/white?text=No+Image'">
             <div class="app-card-content">
                 <div class="app-card-title">${escapeHtml(app.name)}</div>
@@ -412,7 +439,7 @@ function createAppCard(app) {
                 </div>
             </div>
         </div>
-        <div class="app-card-download" onclick="event.stopPropagation(); openAppDetail(${app.id})">📱 عرض التفاصيل</div>
+        <div class="app-card-download" onclick="event.stopPropagation(); openAppDetails(${app.id})">📱 تفاصيل التطبيق</div>
     </div>`;
 }
 

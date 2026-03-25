@@ -190,16 +190,6 @@ body {
     font-weight: 800;
     margin-bottom: 8px;
     color: #2d3748;
-    text-decoration: none;
-}
-
-.app-card-title a {
-    color: #2d3748;
-    text-decoration: none;
-}
-
-.app-card-title a:hover {
-    color: #667eea;
 }
 
 .app-card-description {
@@ -242,151 +232,6 @@ body {
 .app-card-download:hover {
     transform: scale(1.02);
     background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-}
-
-/* زر التحميل في صفحة التفاصيل */
-.download-btn {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-    border: none;
-    padding: 15px 30px;
-    border-radius: 50px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s;
-    width: 100%;
-    margin-top: 20px;
-}
-
-.download-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
-}
-
-/* صفحة التطبيق التفصيلية */
-.app-detail {
-    background: white;
-    border-radius: 20px;
-    overflow: hidden;
-}
-
-.app-detail-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 30px;
-    color: white;
-}
-
-.app-detail-title {
-    font-size: 2rem;
-    margin-bottom: 15px;
-}
-
-.app-detail-stats {
-    display: flex;
-    gap: 30px;
-    flex-wrap: wrap;
-    margin-top: 15px;
-}
-
-.app-detail-stats div {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.app-detail-content {
-    padding: 30px;
-}
-
-.app-detail-image {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.app-detail-image img {
-    max-width: 200px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-}
-
-.app-detail-description {
-    line-height: 1.8;
-    color: #4a5568;
-    margin-bottom: 30px;
-}
-
-.app-gallery {
-    margin: 30px 0;
-}
-
-.app-gallery h3 {
-    margin-bottom: 15px;
-    color: #2d3748;
-}
-
-.gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-}
-
-.gallery-grid img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: transform 0.3s;
-}
-
-.gallery-grid img:hover {
-    transform: scale(1.05);
-}
-
-.rating-section {
-    background: #f8fafc;
-    border-radius: 16px;
-    padding: 20px;
-    margin: 30px 0;
-}
-
-.rating-average {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.rating-average .stars {
-    font-size: 2rem;
-    color: #fbbf24;
-}
-
-.comments-section {
-    margin-top: 30px;
-}
-
-.comment-card {
-    background: #f8fafc;
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 15px;
-}
-
-.comment-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    color: #64748b;
-    font-size: 0.9rem;
-}
-
-.comment-rating {
-    color: #fbbf24;
-}
-
-.comment-text {
-    color: #2d3748;
-    line-height: 1.5;
 }
 
 /* الفوتر */
@@ -565,23 +410,6 @@ body {
     cursor: pointer;
 }
 
-.rating-stars {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin: 20px 0;
-    font-size: 2.5rem;
-}
-
-.star {
-    cursor: pointer;
-    color: #cbd5e1;
-}
-
-.star.active {
-    color: #fbbf24;
-}
-
 /* تنبيهات */
 .alert {
     position: fixed;
@@ -614,49 +442,263 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-/* إدارة الإعلانات */
-.ad-management {
-    background: #f8fafc;
-    border-radius: 15px;
-    padding: 20px;
-    margin-top: 30px;
-}
-
-.ad-item {
+/* ========== أنماط صفحة تفاصيل التطبيق ========== */
+.app-details-container {
+    max-width: 1200px;
+    margin: 0 auto;
     background: white;
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 15px;
-    border: 1px solid #e2e8f0;
+    border-radius: 25px;
+    overflow: hidden;
 }
 
-.ad-item h4 {
+.app-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 40px;
+    color: white;
+}
+
+.app-header-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    align-items: center;
+}
+
+.app-icon-large {
+    width: 120px;
+    height: 120px;
+    border-radius: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    object-fit: cover;
+}
+
+.app-info h1 {
+    font-size: 2rem;
     margin-bottom: 10px;
+}
+
+.app-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.app-meta span {
+    background: rgba(255,255,255,0.2);
+    padding: 5px 12px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+}
+
+.stars {
+    color: #fbbf24;
+    font-size: 1.2rem;
+}
+
+.app-body {
+    padding: 30px;
+}
+
+.app-actions {
+    margin-bottom: 30px;
+}
+
+.download-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s;
+}
+
+.download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+}
+
+.app-gallery {
+    margin: 30px 0;
+}
+
+.app-gallery h3 {
+    margin-bottom: 15px;
     color: #2d3748;
 }
 
-.ad-code {
-    background: #f1f5f9;
-    padding: 10px;
-    border-radius: 8px;
-    font-family: monospace;
-    font-size: 0.8rem;
-    margin: 10px 0;
-    white-space: pre-wrap;
-    word-break: break-all;
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
 }
 
-.ad-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.ad-actions button {
-    padding: 5px 10px;
-    border: none;
-    border-radius: 6px;
+.gallery-grid img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 12px;
     cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.gallery-grid img:hover {
+    transform: scale(1.05);
+}
+
+.app-description {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 20px 0;
+    line-height: 1.8;
+}
+
+.rating-section {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.rating-stats {
+    margin: 20px 0;
+}
+
+.rating-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.rating-bar-label {
+    width: 60px;
+    color: #fbbf24;
+}
+
+.rating-bar-bg {
+    flex: 1;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.rating-bar-fill {
+    height: 100%;
+    background: #fbbf24;
+    border-radius: 4px;
+}
+
+.rating-bar-count {
+    width: 40px;
+    color: #64748b;
+}
+
+.comments-section {
+    margin-top: 30px;
+}
+
+.comment-card {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    color: #64748b;
+}
+
+.comment-rating {
+    color: #fbbf24;
+}
+
+.add-comment {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.add-comment input,
+.add-comment textarea,
+.add-comment select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-family: inherit;
+}
+
+.add-comment button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.similar-apps {
+    margin-top: 40px;
+}
+
+.similar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.similar-card {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.similar-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.similar-card img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 60px;
+    background: white;
+    border-radius: 25px;
+}
+
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
 }
 
 /* لوحة الإدارة */
@@ -787,6 +829,21 @@ body {
     gap: 10px;
 }
 
+.loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1s infinite;
+    padding: 40px;
+    text-align: center;
+    border-radius: 12px;
+    color: #94a3b8;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
 /* ========== تصميم الموبايل ========== */
 @media (max-width: 768px) {
     .main-layout {
@@ -847,14 +904,6 @@ body {
         font-size: 0.85rem;
     }
     
-    .app-detail-title {
-        font-size: 1.3rem;
-    }
-    
-    .gallery-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    
     .footer {
         margin: 10px;
         padding: 20px 15px;
@@ -877,19 +926,27 @@ body {
     .stats-cards {
         grid-template-columns: repeat(2, 1fr);
     }
-}
-
-.loading-skeleton {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: loading 1s infinite;
-    padding: 40px;
-    text-align: center;
-    border-radius: 12px;
-    color: #94a3b8;
-}
-
-@keyframes loading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    
+    /* أنماط صفحة التفاصيل للموبايل */
+    .app-header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .similar-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .comment-header {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .app-meta {
+        justify-content: center;
+    }
 }

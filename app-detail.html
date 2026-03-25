@@ -4,16 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AppNova - تفاصيل التطبيق</title>
+    <meta name="description" content="تفاصيل التطبيق">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <style>
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
 </head>
 <body>
+    <!-- إعلان أعلى الصفحة -->
     <div id="topAdContainer" style="text-align: center; margin: 10px auto; max-width: 1200px;"></div>
 
     <nav class="navbar">
@@ -41,8 +37,12 @@
         </aside>
 
         <main class="content-wrapper">
-            <div id="appContent">
-                <!-- سيتم عرض المحتوى هنا -->
+            <div id="appDetails" class="app-details-container">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <h3>🔄 جاري تحميل بيانات التطبيق...</h3>
+                    <p style="color: #64748b; margin-top: 10px;">يرجى الانتظار قليلاً</p>
+                </div>
             </div>
         </main>
 
@@ -91,6 +91,12 @@
 
     <script src="config.js"></script>
     <script src="common.js"></script>
-    <script src="app-detail.js"></script>
+    <script src="app-details.js"></script>
+    <script>
+        function searchApps() {
+            let term = document.getElementById('searchInput')?.value.toLowerCase().trim();
+            if(term) window.location.href = `apps.html?search=${encodeURIComponent(term)}`;
+        }
+    </script>
 </body>
 </html>
