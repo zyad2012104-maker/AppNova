@@ -84,7 +84,7 @@ function renderGallery(images) {
     images.forEach((img, idx) => {
         html += `
             <div style="cursor: pointer; position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onclick="openImageModal(${idx})">
-                <img src="${img}" style="width: 100%; height: 200px; object-fit: cover; display: block;" onerror="this.src='https://placehold.co/280x200/ef4444/white?text=خطأ'">
+                <img src="${img}" style="width: 100%; height: 300px; object-fit: cover; display: block;" onerror="this.src='https://placehold.co/150x300/ef4444/white?text=خطأ'">
                 <div style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px;">
                     ${idx + 1}/${images.length}
                 </div>
