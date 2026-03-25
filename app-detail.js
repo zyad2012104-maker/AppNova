@@ -1,4 +1,4 @@
-// app-detail.js - صفحة تفاصيل التطبيق
+// app-detail.js - صفحة تفاصيل التطبيق المصححة
 
 let currentApp = null;
 let selectedRating = 0;
@@ -324,18 +324,21 @@ function loadApp() {
     currentApp = apps.find(a => a.id === appId);
     
     if (!currentApp) {
-        showError(`لم نتمكن من العثور على التطبيق المطلوب`);
+        showError(`لم نتمكن من العثور على التطبيق المطلوب (ID: ${appId})`);
         return;
     }
     
     renderAppDetail();
 }
 
-// الانتظار حتى يتم تحميل البيانات
+// انتظار تحميل البيانات
 showLoading();
 let detailInterval = setInterval(() => {
-    if (typeof apps !== 'undefined' && jsonbinReady) {
+    if (jsonbinReady) {
         clearInterval(detailInterval);
+        console.log('✅ البيانات جاهزة، بدء تحميل تفاصيل التطبيق');
         loadApp();
+    } else {
+        console.log('⏳ انتظار تحميل البيانات لصفحة التفاصيل...');
     }
-}, 100);
+}, 500);

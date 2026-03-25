@@ -1,4 +1,4 @@
-// common.js - الملف الرئيسي الكامل
+// common.js - الملف الرئيسي المصحح
 
 // ========== المتغيرات العامة ==========
 let apps = [];
@@ -102,9 +102,11 @@ function loadFromLocalStorage() {
     }
     if (savedUsers) {
         users = JSON.parse(savedUsers);
+        console.log(`👥 تم تحميل ${users.length} مستخدم`);
     }
     if (savedComments) {
         comments = JSON.parse(savedComments);
+        console.log(`💬 تم تحميل ${comments.length} تعليق`);
     }
     if (savedCategories) {
         categories = JSON.parse(savedCategories);
@@ -112,10 +114,12 @@ function loadFromLocalStorage() {
     
     if (!categories || categories.length === 0) {
         categories = defaultCategories;
+        console.log('🏷️ تم تحميل التصنيفات الافتراضية');
     }
     
+    // إذا لم توجد تطبيقات، أنشئ تطبيقات افتراضية
     if (apps.length === 0) {
-        console.log('⚠️ لا توجد تطبيقات، إنشاء تطبيقات افتراضية');
+        console.log('⚠️ لا توجد تطبيقات، إنشاء تطبيقات افتراضية للتجربة');
         createDemoApps();
     }
 }
@@ -134,7 +138,9 @@ function createDemoApps() {
             gallery: [
                 "https://placehold.co/300x200/667eea/white?text=الشاشة+الرئيسية",
                 "https://placehold.co/300x200/667eea/white?text=المحادثات",
-                "https://placehold.co/300x200/667eea/white?text=الملف+الشخصي"
+                "https://placehold.co/300x200/667eea/white?text=الملف+الشخصي",
+                "https://placehold.co/300x200/667eea/white?text=الإشعارات",
+                "https://placehold.co/300x200/667eea/white?text=الإعدادات"
             ],
             downloadLink: "#",
             downloads: 1250,
@@ -147,13 +153,19 @@ function createDemoApps() {
         {
             id: 2,
             name: "لعبة الألغاز - Puzzle Master",
-            description: "لعبة ألغاز ممتعة وتحدي للعقل مع مستويات متعددة. اختبر ذكاءك وحل الألغاز الصعبة.",
+            description: "لعبة ألغاز ممتعة وتحدي للعقل مع مستويات متعددة. اختبر ذكاءك وحل الألغاز الصعبة. تحتوي اللعبة على 100 مستوى مختلف ومؤثرات صوتية رائعة.",
             version: "1.5.0",
             category: "games",
             deviceType: "android",
             size: "78 MB",
             image: "https://placehold.co/400x200/764ba2/white?text=Puzzle+Master",
-            gallery: [],
+            gallery: [
+                "https://placehold.co/300x200/764ba2/white?text=مستوى+1",
+                "https://placehold.co/300x200/764ba2/white?text=مستوى+2",
+                "https://placehold.co/300x200/764ba2/white?text=مستوى+3",
+                "https://placehold.co/300x200/764ba2/white?text=مستوى+4",
+                "https://placehold.co/300x200/764ba2/white?text=مستوى+5"
+            ],
             downloadLink: "#",
             downloads: 890,
             rating: 4.2,
@@ -165,17 +177,47 @@ function createDemoApps() {
         {
             id: 3,
             name: "تطبيق التعليم - EduSmart",
-            description: "منصة تعليمية متكاملة للطلاب تحتوي على دروس واختبارات.",
+            description: "منصة تعليمية متكاملة للطلاب تحتوي على دروس واختبارات. تعلم المواد الدراسية بسهولة مع شرح مبسط وتمارين تفاعلية. يحتوي التطبيق على فيديوهات تعليمية واختبارات تقييمية.",
             version: "3.0.0",
             category: "education",
             deviceType: "both",
             size: "120 MB",
             image: "https://placehold.co/400x200/48c6ef/white?text=EduSmart",
-            gallery: [],
+            gallery: [
+                "https://placehold.co/300x200/48c6ef/white?text=الرئيسية",
+                "https://placehold.co/300x200/48c6ef/white?text=الدروس",
+                "https://placehold.co/300x200/48c6ef/white?text=الاختبارات",
+                "https://placehold.co/300x200/48c6ef/white?text=الفيديوهات",
+                "https://placehold.co/300x200/48c6ef/white?text=الإنجازات"
+            ],
             downloadLink: "#",
             downloads: 2340,
             rating: 4.8,
             ratings: [5, 5, 4, 5, 5],
+            userId: 1,
+            userName: "المدير",
+            date: new Date().toISOString()
+        },
+        {
+            id: 4,
+            name: "تطبيق الإنتاجية - TaskFlow",
+            description: "تطبيق لإدارة المهام والمشاريع يساعدك على تنظيم وقتك وزيادة إنتاجيتك. يحتوي على تقويم وتذكيرات وتقارير متقدمة. واجهة بسيطة وسهلة الاستخدام.",
+            version: "1.2.0",
+            category: "productivity",
+            deviceType: "both",
+            size: "32 MB",
+            image: "https://placehold.co/400x200/10b981/white?text=TaskFlow",
+            gallery: [
+                "https://placehold.co/300x200/10b981/white?text=المهام",
+                "https://placehold.co/300x200/10b981/white?text=التقويم",
+                "https://placehold.co/300x200/10b981/white?text=التقارير",
+                "https://placehold.co/300x200/10b981/white?text=الإعدادات",
+                "https://placehold.co/300x200/10b981/white?text=الإحصائيات"
+            ],
+            downloadLink: "#",
+            downloads: 567,
+            rating: 4.3,
+            ratings: [4, 5, 4, 4, 4],
             userId: 1,
             userName: "المدير",
             date: new Date().toISOString()
@@ -200,14 +242,33 @@ function createDemoApps() {
                 appId: 1,
                 userId: 1,
                 username: "المدير",
-                comment: "تطبيق رائع جداً! أنصح الجميع بتجربته.",
+                comment: "تطبيق رائع جداً! أنصح الجميع بتجربته. الواجهة سهلة والمميزات رائعة.",
                 rating: 5,
                 date: new Date().toISOString()
+            },
+            {
+                id: 1002,
+                appId: 2,
+                userId: null,
+                username: "أحمد محمد",
+                comment: "لعبة ممتعة جداً، الألغاز صعبة لكنها تحفز العقل",
+                rating: 4,
+                date: new Date(Date.now() - 86400000).toISOString()
+            },
+            {
+                id: 1003,
+                appId: 3,
+                userId: null,
+                username: "سارة علي",
+                comment: "منصة تعليمية ممتازة، ساعدتني كثيراً في دراستي",
+                rating: 5,
+                date: new Date(Date.now() - 172800000).toISOString()
             }
         ];
     }
     
-    console.log('✅ تم إنشاء تطبيقات تجريبية');
+    console.log('✅ تم إنشاء تطبيقات تجريبية للتشغيل المحلي');
+    saveToLocalStorage();
 }
 
 // ========== دوال التحقق ==========
@@ -436,6 +497,14 @@ if(storedUser) {
     }
 }
 
+// دالة انتظار تحميل البيانات
+async function waitForData() {
+    while (!jsonbinReady) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    return true;
+}
+
 (async function init() {
     console.log('🚀 بدء تهيئة AppNova...');
     await loadData();
@@ -443,4 +512,5 @@ if(storedUser) {
     renderAds();
     console.log('✅ AppNova جاهز للعمل');
     console.log(`📊 عدد التطبيقات: ${apps.length}`);
+    console.log(`🏷️ عدد التصنيفات: ${categories.length}`);
 })();
