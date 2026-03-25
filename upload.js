@@ -1,4 +1,4 @@
-// upload.js - رفع وتعديل التطبيقات مع إعلان عند الرفع
+// upload.js - رفع وتعديل التطبيقات مع 3 صور منفصلة
 
 let editAppId = null;
 let urlParams = new URLSearchParams(window.location.search);
@@ -36,23 +36,37 @@ function getGalleryImages() {
     const imageInputs = ['galleryImage1', 'galleryImage2', 'galleryImage3'];
     
     for (let i = 0; i < imageInputs.length; i++) {
-        const url = document.getElementById(imageInputs[i])?.value.trim();
-        if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
-            images.push(url);
+        const input = document.getElementById(imageInputs[i]);
+        if (input) {
+            const url = input.value.trim();
+            if (url && url !== '' && (url.startsWith('http://') || url.startsWith('https://'))) {
+                images.push(url);
+                console.log(`✅ تم إضافة الصورة ${i+1}:`, url);
+            } else if (url && url !== '') {
+                console.log(`⚠️ الصورة ${i+1} رابط غير صالح:`, url);
+            }
         }
     }
     
+    console.log('📸 جميع الصور المجمعة:', images);
     return images;
 }
 
-// دالة لتعيين معرض الصور في الحقول المنفصلة
+// دالة لتعيين معرض الصور في الحقول المنفصلة (للتعديل)
 function setGalleryImages(gallery) {
-    if (!gallery || gallery.length === 0) return;
+    if (!gallery || gallery.length === 0) {
+        console.log('⚠️ لا توجد صور لعرضها للتعديل');
+        return;
+    }
+    
+    console.log('📸 تحميل الصور للتعديل:', gallery);
     
     for (let i = 0; i < gallery.length && i < 3; i++) {
         const input = document.getElementById(`galleryImage${i + 1}`);
-        if (input) {
+        if (input && gallery[i]) {
             input.value = gallery[i];
+            console.log(`✅ تم تعيين الصورة ${i+1}:`, gallery[i]);
+            
             // تحديث المعاينة
             const previewId = `preview${i + 1}`;
             const preview = document.getElementById(previewId);
@@ -68,16 +82,14 @@ function setGalleryImages(gallery) {
     }
 }
 
+// انتظار تحميل البيانات
 (async function checkEditMode() {
-    // انتظار تحميل البيانات
     while (!jsonbinReady) {
         await new Promise(resolve => setTimeout(resolve, 100));
     }
     
-    // التحقق من تسجيل الدخول
     if (!checkLoginAndRedirect()) return;
     
-    // تحميل التصنيفات
     loadCategoriesForSelect();
     
     if(editAppId) {
@@ -105,6 +117,19 @@ function setGalleryImages(gallery) {
             if (appToEdit.gallery && appToEdit.gallery.length) {
                 setGalleryImages(appToEdit.gallery);
             }
+            
+            // معاينة الصورة الرئيسية
+            if (appToEdit.image) {
+                const mainPreview = document.getElementById('mainImagePreview');
+                if (mainPreview) {
+                    mainPreview.innerHTML = `
+                        <div class="preview-item">
+                            <img src="${appToEdit.image}" onerror="this.src='https://placehold.co/100x100/ef4444/white?text=خطأ'">
+                            <button class="remove-image" onclick="clearImage('appImage', 'mainImagePreview')">×</button>
+                        </div>
+                    `;
+                }
+            }
         } else if(appToEdit) {
             showAlert('لا تملك صلاحية تعديل هذا التطبيق', 'error');
             window.location.href = 'admin.html';
@@ -112,6 +137,7 @@ function setGalleryImages(gallery) {
     }
 })();
 
+// معالجة إرسال النموذج
 document.getElementById('uploadForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -124,13 +150,7 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
     // جلب معرض الصور من الحقول المنفصلة
     let galleryImages = getGalleryImages();
     
-    // التحقق من صحة الروابط
-    for (let i = 0; i < galleryImages.length; i++) {
-        if (!galleryImages[i].startsWith('http')) {
-            showAlert(`الصورة رقم ${i+1} يجب أن تبدأ بـ http:// أو https://`, 'error');
-            return;
-        }
-    }
+    console.log('📸 الصور قبل الحفظ:', galleryImages);
     
     let appData = {
         id: document.getElementById('appId').value ? parseInt(document.getElementById('appId').value) : Date.now(),
@@ -190,8 +210,11 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
         return;
     }
     
+    console.log('📦 بيانات التطبيق النهائية:', appData);
+    console.log('📸 معرض الصور في البيانات:', appData.gallery);
+    
     if(document.getElementById('appId').value) {
-        // وضع التعديل - لا يحتاج إعلان
+        // وضع التعديل
         let index = apps.findIndex(a => a.id === parseInt(document.getElementById('appId').value));
         if(index !== -1) {
             appData.downloads = apps[index].downloads;
@@ -203,13 +226,22 @@ document.getElementById('uploadForm')?.addEventListener('submit', async function
             window.location.href = 'admin.html';
         }
     } else {
-        // وضع الإضافة الجديدة - عرض إعلان أولاً
-        showClickAdForUpload(async () => {
+        // وضع الإضافة الجديدة
+        if (typeof showClickAdForUpload === 'function') {
+            showClickAdForUpload(async () => {
+                apps.push(appData);
+                await saveApps();
+                console.log('✅ تم حفظ التطبيق مع الصور:', appData.gallery);
+                showAlert('تم رفع التطبيق بنجاح', 'success');
+                window.location.href = `app-detail.html?id=${appData.id}`;
+            });
+        } else {
             apps.push(appData);
             await saveApps();
+            console.log('✅ تم حفظ التطبيق مع الصور:', appData.gallery);
             showAlert('تم رفع التطبيق بنجاح', 'success');
             window.location.href = `app-detail.html?id=${appData.id}`;
-        });
+        }
     }
 });
 

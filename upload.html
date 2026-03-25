@@ -71,10 +71,21 @@
             font-size: 12px;
             margin-left: 8px;
         }
+        .image-url-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: inherit;
+            direction: ltr;
+        }
+        .image-url-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
     </style>
 </head>
 <body>
-    <!-- إعلان أعلى الصفحة -->
     <div id="topAdContainer" style="text-align: center; margin: 10px auto; max-width: 1200px;"></div>
 
     <nav class="navbar">
@@ -152,32 +163,33 @@
                     
                     <div class="form-group">
                         <label>🖼️ رابط صورة التطبيق الرئيسية *</label>
-                        <input type="url" id="appImage" required placeholder="https://example.com/image.jpg">
+                        <input type="url" id="appImage" class="image-url-input" required placeholder="https://example.com/image.jpg">
                         <small>يمكنك استخدام رابط صورة من الإنترنت (يفضل حجم 300x180 بكسل)</small>
+                        <div id="mainImagePreview" class="image-preview"></div>
                     </div>
                     
                     <!-- معرض الصور - 3 حقول منفصلة -->
                     <div style="margin: 20px 0;">
                         <h3 style="margin-bottom: 15px;">📸 صور من داخل التطبيق (3 صور)</h3>
-                        <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 15px;">أضف روابط صور من داخل التطبيق (يفضل إضافة 3 صور لتظهر في صفحة التفاصيل)</p>
+                        <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 15px;">أضف روابط صور من داخل التطبيق (ستظهر في صفحة التفاصيل)</p>
                         
                         <div class="gallery-field">
                             <label><span class="gallery-number">1</span> الصورة الأولى</label>
-                            <input type="url" id="galleryImage1" placeholder="https://example.com/screenshot1.jpg" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px;">
+                            <input type="url" id="galleryImage1" class="image-url-input" placeholder="https://example.com/screenshot1.jpg">
                             <small>رابط الصورة الأولى من داخل التطبيق</small>
                             <div id="preview1" class="image-preview"></div>
                         </div>
                         
                         <div class="gallery-field">
                             <label><span class="gallery-number">2</span> الصورة الثانية</label>
-                            <input type="url" id="galleryImage2" placeholder="https://example.com/screenshot2.jpg" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px;">
+                            <input type="url" id="galleryImage2" class="image-url-input" placeholder="https://example.com/screenshot2.jpg">
                             <small>رابط الصورة الثانية من داخل التطبيق</small>
                             <div id="preview2" class="image-preview"></div>
                         </div>
                         
                         <div class="gallery-field">
                             <label><span class="gallery-number">3</span> الصورة الثالثة</label>
-                            <input type="url" id="galleryImage3" placeholder="https://example.com/screenshot3.jpg" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px;">
+                            <input type="url" id="galleryImage3" class="image-url-input" placeholder="https://example.com/screenshot3.jpg">
                             <small>رابط الصورة الثالثة من داخل التطبيق</small>
                             <div id="preview3" class="image-preview"></div>
                         </div>
@@ -185,7 +197,7 @@
                     
                     <div class="form-group">
                         <label>🔗 رابط تحميل التطبيق *</label>
-                        <input type="url" id="appDownloadLink" required placeholder="رابط تحميل التطبيق (Google Play, Direct Link, etc.)">
+                        <input type="url" id="appDownloadLink" class="image-url-input" required placeholder="رابط تحميل التطبيق (Google Play, Direct Link, etc.)">
                         <small>رابط مباشر لتحميل التطبيق</small>
                     </div>
                     
@@ -234,10 +246,8 @@
         <div class="footer-bottom">© 2024 AppNova. جميع الحقوق محفوظة</div>
     </footer>
 
-    <!-- إعلان أسفل الصفحة -->
     <div id="bottomAdContainer" style="text-align: center; margin: 10px auto; max-width: 1200px;"></div>
 
-    <!-- نافذة الإعلان -->
     <div id="adModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeAdModal()">&times;</span>
@@ -255,7 +265,7 @@
             if(term) window.location.href = `apps.html?search=${encodeURIComponent(term)}`;
         }
         
-        // دالة معاينة الصور
+        // دالة معاينة الصورة
         function previewImage(inputId, previewId) {
             const input = document.getElementById(inputId);
             const preview = document.getElementById(previewId);
@@ -267,7 +277,7 @@
                 if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
                     preview.innerHTML = `
                         <div class="preview-item">
-                            <img src="${url}" onerror="this.src='https://placehold.co/100x100/ef4444/white?text=خطأ'">
+                            <img src="${url}" onerror="this.src='https://placehold.co/100x100/ef4444/white?text=خطأ+في+الرابط'">
                             <button class="remove-image" onclick="clearImage('${inputId}', '${previewId}')">×</button>
                         </div>
                     `;
@@ -284,7 +294,8 @@
             document.getElementById(previewId).innerHTML = '';
         }
         
-        // تفعيل معاينة الصور
+        // تفعيل معاينة الصور لجميع الحقول
+        previewImage('appImage', 'mainImagePreview');
         previewImage('galleryImage1', 'preview1');
         previewImage('galleryImage2', 'preview2');
         previewImage('galleryImage3', 'preview3');
