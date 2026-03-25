@@ -64,43 +64,35 @@ function closeImageModal() {
     }
 }
 
-// دالة عرض معرض الصور - ارتفاع 200px
+// دالة عرض معرض الصور - الآن تظهر تحت زر التحميل وبشكل أفقي مثل جوجل بلاي
 function renderGallery(images) {
-    console.log('🎨 عرض الصور:', images);
-    
     if (!images || images.length === 0) {
         return '<div style="margin: 20px 0; padding: 20px; background: #f8fafc; border-radius: 16px; text-align: center; color: #64748b;">📸 لا توجد صور مضافة للتطبيق</div>';
     }
     
     galleryImages = images;
-    
+
     let html = `
         <div style="margin: 20px 0 30px 0;">
             <h3 style="margin-bottom: 15px; color: #2d3748;">📸 صور من التطبيق (${images.length} صور)</h3>
-            <div style="background: #f8fafc; border-radius: 16px; padding: 15px;">
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;">
+            <div style="display: flex; gap: 10px; justify-content: flex-start; overflow-x: auto; padding-bottom: 5px;">
     `;
-    
+
     images.forEach((img, idx) => {
         html += `
-            <div style="cursor: pointer; position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onclick="openImageModal(${idx})">
-                <img src="${img}" style="width: 100%; height: 300px; object-fit: cover; display: block;" onerror="this.src='https://placehold.co/150x300/ef4444/white?text=خطأ'">
-                <div style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px;">
-                    ${idx + 1}/${images.length}
-                </div>
+            <div style="flex: 0 0 200px; height: 380px; border-radius: 12px; overflow: hidden; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onclick="openImageModal(${idx})">
+                <img src="${img}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://placehold.co/200x380/ef4444/white?text=خطأ'">
             </div>
         `;
     });
-    
+
     html += `
-                </div>
             </div>
         </div>
     `;
-    
+
     return html;
 }
-
 // عرض تفاصيل التطبيق
 function displayAppDetails() {
     console.log('🎨 عرض تفاصيل التطبيق');
