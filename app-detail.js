@@ -1,4 +1,4 @@
-// app-detail.js - عرض تفاصيل التطبيق مع الصور
+// app-detail.js - صفحة تفاصيل التطبيق مع تحسين حجم الصور
 
 console.log('🚀 بدء تحميل app-detail.js');
 
@@ -45,7 +45,6 @@ function renderRatingBars(ratings) {
     return html;
 }
 
-// فتح الصورة في نافذة منبثقة
 function openImageModal(index) {
     if (!galleryImages || galleryImages.length === 0) return;
     const modal = document.getElementById('imageModal');
@@ -65,7 +64,7 @@ function closeImageModal() {
     }
 }
 
-// عرض معرض الصور
+// دالة عرض معرض الصور - مع تحسين حجم الصور
 function renderGallery(images) {
     console.log('🎨 عرض الصور:', images);
     
@@ -79,14 +78,16 @@ function renderGallery(images) {
         <div style="margin: 20px 0 30px 0;">
             <h3 style="margin-bottom: 15px; color: #2d3748;">📸 صور من التطبيق (${images.length} صور)</h3>
             <div style="background: #f8fafc; border-radius: 16px; padding: 15px;">
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
     `;
     
     images.forEach((img, idx) => {
         html += `
-            <div style="cursor: pointer;" onclick="openImageModal(${idx})">
-                <img src="${img}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onerror="this.src='https://placehold.co/200x150/ef4444/white?text=خطأ'">
-                <div style="text-align: center; margin-top: 5px; font-size: 12px; color: #64748b;">صورة ${idx + 1}</div>
+            <div style="cursor: pointer; position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onclick="openImageModal(${idx})">
+                <img src="${img}" style="width: 100%; height: 200px; object-fit: cover; display: block;" onerror="this.src='https://placehold.co/280x200/ef4444/white?text=خطأ+في+الصورة'">
+                <div style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px;">
+                    ${idx + 1}/${images.length}
+                </div>
             </div>
         `;
     });
@@ -149,33 +150,40 @@ function displayAppDetails() {
     
     container.innerHTML = `
         <div style="max-width:1200px;margin:0 auto;background:white;border-radius:25px;overflow:hidden;">
+            <!-- Header -->
             <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:40px;color:white;">
                 <div style="display:flex;flex-wrap:wrap;gap:30px;align-items:center;">
-                    <img src="${appIcon}" style="width:120px;height:120px;border-radius:25px;object-fit:cover;" onerror="this.src='https://placehold.co/120x120/cccccc/white?text=No+Image'">
+                    <img src="${appIcon}" style="width:120px;height:120px;border-radius:25px;object-fit:cover;box-shadow:0 10px 30px rgba(0,0,0,0.3);" onerror="this.src='https://placehold.co/120x120/cccccc/white?text=No+Image'">
                     <div>
-                        <h1 style="font-size:2rem;">${escapeHtml(app.name)}</h1>
-                        <p>${escapeHtml(app.developer || app.userName || "مطور")}</p>
-                        <div style="color:#fbbf24;">${renderStars(avgRating)}</div>
-                        <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;">
-                            <span style="background:rgba(255,255,255,0.2);padding:5px 12px;border-radius:50px;">⭐ ${avgRating}</span>
-                            <span style="background:rgba(255,255,255,0.2);padding:5px 12px;border-radius:50px;">📊 ${totalRatings} تقييم</span>
-                            <span style="background:rgba(255,255,255,0.2);padding:5px 12px;border-radius:50px;">📥 ${app.downloads} تحميل</span>
-                            <span style="background:rgba(255,255,255,0.2);padding:5px 12px;border-radius:50px;">📱 ${escapeHtml(app.version)}</span>
-                            <span style="background:rgba(255,255,255,0.2);padding:5px 12px;border-radius:50px;">💾 ${escapeHtml(app.size)}</span>
+                        <h1 style="font-size:2rem;margin-bottom:10px;">${escapeHtml(app.name)}</h1>
+                        <p style="opacity:0.9;">${escapeHtml(app.developer || app.userName || "مطور")}</p>
+                        <div style="color:#fbbf24;font-size:1.2rem;margin:10px 0;">${renderStars(avgRating)}</div>
+                        <div style="display:flex;flex-wrap:wrap;gap:12px;">
+                            <span style="background:rgba(255,255,255,0.2);padding:6px 14px;border-radius:50px;">⭐ ${avgRating}</span>
+                            <span style="background:rgba(255,255,255,0.2);padding:6px 14px;border-radius:50px;">📊 ${totalRatings} تقييم</span>
+                            <span style="background:rgba(255,255,255,0.2);padding:6px 14px;border-radius:50px;">📥 ${app.downloads} تحميل</span>
+                            <span style="background:rgba(255,255,255,0.2);padding:6px 14px;border-radius:50px;">📱 ${escapeHtml(app.version)}</span>
+                            <span style="background:rgba(255,255,255,0.2);padding:6px 14px;border-radius:50px;">💾 ${escapeHtml(app.size)}</span>
+                            <span style="background:rgba(255,255,255,0.2);padding:6px 14px;border-radius:50px;">${getCategoryIcon(app.category)} ${getCategoryName(app.category)}</span>
                         </div>
                     </div>
                 </div>
             </div>
+            
             <div style="padding:30px;">
-                <button onclick="downloadApp(${app.id})" style="background:#10b981;color:white;border:none;padding:15px;border-radius:50px;font-size:1.2rem;font-weight:bold;cursor:pointer;width:100%;margin-bottom:30px;">📥 تحميل التطبيق</button>
+                <!-- زر التحميل -->
+                <button onclick="downloadApp(${app.id})" style="background:linear-gradient(135deg,#10b981 0%,#059669 100%);color:white;border:none;padding:15px;border-radius:50px;font-size:1.2rem;font-weight:bold;cursor:pointer;width:100%;margin-bottom:30px;">📥 تحميل التطبيق</button>
                 
+                <!-- معرض الصور -->
                 ${galleryHtml}
                 
+                <!-- وصف التطبيق -->
                 <div style="background:#f8fafc;border-radius:16px;padding:25px;margin:20px 0;">
                     <h2>📄 وصف التطبيق</h2>
                     <p style="line-height:1.8;">${escapeHtml(app.description)}</p>
                 </div>
                 
+                <!-- إحصائيات التقييمات -->
                 <div style="background:#f8fafc;border-radius:16px;padding:25px;margin:20px 0;">
                     <h3>📊 إحصائيات التقييمات</h3>
                     <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:center;">
@@ -188,6 +196,7 @@ function displayAppDetails() {
                     </div>
                 </div>
                 
+                <!-- التعليقات -->
                 <div>
                     <h2>💬 التعليقات</h2>
                     <div style="background:#f8fafc;border-radius:16px;padding:25px;margin:20px 0;">
