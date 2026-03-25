@@ -77,32 +77,7 @@
     </style>
 </head>
 <body>
-    <div id="topAdContainer" style="text-align: center; margin: 10px auto; max-width: 1200px;"></div>
-
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">🚀 AppNova</div>
-            <div class="search-container">
-                <input type="text" id="searchInput" placeholder="ابحث عن تطبيق...">
-                <button onclick="searchApps()">🔍</button>
-            </div>
-            <ul class="nav-links">
-                <li><a href="index.html">🏠 الرئيسية</a></li>
-                <li><a href="apps.html">📱 التطبيقات</a></li>
-                <li id="uploadNav"><a href="upload.html">⬆️ رفع تطبيق</a></li>
-                <li id="loginNav"><a href="login.html">🔐 تسجيل الدخول</a></li>
-                <li id="adminNav" style="display:none;"><a href="admin.html">👑 الإدارة</a></li>
-                <li id="moderatorNav" style="display:none;"><a href="admin.html">🛡️ الإشراف</a></li>
-                <li id="userInfo" style="display:none;"></li>
-            </ul>
-        </div>
-    </nav>
-
     <div class="main-layout">
-        <aside class="ad-sidebar ad-left">
-            <div id="leftAdContainer" class="ad-container"></div>
-        </aside>
-
         <main class="content-wrapper">
             <div class="hero">
                 <h1 id="pageTitle">🚀 رفع تطبيق جديد</h1>
@@ -155,27 +130,21 @@
                     <div class="form-group">
                         <label>🖼️ رابط صورة التطبيق الرئيسية *</label>
                         <input type="url" id="appImage" class="image-url-input" required placeholder="https://example.com/image.jpg">
-                        <small>يمكنك استخدام رابط صورة من الإنترنت</small>
                         <div id="mainImagePreview" class="image-preview"></div>
                     </div>
                     
-                    <!-- معرض الصور - 3 حقول منفصلة -->
                     <div style="margin: 20px 0;">
                         <h3 style="margin-bottom: 15px;">📸 صور من داخل التطبيق (3 صور)</h3>
-                        <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 15px;">أضف روابط صور من داخل التطبيق (ستظهر في صفحة التفاصيل)</p>
-                        
                         <div class="gallery-field">
                             <label><span class="gallery-number">1</span> الصورة الأولى</label>
                             <input type="url" id="galleryImage1" class="image-url-input" placeholder="https://example.com/screenshot1.jpg">
                             <div id="preview1" class="image-preview"></div>
                         </div>
-                        
                         <div class="gallery-field">
                             <label><span class="gallery-number">2</span> الصورة الثانية</label>
                             <input type="url" id="galleryImage2" class="image-url-input" placeholder="https://example.com/screenshot2.jpg">
                             <div id="preview2" class="image-preview"></div>
                         </div>
-                        
                         <div class="gallery-field">
                             <label><span class="gallery-number">3</span> الصورة الثالثة</label>
                             <input type="url" id="galleryImage3" class="image-url-input" placeholder="https://example.com/screenshot3.jpg">
@@ -198,92 +167,186 @@
                 </form>
             </div>
         </main>
-
-        <aside class="ad-sidebar ad-right">
-            <div id="rightAdContainer" class="ad-container"></div>
-        </aside>
-    </div>
-
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>AppNova</h3>
-                <p>منصة عربية لتطبيقات الموبيل</p>
-            </div>
-            <div class="footer-section">
-                <h3>روابط</h3>
-                <ul>
-                    <li><a href="index.html">🏠 الرئيسية</a></li>
-                    <li><a href="apps.html">📱 التطبيقات</a></li>
-                    <li><a href="upload.html">⬆️ رفع تطبيق</a></li>
-                    <li><a href="privacy.html">🔒 سياسة الخصوصية</a></li>
-                    <li><a href="about.html">👥 من نحن</a></li>
-                    <li><a href="contact.html">📞 اتصل بنا</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>📧 النشرة البريدية</h3>
-                <div class="newsletter">
-                    <input type="email" id="newsletterEmail" placeholder="بريدك الإلكتروني">
-                    <button onclick="subscribeNewsletter()">اشتراك</button>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">© 2024 AppNova. جميع الحقوق محفوظة</div>
-    </footer>
-
-    <div id="bottomAdContainer" style="text-align: center; margin: 10px auto; max-width: 1200px;"></div>
-
-    <div id="adModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeAdModal()">&times;</span>
-            <div id="modalAdContent"></div>
-            <button onclick="closeAdModal()" class="submit-btn">إغلاق</button>
-        </div>
     </div>
 
     <script src="config.js"></script>
-    <script src="common.js"></script>
-    <script src="upload.js"></script>
+
     <script>
-        function searchApps() {
-            let term = document.getElementById('searchInput')?.value.toLowerCase().trim();
-            if(term) window.location.href = `apps.html?search=${encodeURIComponent(term)}`;
-        }
-        
-        // معاينة الصور
-        function previewImage(inputId, previewId) {
-            const input = document.getElementById(inputId);
-            const preview = document.getElementById(previewId);
-            if (!input || !preview) return;
-            
-            input.addEventListener('input', function() {
-                const url = this.value.trim();
-                if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
-                    preview.innerHTML = `
-                        <div class="preview-item">
-                            <img src="${url}" onerror="this.src='https://placehold.co/100x100/ef4444/white?text=خطأ'">
-                            <button class="remove-image" onclick="clearImage('${inputId}', '${previewId}')">×</button>
-                        </div>
-                    `;
-                } else if (url) {
-                    preview.innerHTML = `<div class="preview-item" style="background:#fee2e2; display:flex; align-items:center; justify-content:center; color:#ef4444;">رابط غير صالح</div>`;
-                } else {
-                    preview.innerHTML = '';
-                }
+    // ================== المتغيرات ==================
+    let apps = [];
+    let jsonbinReady = false;
+    let editAppId = null;
+
+    // التصنيفات
+    let categories = [
+        { key: 'games', name: 'ألعاب', icon: '🎮' },
+        { key: 'apps', name: 'تطبيقات', icon: '📱' },
+        { key: 'tools', name: 'أدوات', icon: '🛠️' },
+        { key: 'education', name: 'تعليمي', icon: '📚' }
+    ];
+
+    // ================== تحميل التطبيقات ==================
+    async function loadApps() {
+        try {
+            const response = await fetch(CONFIG.JSONBIN.BASE_URL + CONFIG.JSONBIN.BIN_ID, {
+                headers: { 'X-Master-Key': CONFIG.JSONBIN.MASTER_KEY }
             });
+            const data = await response.json();
+            apps = data.record.apps || [];
+            jsonbinReady = true;
+        } catch(e) { console.error(e); }
+    }
+
+    // ================== حفظ التطبيقات ==================
+    async function saveApps() {
+        try {
+            const response = await fetch(CONFIG.JSONBIN.BASE_URL + CONFIG.JSONBIN.BIN_ID, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': CONFIG.JSONBIN.MASTER_KEY,
+                    'X-Bin-Versioning': 'false'
+                },
+                body: JSON.stringify({ apps: apps })
+            });
+            await response.json();
+        } catch(e) { console.error(e); alert('فشل رفع البيانات'); }
+    }
+
+    // ================== التصنيفات ==================
+    function loadCategoriesForSelect() {
+        let select = document.getElementById('appCategory');
+        if (!select) return;
+        select.innerHTML = '<option value="">اختر التصنيف</option>';
+        categories.forEach(cat => {
+            let option = document.createElement('option');
+            option.value = cat.key;
+            option.textContent = `${cat.icon} ${cat.name}`;
+            select.appendChild(option);
+        });
+    }
+
+    // ================== المعرض ==================
+    function getGalleryImages() {
+        let images = [];
+        for(let i=1;i<=3;i++){
+            let el = document.getElementById('galleryImage'+i);
+            if(el && el.value.trim()!=='') images.push(el.value.trim());
         }
-        
-        function clearImage(inputId, previewId) {
-            document.getElementById(inputId).value = '';
-            document.getElementById(previewId).innerHTML = '';
+        return images;
+    }
+
+    function setGalleryImages(gallery){
+        if(!Array.isArray(gallery)) return;
+        gallery.forEach((img,i)=>{
+            let input = document.getElementById(`galleryImage${i+1}`);
+            if(input) input.value = img;
+        });
+    }
+
+    // ================== فتح الصفحة ==================
+    async function initPage(){
+        await loadApps();
+        loadCategoriesForSelect();
+
+        let urlParams = new URLSearchParams(window.location.search);
+        let editId = urlParams.get('edit');
+        if(editId){
+            editAppId = parseInt(editId);
+            let app = apps.find(a=>a.id===editAppId);
+            if(app){
+                document.getElementById('appId').value = app.id;
+                document.getElementById('appName').value = app.name;
+                document.getElementById('appDescription').value = app.description;
+                document.getElementById('appVersion').value = app.version;
+                document.getElementById('appDeviceType').value = app.deviceType;
+                document.getElementById('appSize').value = app.size;
+                document.getElementById('appImage').value = app.image;
+                document.getElementById('appDownloadLink').value = app.downloadLink;
+                document.getElementById('appDeveloper').value = app.developer || '';
+                setGalleryImages(app.gallery);
+                setTimeout(()=>{document.getElementById('appCategory').value=app.category},100);
+                document.getElementById('submitBtn').innerText='💾 حفظ التغييرات';
+                document.getElementById('cancelBtn').style.display='inline-block';
+            }
         }
-        
-        // تفعيل المعاينة
-        previewImage('appImage', 'mainImagePreview');
-        previewImage('galleryImage1', 'preview1');
-        previewImage('galleryImage2', 'preview2');
-        previewImage('galleryImage3', 'preview3');
+    }
+
+    // ================== حفظ التطبيق ==================
+    async function saveApp(){
+        let appId = document.getElementById('appId').value;
+        let isEdit = appId && appId!=='';
+        let appData = {
+            id: isEdit?parseInt(appId):Date.now(),
+            name: document.getElementById('appName').value.trim(),
+            description: document.getElementById('appDescription').value.trim(),
+            version: document.getElementById('appVersion').value.trim(),
+            category: document.getElementById('appCategory').value,
+            deviceType: document.getElementById('appDeviceType').value,
+            size: document.getElementById('appSize').value.trim(),
+            image: document.getElementById('appImage').value.trim(),
+            gallery: getGalleryImages(),
+            downloadLink: document.getElementById('appDownloadLink').value.trim(),
+            developer: document.getElementById('appDeveloper').value.trim(),
+            date: new Date().toISOString(),
+            downloads: 0,
+            rating: 0,
+            ratings: [],
+            comments: []
+        };
+
+        if(!appData.name || !appData.description || !appData.version || !appData.category || !appData.deviceType || !appData.size || !appData.image || !appData.downloadLink){
+            return alert('يرجى ملء جميع الحقول المطلوبة!');
+        }
+
+        if(isEdit){
+            let oldApp = apps.find(a=>a.id===appData.id);
+            if(oldApp){
+                appData.downloads = oldApp.downloads;
+                appData.rating = oldApp.rating;
+                appData.ratings = oldApp.ratings;
+                appData.comments = oldApp.comments;
+            }
+            apps = apps.filter(a=>a.id!==appData.id);
+            apps.push(appData);
+            await saveApps();
+            alert('تم تعديل التطبيق بنجاح');
+            window.location.href='admin.html';
+        }else{
+            apps.push(appData);
+            await saveApps();
+            alert('تم رفع التطبيق بنجاح');
+            window.location.href='admin.html';
+        }
+    }
+
+    document.getElementById('submitBtn')?.addEventListener('click',e=>{e.preventDefault(); saveApp();});
+    document.getElementById('uploadForm')?.addEventListener('submit',e=>{e.preventDefault(); saveApp();});
+    function cancelEdit(){if(confirm('هل تريد إلغاء التعديل؟')) window.location.href='admin.html';}
+
+    // ================== معاينة الصور ==================
+    function previewImage(inputId, previewId){
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+        if(!input || !preview) return;
+        input.addEventListener('input',function(){
+            const url = this.value.trim();
+            if(url && (url.startsWith('http://')||url.startsWith('https://'))){
+                preview.innerHTML=`<div class="preview-item"><img src="${url}" onerror="this.src='https://placehold.co/100x100/ef4444/white?text=خطأ'"><button class="remove-image" onclick="clearImage('${inputId}','${previewId}')">×</button></div>`;
+            }else if(url){
+                preview.innerHTML=`<div class="preview-item" style="background:#fee2e2; display:flex; align-items:center; justify-content:center; color:#ef4444;">رابط غير صالح</div>`;
+            }else{preview.innerHTML='';}
+        });
+    }
+
+    function clearImage(inputId, previewId){document.getElementById(inputId).value=''; document.getElementById(previewId).innerHTML='';}
+
+    previewImage('appImage','mainImagePreview');
+    previewImage('galleryImage1','preview1');
+    previewImage('galleryImage2','preview2');
+    previewImage('galleryImage3','preview3');
+
+    initPage();
     </script>
 </body>
 </html>

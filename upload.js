@@ -1,47 +1,31 @@
 // ================== الإعدادات ==================
-const CONFIG = {
-    JSONBIN: {
-        BIN_ID: '69c13f81b7ec241ddc956318',
-        MASTER_KEY: '$2a$10$5X1fbgOhCiGV23rKGUkLLuhD/a1eIHNuKwvtNzKwu3W7KT8CGpaG.',
-        BASE_URL: 'https://api.jsonbin.io/v3/b/'
-    }
-};
-
 let apps = [];
 let jsonbinReady = false;
 let editAppId = null;
 
-// ================== تحميل البيانات ==================
+// ================== تحميل التطبيقات من JSONBin ==================
 async function loadApps() {
     try {
         console.log('📥 تحميل البيانات...');
-
         const response = await fetch(
             CONFIG.JSONBIN.BASE_URL + CONFIG.JSONBIN.BIN_ID,
             {
-                headers: {
-                    'X-Master-Key': CONFIG.JSONBIN.MASTER_KEY
-                }
+                headers: { 'X-Master-Key': CONFIG.JSONBIN.MASTER_KEY }
             }
         );
-
         const data = await response.json();
-
         apps = data.record.apps || [];
         jsonbinReady = true;
-
-        console.log('✅ تم تحميل التطبيقات:', apps);
-
+        console.log('✅ تم تحميل التطبيقات', apps);
     } catch (error) {
-        console.error('❌ خطأ تحميل:', error);
+        console.error('❌ خطأ تحميل التطبيقات:', error);
     }
 }
 
-// ================== حفظ البيانات ==================
+// ================== حفظ التطبيقات إلى JSONBin ==================
 async function saveApps() {
     try {
         console.log('📡 جاري الحفظ...');
-
         const response = await fetch(
             CONFIG.JSONBIN.BASE_URL + CONFIG.JSONBIN.BIN_ID,
             {
@@ -54,58 +38,57 @@ async function saveApps() {
                 body: JSON.stringify({ apps: apps })
             }
         );
-
         const data = await response.json();
-
-        console.log('📥 رد السيرفر:', data);
-
         if (!response.ok) throw new Error('فشل الحفظ');
-
+        console.log('✅ تم الحفظ بنجاح', data);
         return true;
-
     } catch (error) {
-        console.error('❌ خطأ حفظ:', error);
-        alert('فشل حفظ البيانات');
+        console.error('❌ خطأ الحفظ:', error);
+        alert('فشل رفع البيانات');
         return false;
     }
 }
 
-// ================== تحميل التصنيفات ==================
+// ================== التصنيفات ==================
+let categories = [
+    { key: 'games', name: 'ألعاب', icon: '🎮' },
+    { key: 'apps', name: 'تطبيقات', icon: '📱' },
+    { key: 'tools', name: 'أدوات', icon: '🛠️' },
+    { key: 'education', name: 'تعليمي', icon: '📚' }
+];
+
 function loadCategoriesForSelect() {
     let select = document.getElementById('appCategory');
     if (!select) return;
-
     select.innerHTML = '<option value="">اختر التصنيف</option>';
-
     categories.forEach(cat => {
-        select.innerHTML += `<option value="${cat.key}">${cat.icon} ${cat.name}</option>`;
+        let option = document.createElement('option');
+        option.value = cat.key;
+        option.textContent = `${cat.icon} ${cat.name}`;
+        select.appendChild(option);
     });
+    console.log('✅ تم تحميل التصنيفات');
 }
 
-// ================== صور المعرض ==================
+// ================== المعرض ==================
 function getGalleryImages() {
     let images = [];
-
-    ['galleryImage1','galleryImage2','galleryImage3'].forEach(id => {
-        let el = document.getElementById(id);
-        if (el && el.value.trim()) {
-            images.push(el.value.trim());
-        }
-    });
-
+    for (let i = 1; i <= 3; i++) {
+        let el = document.getElementById('galleryImage' + i);
+        if (el && el.value.trim() !== '') images.push(el.value.trim());
+    }
     return images;
 }
 
 function setGalleryImages(gallery) {
-    if (!gallery) return;
-
+    if (!Array.isArray(gallery)) return;
     gallery.forEach((img, i) => {
         let input = document.getElementById(`galleryImage${i+1}`);
         if (input) input.value = img;
     });
 }
 
-// ================== فتح التعديل ==================
+// ================== فتح الصفحة ==================
 async function initPage() {
     await loadApps();
 
@@ -113,36 +96,34 @@ async function initPage() {
 
     let urlParams = new URLSearchParams(window.location.search);
     let editId = urlParams.get('edit');
-
     if (editId) {
         editAppId = parseInt(editId);
-
         let app = apps.find(a => a.id === editAppId);
-
         if (app) {
-            console.log('✏️ تحميل بيانات التعديل');
-
             document.getElementById('appId').value = app.id;
             document.getElementById('appName').value = app.name;
             document.getElementById('appDescription').value = app.description;
             document.getElementById('appVersion').value = app.version;
-            document.getElementById('appCategory').value = app.category;
             document.getElementById('appDeviceType').value = app.deviceType;
             document.getElementById('appSize').value = app.size;
             document.getElementById('appImage').value = app.image;
             document.getElementById('appDownloadLink').value = app.downloadLink;
             document.getElementById('appDeveloper').value = app.developer || '';
-
+            
             setGalleryImages(app.gallery);
 
+            setTimeout(() => {
+                document.getElementById('appCategory').value = app.category;
+            }, 100);
+
             document.getElementById('submitBtn').innerText = '💾 حفظ التغييرات';
+            document.getElementById('cancelBtn').style.display = 'inline-block';
         }
     }
 }
 
-// ================== حفظ / رفع ==================
+// ================== حفظ/رفع التطبيق ==================
 async function saveApp() {
-
     let appId = document.getElementById('appId').value;
     let isEdit = appId && appId !== '';
 
@@ -159,20 +140,18 @@ async function saveApp() {
         downloadLink: document.getElementById('appDownloadLink').value.trim(),
         developer: document.getElementById('appDeveloper').value.trim(),
         date: new Date().toISOString(),
-
         downloads: 0,
         rating: 0,
         ratings: [],
         comments: []
     };
 
-    if (!appData.name) return alert('اكتب اسم التطبيق');
+    if (!appData.name || !appData.description || !appData.version || !appData.category || !appData.deviceType || !appData.size || !appData.image || !appData.downloadLink) {
+        return alert('يرجى ملء جميع الحقول المطلوبة!');
+    }
 
     if (isEdit) {
-        console.log('✏️ تعديل التطبيق');
-
         let oldApp = apps.find(a => a.id === appData.id);
-
         if (oldApp) {
             appData.downloads = oldApp.downloads;
             appData.rating = oldApp.rating;
@@ -180,39 +159,68 @@ async function saveApp() {
             appData.comments = oldApp.comments;
         }
 
-        // حذف القديم
         apps = apps.filter(a => a.id !== appData.id);
-
-        // إضافة الجديد
         apps.push(appData);
 
         await saveApps();
-
-        alert('تم التحديث');
+        alert('تم تعديل التطبيق بنجاح');
         window.location.href = 'admin.html';
-
     } else {
-        console.log('📤 رفع جديد');
-
         apps.push(appData);
-
         await saveApps();
-
-        alert('تم الرفع');
+        alert('تم رفع التطبيق بنجاح');
         window.location.href = 'admin.html';
     }
 }
 
 // ================== أحداث ==================
-document.getElementById('submitBtn')?.addEventListener('click', function(e){
+document.getElementById('submitBtn')?.addEventListener('click', e => {
     e.preventDefault();
     saveApp();
 });
 
-document.getElementById('uploadForm')?.addEventListener('submit', function(e){
+document.getElementById('uploadForm')?.addEventListener('submit', e => {
     e.preventDefault();
     saveApp();
 });
 
-// ================== تشغيل ==================
+function cancelEdit() {
+    if (confirm('هل تريد إلغاء التعديل؟')) window.location.href = 'admin.html';
+}
+
+// ================== معاينة الصور ==================
+function previewImage(inputId, previewId) {
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
+    if (!input || !preview) return;
+
+    input.addEventListener('input', function() {
+        const url = this.value.trim();
+        if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+            preview.innerHTML = `
+                <div class="preview-item">
+                    <img src="${url}" onerror="this.src='https://placehold.co/100x100/ef4444/white?text=خطأ'">
+                    <button class="remove-image" onclick="clearImage('${inputId}', '${previewId}')">×</button>
+                </div>
+            `;
+        } else if (url) {
+            preview.innerHTML = `<div class="preview-item" style="background:#fee2e2; display:flex; align-items:center; justify-content:center; color:#ef4444;">رابط غير صالح</div>`;
+        } else {
+            preview.innerHTML = '';
+        }
+    });
+}
+
+function clearImage(inputId, previewId) {
+    document.getElementById(inputId).value = '';
+    document.getElementById(previewId).innerHTML = '';
+}
+
+// تفعيل معاينة الصور
+previewImage('appImage', 'mainImagePreview');
+previewImage('galleryImage1', 'preview1');
+previewImage('galleryImage2', 'preview2');
+previewImage('galleryImage3', 'preview3');
+
+// ================== تشغيل الصفحة ==================
 initPage();
