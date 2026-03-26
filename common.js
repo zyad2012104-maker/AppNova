@@ -1,4 +1,4 @@
-// common.js - الملف الرئيسي الكامل والمحدث
+// common.js - الملف الرئيسي مع إجبار إنشاء البيانات
 
 // ========== المتغيرات العامة ==========
 let apps = [];
@@ -41,14 +41,133 @@ const isLocalhost = window.location.protocol === 'file:' ||
 
 console.log(`🔧 وضع التشغيل: ${isLocalhost ? 'محلي (Local)' : 'خادم (Server)'}`);
 
+// ========== إنشاء بيانات افتراضية فورية ==========
+function createImmediateDemoData() {
+    console.log('🔄 إنشاء بيانات افتراضية فورية...');
+    
+    // إنشاء تطبيقات تجريبية
+    apps = [
+        {
+            id: 1,
+            name: "تطبيق التواصل الاجتماعي - NovaSocial",
+            description: "تطبيق رائع للتواصل مع الأصدقاء ومشاركة الصور والفيديوهات.",
+            version: "2.0.1",
+            category: "social",
+            deviceType: "both",
+            size: "45 MB",
+            image: "https://placehold.co/400x200/667eea/white?text=NovaSocial",
+            icon: "https://placehold.co/120x120/667eea/white?text=NS",
+            gallery: [
+                "https://placehold.co/800x400/667eea/white?text=صورة+1",
+                "https://placehold.co/800x400/764ba2/white?text=صورة+2"
+            ],
+            downloadLink: "#",
+            downloads: 1250,
+            rating: 4.5,
+            ratings: [5, 4, 5, 4, 5],
+            userId: 1,
+            userName: "المدير",
+            date: new Date().toISOString(),
+            developer: "NovaTech"
+        },
+        {
+            id: 2,
+            name: "لعبة الألغاز - Puzzle Master",
+            description: "لعبة ألغاز ممتعة مع مستويات متعددة.",
+            version: "1.5.0",
+            category: "games",
+            deviceType: "android",
+            size: "78 MB",
+            image: "https://placehold.co/400x200/764ba2/white?text=Puzzle+Master",
+            icon: "https://placehold.co/120x120/764ba2/white?text=PM",
+            gallery: [
+                "https://placehold.co/800x400/764ba2/white?text=مستوى+1",
+                "https://placehold.co/800x400/667eea/white?text=مستوى+2"
+            ],
+            downloadLink: "#",
+            downloads: 890,
+            rating: 4.2,
+            ratings: [4, 5, 4, 4, 4],
+            userId: 1,
+            userName: "المدير",
+            date: new Date().toISOString(),
+            developer: "Puzzle Games"
+        },
+        {
+            id: 3,
+            name: "تطبيق التعليم - EduSmart",
+            description: "منصة تعليمية متكاملة للطلاب.",
+            version: "3.0.0",
+            category: "education",
+            deviceType: "both",
+            size: "120 MB",
+            image: "https://placehold.co/400x200/48c6ef/white?text=EduSmart",
+            icon: "https://placehold.co/120x120/48c6ef/white?text=ES",
+            gallery: [
+                "https://placehold.co/800x400/48c6ef/white?text=الرئيسية",
+                "https://placehold.co/800x400/667eea/white?text=الدروس"
+            ],
+            downloadLink: "#",
+            downloads: 2340,
+            rating: 4.8,
+            ratings: [5, 5, 4, 5, 5],
+            userId: 1,
+            userName: "المدير",
+            date: new Date().toISOString(),
+            developer: "EduTech"
+        }
+    ];
+    
+    // إنشاء مستخدم admin
+    users = [
+        {
+            id: 1,
+            username: "المدير",
+            email: "admin",
+            password: "admin2012",
+            role: "admin",
+            date: new Date().toISOString()
+        }
+    ];
+    
+    // إنشاء تعليقات
+    comments = [
+        {
+            id: 1001,
+            appId: 1,
+            userId: 1,
+            username: "المدير",
+            comment: "تطبيق رائع جداً!",
+            rating: 5,
+            date: new Date().toISOString()
+        }
+    ];
+    
+    categories = defaultCategories;
+    
+    saveToLocalStorage();
+    console.log('✅ تم إنشاء البيانات الافتراضية بنجاح');
+    console.log(`👥 مستخدم admin: admin / admin2012`);
+}
+
 // ========== تحميل البيانات ==========
 async function loadData() {
     console.log('🔄 جاري تحميل البيانات...');
     
+    // أولاً: محاولة تحميل من localStorage
     loadFromLocalStorage();
     
+    // إذا كانت البيانات موجودة في localStorage، استخدمها
+    if (apps.length > 0 && users.length > 0) {
+        console.log('✅ تم تحميل البيانات من localStorage');
+        jsonbinReady = true;
+        return;
+    }
+    
+    // إذا لم تكن هناك بيانات، حاول جلبها من JSONBin
     if (!isLocalhost) {
         try {
+            console.log('📡 محاولة جلب البيانات من JSONBin...');
             const response = await fetch(`${BASE_URL}${BIN_ID}/latest`, {
                 method: 'GET',
                 headers: {
@@ -59,7 +178,7 @@ async function loadData() {
             
             if (response.ok) {
                 const data = await response.json();
-                if (data.record.apps && data.record.apps.length > 0) {
+                if (data.record && data.record.apps && data.record.apps.length > 0) {
                     apps = data.record.apps;
                     users = data.record.users || [];
                     comments = data.record.comments || [];
@@ -67,25 +186,19 @@ async function loadData() {
                     adSettings = data.record.adSettings || adSettings;
                     console.log('✅ تم تحميل البيانات من JSONBin');
                     saveToLocalStorage();
+                    jsonbinReady = true;
+                    return;
                 }
             }
         } catch (error) {
-            console.log('⚠️ فشل تحميل من JSONBin، استخدام البيانات المحلية');
+            console.log('⚠️ فشل تحميل من JSONBin:', error);
         }
     }
     
-    // إنشاء بيانات افتراضية إذا كانت فارغة
-    if (apps.length === 0 || users.length === 0) {
-        console.log('⚠️ لا توجد بيانات، إنشاء بيانات افتراضية');
-        createDemoApps();
-    }
-    
-    if (!categories || categories.length === 0) {
-        categories = defaultCategories;
-    }
-    
+    // إذا لم تنجح أي محاولة، أنشئ بيانات افتراضية
+    console.log('⚠️ لا توجد بيانات، إنشاء بيانات افتراضية');
+    createImmediateDemoData();
     jsonbinReady = true;
-    console.log(`✅ تم تحميل ${apps.length} تطبيق و ${users.length} مستخدم و ${categories.length} تصنيف`);
 }
 
 function saveToLocalStorage() {
@@ -128,121 +241,6 @@ function loadFromLocalStorage() {
     }
 }
 
-function createDemoApps() {
-    // إنشاء تطبيقات تجريبية
-    if (apps.length === 0) {
-        apps = [
-            {
-                id: 1,
-                name: "تطبيق التواصل الاجتماعي - NovaSocial",
-                description: "تطبيق رائع للتواصل مع الأصدقاء ومشاركة الصور والفيديوهات. يمكنك الدردشة مع الأصدقاء ومشاركة اللحظات الجميلة.",
-                version: "2.0.1",
-                category: "social",
-                deviceType: "both",
-                size: "45 MB",
-                image: "https://placehold.co/400x200/667eea/white?text=NovaSocial",
-                icon: "https://placehold.co/120x120/667eea/white?text=NS",
-                gallery: [
-                    "https://placehold.co/800x400/667eea/white?text=صورة+1",
-                    "https://placehold.co/800x400/764ba2/white?text=صورة+2",
-                    "https://placehold.co/800x400/48c6ef/white?text=صورة+3"
-                ],
-                downloadLink: "#",
-                downloads: 1250,
-                rating: 4.5,
-                ratings: [5, 4, 5, 4, 5],
-                userId: 1,
-                userName: "المدير",
-                date: new Date().toISOString(),
-                developer: "NovaTech"
-            },
-            {
-                id: 2,
-                name: "لعبة الألغاز - Puzzle Master",
-                description: "لعبة ألغاز ممتعة وتحدي للعقل مع مستويات متعددة.",
-                version: "1.5.0",
-                category: "games",
-                deviceType: "android",
-                size: "78 MB",
-                image: "https://placehold.co/400x200/764ba2/white?text=Puzzle+Master",
-                icon: "https://placehold.co/120x120/764ba2/white?text=PM",
-                gallery: [
-                    "https://placehold.co/800x400/764ba2/white?text=مستوى+1",
-                    "https://placehold.co/800x400/667eea/white?text=مستوى+2"
-                ],
-                downloadLink: "#",
-                downloads: 890,
-                rating: 4.2,
-                ratings: [4, 5, 4, 4, 4],
-                userId: 1,
-                userName: "المدير",
-                date: new Date().toISOString(),
-                developer: "Puzzle Games"
-            },
-            {
-                id: 3,
-                name: "تطبيق التعليم - EduSmart",
-                description: "منصة تعليمية متكاملة للطلاب تحتوي على دروس واختبارات.",
-                version: "3.0.0",
-                category: "education",
-                deviceType: "both",
-                size: "120 MB",
-                image: "https://placehold.co/400x200/48c6ef/white?text=EduSmart",
-                icon: "https://placehold.co/120x120/48c6ef/white?text=ES",
-                gallery: [
-                    "https://placehold.co/800x400/48c6ef/white?text=الرئيسية",
-                    "https://placehold.co/800x400/667eea/white?text=الدروس"
-                ],
-                downloadLink: "#",
-                downloads: 2340,
-                rating: 4.8,
-                ratings: [5, 5, 4, 5, 5],
-                userId: 1,
-                userName: "المدير",
-                date: new Date().toISOString(),
-                developer: "EduTech"
-            }
-        ];
-        console.log('✅ تم إنشاء تطبيقات تجريبية');
-    }
-    
-    // إنشاء مستخدم admin إذا لم يوجد أي مستخدم
-    if (users.length === 0) {
-        users = [
-            {
-                id: 1,
-                username: "المدير",
-                email: "admin",
-                password: "admin2012",
-                role: "admin",
-                date: new Date().toISOString()
-            }
-        ];
-        console.log('✅ تم إنشاء مستخدم admin');
-    }
-    
-    // إنشاء تعليقات تجريبية
-    if (comments.length === 0 && apps.length > 0) {
-        comments = [
-            {
-                id: 1001,
-                appId: 1,
-                userId: 1,
-                username: "المدير",
-                comment: "تطبيق رائع جداً! أنصح الجميع بتجربته.",
-                rating: 5,
-                date: new Date().toISOString()
-            }
-        ];
-        console.log('✅ تم إنشاء تعليقات تجريبية');
-    }
-    
-    saveToLocalStorage();
-    console.log('✅ تم إنشاء البيانات التجريبية');
-    console.log(`👥 عدد المستخدمين: ${users.length}`);
-    console.log(`👑 مستخدم admin موجود: ${users.some(u => u.email === 'admin')}`);
-}
-
 // ========== دوال التحقق ==========
 function isAdmin(user) {
     return user && user.role === 'admin';
@@ -271,65 +269,11 @@ function getCategoryName(key) {
 }
 
 // ========== دوال حفظ البيانات ==========
-async function saveApps() { 
-    saveToLocalStorage();
-    if (!isLocalhost) {
-        await syncToJSONBin();
-    }
-}
-
-async function saveUsers() { 
-    saveToLocalStorage();
-    if (!isLocalhost) {
-        await syncToJSONBin();
-    }
-}
-
-async function saveComments() { 
-    saveToLocalStorage();
-    if (!isLocalhost) {
-        await syncToJSONBin();
-    }
-}
-
-async function saveCategories() { 
-    saveToLocalStorage();
-    if (!isLocalhost) {
-        await syncToJSONBin();
-    }
-}
-
-async function saveAdSettings() { 
-    saveToLocalStorage();
-    if (!isLocalhost) {
-        await syncToJSONBin();
-    }
-}
-
-async function syncToJSONBin() {
-    try {
-        const data = {
-            apps: apps,
-            users: users,
-            comments: comments,
-            categories: categories,
-            adSettings: adSettings
-        };
-        
-        await fetch(`${BASE_URL}${BIN_ID}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': MASTER_KEY,
-                'X-Bin-Versioning': 'false'
-            },
-            body: JSON.stringify(data)
-        });
-        console.log('✅ تم المزامنة مع JSONBin');
-    } catch (error) {
-        console.log('⚠️ فشل المزامنة مع JSONBin');
-    }
-}
+async function saveApps() { saveToLocalStorage(); }
+async function saveUsers() { saveToLocalStorage(); }
+async function saveComments() { saveToLocalStorage(); }
+async function saveCategories() { saveToLocalStorage(); }
+async function saveAdSettings() { saveToLocalStorage(); }
 
 // ========== دوال مساعدة ==========
 function showAlert(message, type) {
@@ -409,13 +353,10 @@ function escapeHtml(text) {
 }
 
 // ========== دوال التطبيقات الأساسية ==========
-
-// دالة فتح صفحة تفاصيل التطبيق
 function openAppDetail(appId) {
     window.location.href = `app-detail.html?id=${appId}`;
 }
 
-// دالة تحميل التطبيق
 async function downloadApp(appId) {
     const app = apps.find(a => a.id === appId);
     if (!app) {
@@ -436,7 +377,6 @@ async function downloadApp(appId) {
     });
 }
 
-// دالة إنشاء بطاقة التطبيق
 function createAppCard(app) {
     let fullStars = Math.floor(app.rating);
     let emptyStars = 5 - fullStars;
@@ -481,44 +421,27 @@ function searchApps() {
 }
 
 // ========== دوال الإعلانات ==========
-
 function renderAds() {
     const topAd = document.getElementById('topAdContainer');
     const bottomAd = document.getElementById('bottomAdContainer');
     const leftAd = document.getElementById('leftAdContainer');
     const rightAd = document.getElementById('rightAdContainer');
     
-    if (topAd && adSettings.topBanner) {
-        topAd.innerHTML = adSettings.topBanner;
-        executeAdScripts(topAd);
-    }
-    if (bottomAd && adSettings.bottomBanner) {
-        bottomAd.innerHTML = adSettings.bottomBanner;
-        executeAdScripts(bottomAd);
-    }
-    if (leftAd && adSettings.leftSidebar) {
-        leftAd.innerHTML = adSettings.leftSidebar;
-        executeAdScripts(leftAd);
-    }
-    if (rightAd && adSettings.rightSidebar) {
-        rightAd.innerHTML = adSettings.rightSidebar;
-        executeAdScripts(rightAd);
-    }
+    if (topAd && adSettings.topBanner) topAd.innerHTML = adSettings.topBanner;
+    if (bottomAd && adSettings.bottomBanner) bottomAd.innerHTML = adSettings.bottomBanner;
+    if (leftAd && adSettings.leftSidebar) leftAd.innerHTML = adSettings.leftSidebar;
+    if (rightAd && adSettings.rightSidebar) rightAd.innerHTML = adSettings.rightSidebar;
 }
 
 function executeAdScripts(container) {
     if (!container) return;
-    
     const scripts = container.getElementsByTagName('script');
     for (let i = 0; i < scripts.length; i++) {
         const script = document.createElement('script');
         const oldScript = scripts[i];
-        
         for (let j = 0; j < oldScript.attributes.length; j++) {
-            const attr = oldScript.attributes[j];
-            script.setAttribute(attr.name, attr.value);
+            script.setAttribute(oldScript.attributes[j].name, oldScript.attributes[j].value);
         }
-        
         script.text = oldScript.text;
         oldScript.parentNode.replaceChild(script, oldScript);
     }
@@ -538,16 +461,12 @@ function showClickAd(callback) {
             closeBtn.innerHTML = '✓ متابعة التحميل';
             closeBtn.className = 'submit-btn close-ad-btn';
             closeBtn.style.marginTop = '20px';
-            closeBtn.style.width = 'auto';
-            closeBtn.style.padding = '12px 30px';
-            closeBtn.style.background = '#10b981';
             closeBtn.onclick = () => {
                 modal.style.display = 'none';
                 if (callback) callback();
             };
             modalContent.appendChild(closeBtn);
         }
-        
         window.pendingCallback = callback;
     } else {
         if (callback) callback();
@@ -583,5 +502,4 @@ if(storedUser) {
     console.log('✅ AppNova جاهز للعمل');
     console.log(`📊 عدد التطبيقات: ${apps.length}`);
     console.log(`👥 عدد المستخدمين: ${users.length}`);
-    console.log(`🏷️ عدد التصنيفات: ${categories.length}`);
 })();
