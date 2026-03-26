@@ -84,7 +84,7 @@ async function loadData() {
     }
     
     jsonbinReady = true;
-    console.log(`✅ تم تحميل ${apps.length} تطبيق و ${categories.length} تصنيف`);
+    console.log(`✅ تم تحميل ${apps.length} تطبيق و ${users.length} مستخدم و ${categories.length} تصنيف`);
 }
 
 function saveToLocalStorage() {
@@ -206,61 +206,10 @@ function createDemoApps() {
             userName: "المدير",
             date: new Date().toISOString(),
             developer: "EduTech"
-        },
-        {
-            id: 4,
-            name: "تطبيق الإنتاجية - TaskFlow",
-            description: "تطبيق لإدارة المهام والمشاريع يساعدك على تنظيم وقتك وزيادة إنتاجيتك. يحتوي على تقويم وتذكيرات وتقارير متقدمة.",
-            version: "1.2.0",
-            category: "productivity",
-            deviceType: "both",
-            size: "32 MB",
-            image: "https://placehold.co/400x200/10b981/white?text=TaskFlow",
-            icon: "https://placehold.co/120x120/10b981/white?text=TF",
-            gallery: [
-                "https://placehold.co/800x400/10b981/white?text=المهام",
-                "https://placehold.co/800x400/667eea/white?text=التقويم",
-                "https://placehold.co/800x400/764ba2/white?text=التقارير",
-                "https://placehold.co/800x400/48c6ef/white?text=الإعدادات",
-                "https://placehold.co/800x400/f59e0b/white?text=الإحصائيات"
-            ],
-            downloadLink: "#",
-            downloads: 567,
-            rating: 4.3,
-            ratings: [4, 5, 4, 4, 4],
-            userId: 1,
-            userName: "المدير",
-            date: new Date().toISOString(),
-            developer: "Productivity Lab"
-        },
-        {
-            id: 5,
-            name: "تطبيق الترفيه - FunTime",
-            description: "تطبيق ترفيهي يحتوي على ألعاب وفيديوهات وموسيقى. وقت ممتع مع العائلة والأصدقاء.",
-            version: "1.0.0",
-            category: "entertainment",
-            deviceType: "both",
-            size: "95 MB",
-            image: "https://placehold.co/400x200/f59e0b/white?text=FunTime",
-            icon: "https://placehold.co/120x120/f59e0b/white?text=FT",
-            gallery: [
-                "https://placehold.co/800x400/f59e0b/white?text=الألعاب",
-                "https://placehold.co/800x400/667eea/white?text=الفيديوهات",
-                "https://placehold.co/800x400/764ba2/white?text=الموسيقى",
-                "https://placehold.co/800x400/48c6ef/white?text=البودكاست",
-                "https://placehold.co/800x400/10b981/white?text=المفضلة"
-            ],
-            downloadLink: "#",
-            downloads: 345,
-            rating: 4.0,
-            ratings: [4, 4, 4, 4, 4],
-            userId: 1,
-            userName: "المدير",
-            date: new Date().toISOString(),
-            developer: "Fun Studios"
         }
     ];
     
+    // إنشاء مستخدم admin إذا لم يوجد
     if (users.length === 0) {
         users = [{
             id: 1,
@@ -318,11 +267,65 @@ function getCategoryName(key) {
 }
 
 // ========== دوال حفظ البيانات ==========
-function saveApps() { saveToLocalStorage(); }
-function saveUsers() { saveToLocalStorage(); }
-function saveComments() { saveToLocalStorage(); }
-function saveCategories() { saveToLocalStorage(); }
-async function saveAdSettings() { saveToLocalStorage(); }
+async function saveApps() { 
+    saveToLocalStorage();
+    if (!isLocalhost) {
+        await syncToJSONBin();
+    }
+}
+
+async function saveUsers() { 
+    saveToLocalStorage();
+    if (!isLocalhost) {
+        await syncToJSONBin();
+    }
+}
+
+async function saveComments() { 
+    saveToLocalStorage();
+    if (!isLocalhost) {
+        await syncToJSONBin();
+    }
+}
+
+async function saveCategories() { 
+    saveToLocalStorage();
+    if (!isLocalhost) {
+        await syncToJSONBin();
+    }
+}
+
+async function saveAdSettings() { 
+    saveToLocalStorage();
+    if (!isLocalhost) {
+        await syncToJSONBin();
+    }
+}
+
+async function syncToJSONBin() {
+    try {
+        const data = {
+            apps: apps,
+            users: users,
+            comments: comments,
+            categories: categories,
+            adSettings: adSettings
+        };
+        
+        await fetch(`${BASE_URL}${BIN_ID}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': MASTER_KEY,
+                'X-Bin-Versioning': 'false'
+            },
+            body: JSON.stringify(data)
+        });
+        console.log('✅ تم المزامنة مع JSONBin');
+    } catch (error) {
+        console.log('⚠️ فشل المزامنة مع JSONBin');
+    }
+}
 
 // ========== دوال مساعدة ==========
 function showAlert(message, type) {
@@ -589,5 +592,6 @@ if(storedUser) {
     renderAds();
     console.log('✅ AppNova جاهز للعمل');
     console.log(`📊 عدد التطبيقات: ${apps.length}`);
+    console.log(`👥 عدد المستخدمين: ${users.length}`);
     console.log(`🏷️ عدد التصنيفات: ${categories.length}`);
 })();

@@ -1,4 +1,4 @@
-// register.js - إنشاء حساب جديد مع JSONBin.io
+// register.js - إنشاء حساب جديد
 
 document.getElementById('registerForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -50,16 +50,18 @@ document.getElementById('registerForm')?.addEventListener('submit', async functi
     }
     
     // التحقق من عدم وجود مستخدم بنفس البريد أو اسم المستخدم
-    const existingUserByEmail = users.find(u => u.email === email);
-    if (existingUserByEmail) {
-        showAlert('البريد الإلكتروني مستخدم بالفعل', 'error');
-        return;
-    }
-    
-    const existingUserByUsername = users.find(u => u.username === username);
-    if (existingUserByUsername) {
-        showAlert('اسم المستخدم موجود بالفعل، يرجى اختيار اسم آخر', 'error');
-        return;
+    if (users) {
+        const existingUserByEmail = users.find(u => u.email === email);
+        if (existingUserByEmail) {
+            showAlert('البريد الإلكتروني مستخدم بالفعل', 'error');
+            return;
+        }
+        
+        const existingUserByUsername = users.find(u => u.username === username);
+        if (existingUserByUsername) {
+            showAlert('اسم المستخدم موجود بالفعل، يرجى اختيار اسم آخر', 'error');
+            return;
+        }
     }
     
     // إنشاء مستخدم جديد
