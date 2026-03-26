@@ -74,8 +74,9 @@ async function loadData() {
         }
     }
     
-    if (apps.length === 0) {
-        console.log('⚠️ لا توجد تطبيقات، إنشاء تطبيقات افتراضية');
+    // إنشاء بيانات افتراضية إذا كانت فارغة
+    if (apps.length === 0 || users.length === 0) {
+        console.log('⚠️ لا توجد بيانات، إنشاء بيانات افتراضية');
         createDemoApps();
     }
     
@@ -128,100 +129,100 @@ function loadFromLocalStorage() {
 }
 
 function createDemoApps() {
-    apps = [
-        {
-            id: 1,
-            name: "تطبيق التواصل الاجتماعي - NovaSocial",
-            description: "تطبيق رائع للتواصل مع الأصدقاء ومشاركة الصور والفيديوهات. يمكنك الدردشة مع الأصدقاء ومشاركة اللحظات الجميلة. يتميز التطبيق بواجهة سهلة الاستخدام وميزات متقدمة مثل المكالمات الصوتية والمرئية.",
-            version: "2.0.1",
-            category: "social",
-            deviceType: "both",
-            size: "45 MB",
-            image: "https://placehold.co/400x200/667eea/white?text=NovaSocial",
-            icon: "https://placehold.co/120x120/667eea/white?text=NS",
-            gallery: [
-                "https://placehold.co/800x400/667eea/white?text=صورة+1",
-                "https://placehold.co/800x400/764ba2/white?text=صورة+2",
-                "https://placehold.co/800x400/48c6ef/white?text=صورة+3",
-                "https://placehold.co/800x400/10b981/white?text=صورة+4",
-                "https://placehold.co/800x400/f59e0b/white?text=صورة+5"
-            ],
-            downloadLink: "#",
-            downloads: 1250,
-            rating: 4.5,
-            ratings: [5, 4, 5, 4, 5],
-            userId: 1,
-            userName: "المدير",
-            date: new Date().toISOString(),
-            developer: "NovaTech"
-        },
-        {
-            id: 2,
-            name: "لعبة الألغاز - Puzzle Master",
-            description: "لعبة ألغاز ممتعة وتحدي للعقل مع مستويات متعددة. اختبر ذكاءك وحل الألغاز الصعبة. تحتوي اللعبة على 100 مستوى مختلف ومؤثرات صوتية رائعة.",
-            version: "1.5.0",
-            category: "games",
-            deviceType: "android",
-            size: "78 MB",
-            image: "https://placehold.co/400x200/764ba2/white?text=Puzzle+Master",
-            icon: "https://placehold.co/120x120/764ba2/white?text=PM",
-            gallery: [
-                "https://placehold.co/800x400/764ba2/white?text=مستوى+1",
-                "https://placehold.co/800x400/667eea/white?text=مستوى+2",
-                "https://placehold.co/800x400/48c6ef/white?text=مستوى+3",
-                "https://placehold.co/800x400/10b981/white?text=مستوى+4",
-                "https://placehold.co/800x400/f59e0b/white?text=مستوى+5"
-            ],
-            downloadLink: "#",
-            downloads: 890,
-            rating: 4.2,
-            ratings: [4, 5, 4, 4, 4],
-            userId: 1,
-            userName: "المدير",
-            date: new Date().toISOString(),
-            developer: "Puzzle Games"
-        },
-        {
-            id: 3,
-            name: "تطبيق التعليم - EduSmart",
-            description: "منصة تعليمية متكاملة للطلاب تحتوي على دروس واختبارات. تعلم المواد الدراسية بسهولة مع شرح مبسط وتمارين تفاعلية.",
-            version: "3.0.0",
-            category: "education",
-            deviceType: "both",
-            size: "120 MB",
-            image: "https://placehold.co/400x200/48c6ef/white?text=EduSmart",
-            icon: "https://placehold.co/120x120/48c6ef/white?text=ES",
-            gallery: [
-                "https://placehold.co/800x400/48c6ef/white?text=الرئيسية",
-                "https://placehold.co/800x400/667eea/white?text=الدروس",
-                "https://placehold.co/800x400/764ba2/white?text=الاختبارات",
-                "https://placehold.co/800x400/10b981/white?text=الفيديوهات",
-                "https://placehold.co/800x400/f59e0b/white?text=الإنجازات"
-            ],
-            downloadLink: "#",
-            downloads: 2340,
-            rating: 4.8,
-            ratings: [5, 5, 4, 5, 5],
-            userId: 1,
-            userName: "المدير",
-            date: new Date().toISOString(),
-            developer: "EduTech"
-        }
-    ];
-    
-    // إنشاء مستخدم admin إذا لم يوجد
-    if (users.length === 0) {
-        users = [{
-            id: 1,
-            username: "المدير",
-            email: "admin",
-            password: "admin2012",
-            role: "admin",
-            date: new Date().toISOString()
-        }];
+    // إنشاء تطبيقات تجريبية
+    if (apps.length === 0) {
+        apps = [
+            {
+                id: 1,
+                name: "تطبيق التواصل الاجتماعي - NovaSocial",
+                description: "تطبيق رائع للتواصل مع الأصدقاء ومشاركة الصور والفيديوهات. يمكنك الدردشة مع الأصدقاء ومشاركة اللحظات الجميلة.",
+                version: "2.0.1",
+                category: "social",
+                deviceType: "both",
+                size: "45 MB",
+                image: "https://placehold.co/400x200/667eea/white?text=NovaSocial",
+                icon: "https://placehold.co/120x120/667eea/white?text=NS",
+                gallery: [
+                    "https://placehold.co/800x400/667eea/white?text=صورة+1",
+                    "https://placehold.co/800x400/764ba2/white?text=صورة+2",
+                    "https://placehold.co/800x400/48c6ef/white?text=صورة+3"
+                ],
+                downloadLink: "#",
+                downloads: 1250,
+                rating: 4.5,
+                ratings: [5, 4, 5, 4, 5],
+                userId: 1,
+                userName: "المدير",
+                date: new Date().toISOString(),
+                developer: "NovaTech"
+            },
+            {
+                id: 2,
+                name: "لعبة الألغاز - Puzzle Master",
+                description: "لعبة ألغاز ممتعة وتحدي للعقل مع مستويات متعددة.",
+                version: "1.5.0",
+                category: "games",
+                deviceType: "android",
+                size: "78 MB",
+                image: "https://placehold.co/400x200/764ba2/white?text=Puzzle+Master",
+                icon: "https://placehold.co/120x120/764ba2/white?text=PM",
+                gallery: [
+                    "https://placehold.co/800x400/764ba2/white?text=مستوى+1",
+                    "https://placehold.co/800x400/667eea/white?text=مستوى+2"
+                ],
+                downloadLink: "#",
+                downloads: 890,
+                rating: 4.2,
+                ratings: [4, 5, 4, 4, 4],
+                userId: 1,
+                userName: "المدير",
+                date: new Date().toISOString(),
+                developer: "Puzzle Games"
+            },
+            {
+                id: 3,
+                name: "تطبيق التعليم - EduSmart",
+                description: "منصة تعليمية متكاملة للطلاب تحتوي على دروس واختبارات.",
+                version: "3.0.0",
+                category: "education",
+                deviceType: "both",
+                size: "120 MB",
+                image: "https://placehold.co/400x200/48c6ef/white?text=EduSmart",
+                icon: "https://placehold.co/120x120/48c6ef/white?text=ES",
+                gallery: [
+                    "https://placehold.co/800x400/48c6ef/white?text=الرئيسية",
+                    "https://placehold.co/800x400/667eea/white?text=الدروس"
+                ],
+                downloadLink: "#",
+                downloads: 2340,
+                rating: 4.8,
+                ratings: [5, 5, 4, 5, 5],
+                userId: 1,
+                userName: "المدير",
+                date: new Date().toISOString(),
+                developer: "EduTech"
+            }
+        ];
+        console.log('✅ تم إنشاء تطبيقات تجريبية');
     }
     
-    if (comments.length === 0) {
+    // إنشاء مستخدم admin إذا لم يوجد أي مستخدم
+    if (users.length === 0) {
+        users = [
+            {
+                id: 1,
+                username: "المدير",
+                email: "admin",
+                password: "admin2012",
+                role: "admin",
+                date: new Date().toISOString()
+            }
+        ];
+        console.log('✅ تم إنشاء مستخدم admin');
+    }
+    
+    // إنشاء تعليقات تجريبية
+    if (comments.length === 0 && apps.length > 0) {
         comments = [
             {
                 id: 1001,
@@ -233,10 +234,13 @@ function createDemoApps() {
                 date: new Date().toISOString()
             }
         ];
+        console.log('✅ تم إنشاء تعليقات تجريبية');
     }
     
     saveToLocalStorage();
-    console.log('✅ تم إنشاء تطبيقات تجريبية');
+    console.log('✅ تم إنشاء البيانات التجريبية');
+    console.log(`👥 عدد المستخدمين: ${users.length}`);
+    console.log(`👑 مستخدم admin موجود: ${users.some(u => u.email === 'admin')}`);
 }
 
 // ========== دوال التحقق ==========
@@ -411,7 +415,7 @@ function openAppDetail(appId) {
     window.location.href = `app-detail.html?id=${appId}`;
 }
 
-// دالة تحميل التطبيق (تعرض إعلاناً أولاً)
+// دالة تحميل التطبيق
 async function downloadApp(appId) {
     const app = apps.find(a => a.id === appId);
     if (!app) {
@@ -419,23 +423,13 @@ async function downloadApp(appId) {
         return;
     }
     
-    // عرض الإعلان أولاً
     showClickAd(async () => {
         app.downloads++;
         await saveApps();
         
         if (app.downloadLink && app.downloadLink !== '#') {
-            const popupOptions = 'width=900,height=700,scrollbars=yes,resizable=yes,top=100,left=100';
-            const popupWindow = window.open(app.downloadLink, '_blank', popupOptions);
-            
-            if (popupWindow) {
-                showAlert('📥 تم فتح رابط التحميل', 'success');
-                popupWindow.focus();
-            } else {
-                if (confirm('⚠️ تم حظر النوافذ المنبثقة. هل تريد فتح الرابط في نفس الصفحة؟')) {
-                    window.location.href = app.downloadLink;
-                }
-            }
+            window.open(app.downloadLink, '_blank');
+            showAlert('📥 جاري التحميل...', 'success');
         } else {
             showAlert('❌ رابط التحميل غير متوفر', 'error');
         }
@@ -488,7 +482,6 @@ function searchApps() {
 
 // ========== دوال الإعلانات ==========
 
-// دالة عرض جميع الإعلانات في الصفحة
 function renderAds() {
     const topAd = document.getElementById('topAdContainer');
     const bottomAd = document.getElementById('bottomAdContainer');
@@ -513,7 +506,6 @@ function renderAds() {
     }
 }
 
-// دالة لتنفيذ السكريبتات داخل الإعلانات
 function executeAdScripts(container) {
     if (!container) return;
     
@@ -532,7 +524,6 @@ function executeAdScripts(container) {
     }
 }
 
-// دالة عرض إعلان عند النقر
 function showClickAd(callback) {
     const modal = document.getElementById('adModal');
     const modalContent = document.getElementById('modalAdContent');
@@ -563,7 +554,6 @@ function showClickAd(callback) {
     }
 }
 
-// دالة إغلاق نافذة الإعلان
 function closeAdModal() {
     const modal = document.getElementById('adModal');
     if (modal) {
