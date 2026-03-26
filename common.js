@@ -1,4 +1,4 @@
-// common.js - الملف الرئيسي مع إجبار إنشاء البيانات
+// common.js - الملف الرئيسي الكامل والمحدث
 
 // ========== المتغيرات العامة ==========
 let apps = [];
@@ -66,7 +66,7 @@ function createImmediateDemoData() {
             rating: 4.5,
             ratings: [5, 4, 5, 4, 5],
             userId: 1,
-            userName: "المدير",
+            userName: "admin",
             date: new Date().toISOString(),
             developer: "NovaTech"
         },
@@ -89,7 +89,7 @@ function createImmediateDemoData() {
             rating: 4.2,
             ratings: [4, 5, 4, 4, 4],
             userId: 1,
-            userName: "المدير",
+            userName: "admin",
             date: new Date().toISOString(),
             developer: "Puzzle Games"
         },
@@ -112,17 +112,17 @@ function createImmediateDemoData() {
             rating: 4.8,
             ratings: [5, 5, 4, 5, 5],
             userId: 1,
-            userName: "المدير",
+            userName: "admin",
             date: new Date().toISOString(),
             developer: "EduTech"
         }
     ];
     
-    // إنشاء مستخدم admin
+    // إنشاء مستخدم admin - username = "admin" و email = "admin"
     users = [
         {
             id: 1,
-            username: "المدير",
+            username: "admin",
             email: "admin",
             password: "admin2012",
             role: "admin",
@@ -136,7 +136,7 @@ function createImmediateDemoData() {
             id: 1001,
             appId: 1,
             userId: 1,
-            username: "المدير",
+            username: "admin",
             comment: "تطبيق رائع جداً!",
             rating: 5,
             date: new Date().toISOString()
@@ -147,7 +147,9 @@ function createImmediateDemoData() {
     
     saveToLocalStorage();
     console.log('✅ تم إنشاء البيانات الافتراضية بنجاح');
-    console.log(`👥 مستخدم admin: admin / admin2012`);
+    console.log('👥 بيانات الدخول:');
+    console.log('   اسم المستخدم: admin');
+    console.log('   كلمة المرور: admin2012');
 }
 
 // ========== تحميل البيانات ==========

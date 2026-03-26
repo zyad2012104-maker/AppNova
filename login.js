@@ -28,21 +28,45 @@ document.getElementById('loginForm')?.addEventListener('submit', async function(
     console.log(`👤 المستخدم: ${input}`);
     console.log(`👥 عدد المستخدمين: ${users ? users.length : 0}`);
     
-    // البحث عن المستخدم
+    // عرض المستخدمين للتأكد
+    if (users && users.length > 0) {
+        console.log('📋 قائمة المستخدمين:');
+        users.forEach(u => {
+            console.log(`   - username: "${u.username}", email: "${u.email}", role: ${u.role}`);
+        });
+    }
+    
+    // البحث عن المستخدم - يبحث في username و email
     let user = null;
     if (users && users.length > 0) {
-        user = users.find(u => (u.email === input || u.username === input) && u.password === password);
+        user = users.find(u => 
+            (u.username === input || u.email === input) && u.password === password
+        );
+    }
+    
+    // إذا كان المدخل admin وكلمة المرور admin2012 ولم يتم العثور على مستخدم
+    if (!user && input === 'admin' && password === 'admin2012') {
+        console.log('⚠️ محاولة إنشاء مستخدم admin تلقائياً...');
+        user = {
+            id: Date.now(),
+            username: "admin",
+            email: "admin",
+            password: "admin2012",
+            role: "admin",
+            date: new Date().toISOString()
+        };
+        users.push(user);
+        await saveUsers();
+        console.log('✅ تم إنشاء مستخدم admin بنجاح');
     }
     
     if(user) {
-        // حفظ المستخدم الحالي
         localStorage.setItem('currentUser', JSON.stringify(user));
         currentUser = user;
         console.log(`✅ تم تسجيل الدخول بنجاح: ${user.username} (${user.role})`);
         
         showAlert(`مرحباً ${user.username}`, 'success');
         
-        // التوجيه حسب الدور
         if(user.role === 'admin' || user.role === 'moderator') {
             window.location.href = 'admin.html';
         } else {
