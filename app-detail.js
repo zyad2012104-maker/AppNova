@@ -10,6 +10,16 @@ function getAppIdFromURL() {
     return params.get("id");
 }
 
+مكان الكود صح
+const appId = getAppIdFromURL();
+   if (!appId) {
+       const meta = document.createElement('meta');
+       meta.name = 'robots';
+       meta.content = 'noindex, nofollow';
+       document.head.appendChild(meta);
+       console.log('🔒 تم منع فهرسة الصفحة (لا يوجد ID)');
+}
+
 function renderStars(rating) {
     let stars = '';
     for (let i = 1; i <= 5; i++) {

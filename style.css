@@ -950,3 +950,19 @@ body {
         justify-content: center;
     }
 }
+
+/* تحسينات SEO */
+h1, h2, h3 {
+    scroll-margin-top: 100px;
+}
+
+/* تحسين عرض الروابط */
+a {
+    text-decoration: none;
+}
+
+/* تحسين الطباعة للموبايل */
+@media (max-width: 768px) {
+    h1 { font-size: 1.8rem; }
+    h2 { font-size: 1.4rem; }
+}
