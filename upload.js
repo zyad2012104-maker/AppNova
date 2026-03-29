@@ -9,33 +9,40 @@ let categories = [
     { key: 'entertainment', name: 'ترفيه', icon: '🎬' }
 ];
 
+// ========== تحميل التصنيفات ==========
 function loadCategoriesForSelect() {
     let select = document.getElementById('appCategory');
     if (!select) return;
+
     select.innerHTML = '<option value="">اختر التصنيف</option>';
+
     categories.forEach(cat => {
         let option = document.createElement('option');
         option.value = cat.key;
         option.textContent = `${cat.icon} ${cat.name}`;
         select.appendChild(option);
     });
-    console.log('✅ تم تحميل التصنيفات');
 }
 
 // ========== المعرض ==========
 function getGalleryImages() {
     let images = [];
+
     for (let i = 1; i <= 3; i++) {
         let el = document.getElementById('galleryImage' + i);
-        if (el && el.value.trim() !== '') images.push(el.value.trim());
+        if (el && el.value.trim() !== '') {
+            images.push(el.value.trim());
+        }
     }
+
     return images;
 }
 
 function setGalleryImages(gallery) {
     if (!Array.isArray(gallery)) return;
+
     gallery.forEach((img, i) => {
-        let input = document.getElementById(`galleryImage${i+1}`);
+        let input = document.getElementById(`galleryImage${i + 1}`);
         if (input) input.value = img;
     });
 }
@@ -44,10 +51,12 @@ function setGalleryImages(gallery) {
 function previewImage(inputId, previewId) {
     const input = document.getElementById(inputId);
     const preview = document.getElementById(previewId);
+
     if (!input || !preview) return;
 
-    input.addEventListener('input', function() {
+    input.addEventListener('input', function () {
         const url = this.value.trim();
+
         if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
             preview.innerHTML = `
                 <div class="preview-item">
@@ -64,27 +73,35 @@ function previewImage(inputId, previewId) {
 }
 
 function clearImage(inputId, previewId) {
-    document.getElementById(inputId).value = '';
-    document.getElementById(previewId).innerHTML = '';
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
+
+    if (input) input.value = '';
+    if (preview) preview.innerHTML = '';
 }
 
-// ========== فتح الصفحة ==========
-async function initPage() {
-    // انتظار تحميل البيانات من common.js
+// ========== انتظار تحميل البيانات ==========
+async function waitForData() {
+    if (typeof jsonbinReady === "undefined") return;
+
     if (!jsonbinReady) {
         await new Promise(resolve => {
-            const checkReady = setInterval(() => {
+            const check = setInterval(() => {
                 if (jsonbinReady) {
-                    clearInterval(checkReady);
+                    clearInterval(check);
                     resolve();
                 }
             }, 100);
         });
     }
-    
+}
+
+// ========== تهيئة الصفحة ==========
+async function initPage() {
+    await waitForData();
+
     loadCategoriesForSelect();
-    
-    // تفعيل معاينة الصور
+
     previewImage('appImage', 'mainImagePreview');
     previewImage('galleryImage1', 'preview1');
     previewImage('galleryImage2', 'preview2');
@@ -92,8 +109,10 @@ async function initPage() {
 
     let urlParams = new URLSearchParams(window.location.search);
     let editId = urlParams.get('edit');
+
     if (editId) {
         let app = apps.find(a => a.id == editId);
+
         if (app) {
             document.getElementById('appId').value = app.id;
             document.getElementById('appName').value = app.name;
@@ -104,7 +123,7 @@ async function initPage() {
             document.getElementById('appImage').value = app.image;
             document.getElementById('appDownloadLink').value = app.downloadLink;
             document.getElementById('appDeveloper').value = app.developer || '';
-            
+
             setGalleryImages(app.gallery);
 
             setTimeout(() => {
@@ -119,55 +138,79 @@ async function initPage() {
     }
 }
 
-// ========== حفظ/رفع التطبيق ==========
+// ========== حفظ التطبيق ==========
 async function saveApp() {
-    let appId = document.getElementById('appId').value;
-    let isEdit = appId && appId !== '';
+    try {
+        await waitForData();
 
-    let appData = {
-        id: isEdit ? parseInt(appId) : Date.now(),
-        name: document.getElementById('appName').value.trim(),
-        description: document.getElementById('appDescription').value.trim(),
-        version: document.getElementById('appVersion').value.trim(),
-        category: document.getElementById('appCategory').value,
-        deviceType: document.getElementById('appDeviceType').value,
-        size: document.getElementById('appSize').value.trim(),
-        image: document.getElementById('appImage').value.trim(),
-        gallery: getGalleryImages(),
-        downloadLink: document.getElementById('appDownloadLink').value.trim(),
-        developer: document.getElementById('appDeveloper').value.trim(),
-        date: new Date().toISOString(),
-        downloads: 0,
-        rating: 0,
-        ratings: [],
-        comments: []
-    };
-
-    if (!appData.name || !appData.description || !appData.version || !appData.category || !appData.deviceType || !appData.size || !appData.image || !appData.downloadLink) {
-        showAlert('يرجى ملء جميع الحقول المطلوبة!', 'error');
-        return;
-    }
-
-    if (isEdit) {
-        let oldApp = apps.find(a => a.id === appData.id);
-        if (oldApp) {
-            appData.downloads = oldApp.downloads;
-            appData.rating = oldApp.rating;
-            appData.ratings = oldApp.ratings;
-            appData.comments = oldApp.comments;
+        // تحديث البيانات من السيرفر قبل أي تعديل
+        if (typeof loadApps === "function") {
+            await loadApps();
         }
 
-        apps = apps.filter(a => a.id !== appData.id);
+        let appId = document.getElementById('appId').value;
+        let isEdit = appId && appId !== '';
+
+        let appData = {
+            id: isEdit ? parseInt(appId) : Date.now(),
+            name: document.getElementById('appName').value.trim(),
+            description: document.getElementById('appDescription').value.trim(),
+            version: document.getElementById('appVersion').value.trim(),
+            category: document.getElementById('appCategory').value,
+            deviceType: document.getElementById('appDeviceType').value,
+            size: document.getElementById('appSize').value.trim(),
+            image: document.getElementById('appImage').value.trim(),
+            gallery: getGalleryImages(),
+            downloadLink: document.getElementById('appDownloadLink').value.trim(),
+            developer: document.getElementById('appDeveloper').value.trim(),
+            date: new Date().toISOString(),
+            downloads: 0,
+            rating: 0,
+            ratings: [],
+            comments: []
+        };
+
+        if (
+            !appData.name ||
+            !appData.description ||
+            !appData.version ||
+            !appData.category ||
+            !appData.deviceType ||
+            !appData.size ||
+            !appData.image ||
+            !appData.downloadLink
+        ) {
+            showAlert('يرجى ملء جميع الحقول المطلوبة!', 'error');
+            return;
+        }
+
+        if (isEdit) {
+            let oldApp = apps.find(a => a.id === appData.id);
+
+            if (oldApp) {
+                appData.downloads = oldApp.downloads;
+                appData.rating = oldApp.rating;
+                appData.ratings = oldApp.ratings;
+                appData.comments = oldApp.comments;
+            }
+
+            apps = apps.filter(a => a.id !== appData.id);
+        }
+
         apps.push(appData);
 
-        await saveApps();
-        showAlert('تم تعديل التطبيق بنجاح', 'success');
+        // حفظ على السيرفر
+        if (typeof saveApps === "function") {
+            await saveApps();
+        }
+
+        showAlert(isEdit ? 'تم تعديل التطبيق بنجاح' : 'تم رفع التطبيق بنجاح', 'success');
+
         window.location.href = 'admin.html';
-    } else {
-        apps.push(appData);
-        await saveApps();
-        showAlert('تم رفع التطبيق بنجاح', 'success');
-        window.location.href = 'admin.html';
+
+    } catch (error) {
+        console.error("❌ خطأ:", error);
+        showAlert('حدث خطأ أثناء الحفظ!', 'error');
     }
 }
 
@@ -183,8 +226,10 @@ document.getElementById('uploadForm')?.addEventListener('submit', e => {
 });
 
 function cancelEdit() {
-    if (confirm('هل تريد إلغاء التعديل؟')) window.location.href = 'admin.html';
+    if (confirm('هل تريد إلغاء التعديل؟')) {
+        window.location.href = 'admin.html';
+    }
 }
 
-// ========== تشغيل الصفحة ==========
+// ========== تشغيل ==========
 initPage();
