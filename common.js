@@ -3,7 +3,7 @@ const CONFIG = {
     JSONBIN: {
         BASE_URL: "https://api.jsonbin.io/v3/b/",
         BIN_ID: "69c9835736566621a85cb01f",
-        MASTER_KEY: "YOUR_REAL_MASTER_KEY"
+        MASTER_KEY: "$2a$10$5X1fbgOhCiGV23rKGUkLLuhD/a1eIHNuKwvtNzKwu3W7KT8CGpaG."
     }
 };
 // ========== البيانات ==========
