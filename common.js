@@ -2,8 +2,8 @@
 const CONFIG = {
     JSONBIN: {
         BASE_URL: "https://api.jsonbin.io/v3/b/",
-        BIN_ID: "69c13f81b7ec241ddc956318",
-        MASTER_KEY: "YOUR_MASTER_KEY_HERE"
+        BIN_ID: "69c9835736566621a85cb01f",
+        MASTER_KEY: "$2a$10$5X1fbgOhCiGV23rKGUkLLuhD/a1eIHNuKwvtNzKwu3W7KT8CGpaG"
     }
 };
 
@@ -14,7 +14,9 @@ let jsonbinReady = false;
 // ========== تحميل التطبيقات ==========
 async function loadApps() {
     try {
-        const response = await fetch(`${CONFIG.JSONBIN.BASE_URL}${CONFIG.JSONBIN.BIN_ID}`, {
+        console.log("🔄 جاري تحميل التطبيقات...");
+
+        const response = await fetch(`${CONFIG.JSONBIN.BASE_URL}${CONFIG.JSONBIN.BIN_ID}/latest`, {
             headers: {
                 "X-Master-Key": CONFIG.JSONBIN.MASTER_KEY
             }
@@ -22,21 +24,44 @@ async function loadApps() {
 
         const data = await response.json();
 
-        // مهم: JSONBin بيرجع record
-        apps = data.record || [];
+        console.log("📦 البيانات المستلمة:", data);
 
-        console.log("📥 تم تحميل التطبيقات:", apps);
+        // دعم كل الحالات
+        if (Array.isArray(data.record)) {
+            apps = data.record;
+        } else if (data.record && Array.isArray(data.record.apps)) {
+            apps = data.record.apps;
+        } else {
+            apps = [];
+        }
+
+        console.log("✅ التطبيقات بعد المعالجة:", apps);
 
         jsonbinReady = true;
 
+        // إزالة رسالة التحميل لو موجودة
+        const loadingEl = document.getElementById("loadingMessage");
+        if (loadingEl) loadingEl.style.display = "none";
+
     } catch (error) {
         console.error("❌ خطأ في تحميل التطبيقات:", error);
+
+        // fallback: حاول من localStorage
+        let local = localStorage.getItem("apps");
+        if (local) {
+            apps = JSON.parse(local);
+            console.log("📦 تم تحميل من localStorage");
+        }
+
+        jsonbinReady = true;
     }
 }
 
 // ========== حفظ التطبيقات ==========
 async function saveApps() {
     try {
+        console.log("💾 جاري حفظ التطبيقات...");
+
         const response = await fetch(`${CONFIG.JSONBIN.BASE_URL}${CONFIG.JSONBIN.BIN_ID}`, {
             method: "PUT",
             headers: {
@@ -48,7 +73,10 @@ async function saveApps() {
 
         const data = await response.json();
 
-        console.log("✅ تم حفظ التطبيقات:", data);
+        console.log("✅ تم الحفظ:", data);
+
+        // حفظ نسخة محلية احتياطية
+        localStorage.setItem("apps", JSON.stringify(apps));
 
     } catch (error) {
         console.error("❌ خطأ في الحفظ:", error);
@@ -57,11 +85,11 @@ async function saveApps() {
 
 // ========== رسائل ==========
 function showAlert(message, type = "success") {
-    alert(message); // بدون تغيير تصميم
+    alert(message); // بدون تغيير التصميم
 }
 
-// ========== بدء التحميل ==========
+// ========== بدء التشغيل ==========
 loadApps();
 
-// تحديث تلقائي (اختياري لكن مهم)
+// تحديث تلقائي كل 5 ثواني
 setInterval(loadApps, 5000);
