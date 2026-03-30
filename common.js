@@ -1,7 +1,11 @@
 // ========== إعدادات JSONBin ==========
-let apps = [];
-let jsonbinReady = false;
-
+const CONFIG = {
+    JSONBIN: {
+        BASE_URL: "https://api.jsonbin.io/v3/b/",
+        BIN_ID: "69c9835736566621a85cb01f",
+        MASTER_KEY: "YOUR_REAL_MASTER_KEY"
+    }
+};
 // ========== البيانات ==========
 let apps = [];
 let jsonbinReady = false;
